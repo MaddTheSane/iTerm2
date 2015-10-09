@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="8191" systemVersion="15A284" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment identifier="macosx"/>
+        <development version="6300" identifier="xcode"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="8191"/>
     </dependencies>
     <objects>
@@ -35,6 +35,7 @@
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" headerView="6" id="4">
                                     <rect key="frame" x="0.0" y="0.0" width="208" height="266"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <animations/>
                                     <size key="intercellSpacing" width="3" height="2"/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
@@ -70,19 +71,24 @@
                                     </connections>
                                 </tableView>
                             </subviews>
+                            <animations/>
                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </clipView>
+                        <animations/>
                         <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="5">
                             <rect key="frame" x="1" y="267" width="208" height="16"/>
                             <autoresizingMask key="autoresizingMask"/>
+                            <animations/>
                         </scroller>
-                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="7">
+                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="7">
                             <rect key="frame" x="224" y="17" width="15" height="102"/>
                             <autoresizingMask key="autoresizingMask"/>
+                            <animations/>
                         </scroller>
                         <tableHeaderView key="headerView" id="6">
                             <rect key="frame" x="0.0" y="0.0" width="208" height="17"/>
                             <autoresizingMask key="autoresizingMask"/>
+                            <animations/>
                         </tableHeaderView>
                     </scrollView>
                     <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="12">
@@ -95,6 +101,7 @@
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" autosaveColumns="NO" headerView="14" id="16">
                                     <rect key="frame" x="0.0" y="0.0" width="314" height="19"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <animations/>
                                     <size key="intercellSpacing" width="3" height="2"/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
@@ -119,24 +126,30 @@
                                     </connections>
                                 </tableView>
                             </subviews>
+                            <animations/>
                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </clipView>
+                        <animations/>
                         <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="15">
-                            <rect key="frame" x="1" y="268" width="315.5" height="15"/>
+                            <rect key="frame" x="1" y="268" width="316" height="15"/>
                             <autoresizingMask key="autoresizingMask"/>
+                            <animations/>
                         </scroller>
-                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="13">
+                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="13">
                             <rect key="frame" x="224" y="17" width="15" height="102"/>
                             <autoresizingMask key="autoresizingMask"/>
+                            <animations/>
                         </scroller>
                         <tableHeaderView key="headerView" id="14">
                             <rect key="frame" x="0.0" y="0.0" width="315" height="17"/>
                             <autoresizingMask key="autoresizingMask"/>
+                            <animations/>
                         </tableHeaderView>
                     </scrollView>
                     <button verticalHuggingPriority="750" id="24">
                         <rect key="frame" x="20" y="18" width="21" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="25">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -148,6 +161,7 @@
                     <button verticalHuggingPriority="750" id="26">
                         <rect key="frame" x="40" y="18" width="21" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="27">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -159,6 +173,7 @@
                     <button verticalHuggingPriority="750" id="28">
                         <rect key="frame" x="60" y="18" width="92" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" title="Attach" bezelStyle="smallSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="29">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -170,6 +185,7 @@
                     <button verticalHuggingPriority="750" id="102">
                         <rect key="frame" x="150" y="18" width="80" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" title="Detach" bezelStyle="smallSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="103">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -181,6 +197,7 @@
                     <searchField wantsLayer="YES" verticalHuggingPriority="750" id="30">
                         <rect key="frame" x="238" y="48" width="318" height="22"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" borderStyle="bezel" placeholderString="Search Windows" usesSingleLineMode="YES" bezelStyle="round" id="31">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -193,6 +210,7 @@
                     <button verticalHuggingPriority="750" id="92">
                         <rect key="frame" x="239" y="18" width="21" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="101">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -204,6 +222,7 @@
                     <button verticalHuggingPriority="750" id="93">
                         <rect key="frame" x="259" y="18" width="21" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="100">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -215,6 +234,7 @@
                     <button verticalHuggingPriority="750" id="94">
                         <rect key="frame" x="279" y="18" width="101" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" title="Open in Tabs" bezelStyle="smallSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="99">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -226,6 +246,7 @@
                     <button verticalHuggingPriority="750" id="95">
                         <rect key="frame" x="379" y="18" width="130" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" title="Open in Windows" bezelStyle="smallSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="98">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -237,6 +258,7 @@
                     <button verticalHuggingPriority="750" id="96">
                         <rect key="frame" x="508" y="18" width="47" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <animations/>
                         <buttonCell key="cell" type="smallSquare" title="Hide" bezelStyle="smallSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="97">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -248,6 +270,7 @@
                     <popUpButton verticalHuggingPriority="750" id="HcS-21-y1k">
                         <rect key="frame" x="18" y="45" width="215" height="26"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
+                        <animations/>
                         <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="IH8-hx-eB7">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="menu"/>
@@ -258,6 +281,7 @@
                         </connections>
                     </popUpButton>
                 </subviews>
+                <animations/>
             </view>
         </window>
         <customObject id="50" customClass="TmuxSessionsTable">
