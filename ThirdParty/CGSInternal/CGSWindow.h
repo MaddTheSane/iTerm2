@@ -29,24 +29,24 @@ typedef int CGSWindowID;
 typedef int CGSAnimationObj;
 typedef struct { CGPoint localPoint; CGPoint globalPoint; } CGSWarpPoint;
 
-typedef enum {
+typedef CF_ENUM(int, CGSSharingState) {
 	kCGSSharingNone,
 	kCGSSharingReadOnly,
 	kCGSSharingReadWrite
-} CGSSharingState;
+};
 
-typedef enum {
+typedef CF_ENUM(int, CGSWindowOrderingMode) {
 	kCGSOrderBelow = -1,
 	kCGSOrderOut, /* hides the window */
 	kCGSOrderAbove,
 	kCGSOrderIn /* shows the window */
-} CGSWindowOrderingMode;
+};
 
-typedef enum {
+typedef CF_ENUM(int, CGSBackingType) {
    kCGSBackingNonRetianed,
    kCGSBackingRetained,
    kCGSBackingBuffered,
-} CGSBackingType;
+};
 
 
 CG_EXTERN_C_BEGIN

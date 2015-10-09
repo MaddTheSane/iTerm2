@@ -111,7 +111,7 @@
  *
  * @result					The number of objects currently in the receiver.
  */
-- (NSUInteger) count;
+@property (readonly) NSUInteger count;
 
 
 /*!

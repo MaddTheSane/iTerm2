@@ -26,7 +26,7 @@
 
 typedef int CGSTransitionID;
 
-typedef enum {
+typedef CF_ENUM(int, CGSTransitionType) {
 	kCGSTransitionNone,
 	kCGSTransitionFade,
 	kCGSTransitionZoom,
@@ -37,9 +37,9 @@ typedef enum {
 	kCGSTransitionCube,
 	kCGSTransitionWarpSwitch,
 	kCGSTransitionFlip
-} CGSTransitionType;
+};
 
-typedef enum {
+typedef CF_OPTIONS(unsigned int, CGSTransitionFlags) {
 	/*! Directions for the transition. Some directions don't apply to some transitions. */
 	kCGSTransitionDirectionLeft = 1 << 0,
 	kCGSTransitionDirectionRight = 1 << 1,
@@ -52,7 +52,7 @@ typedef enum {
 	
 	/*! Ignore the background color and only transition the window. */
 	kCGSTransitionFlagTransparent = 1 << 7,
-} CGSTransitionFlags;
+};
 
 typedef struct {
 	int unknown; // always set to zero
