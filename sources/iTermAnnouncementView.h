@@ -8,14 +8,14 @@
 
 #import <Cocoa/Cocoa.h>
 
-typedef enum {
+typedef NS_ENUM(NSInteger, iTermAnnouncementViewStyle) {
     kiTermAnnouncementViewStyleWarning,
     kiTermAnnouncementViewStyleQuestion
-} iTermAnnouncementViewStyle;
+};
 
 @interface iTermAnnouncementView : NSView
 
-+ (id)announcementViewWithTitle:(NSString *)title
++ (instancetype)announcementViewWithTitle:(NSString *)title
                           style:(iTermAnnouncementViewStyle)style
                         actions:(NSArray *)actions
                           block:(void (^)(int index))block;

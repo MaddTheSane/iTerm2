@@ -10,14 +10,14 @@
 
 #import <Cocoa/Cocoa.h>
 
-typedef enum {
+typedef NS_ENUM(NSInteger, SplitSessionHalf) {
     kNoHalf,
     kNorthHalf,
     kSouthHalf,
     kEastHalf,
     kWestHalf,
     kFullPane
-} SplitSessionHalf;
+};
 
 @class PTYSession;
 

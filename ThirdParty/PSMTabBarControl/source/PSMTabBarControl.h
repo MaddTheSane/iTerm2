@@ -124,12 +124,12 @@ extern const NSInteger kPSMStartResizeAnimation;
 
 @end
 
-typedef enum {
+typedef NS_ENUM(NSInteger, PSMTabBarOrientation) {
     PSMTabBarHorizontalOrientation,
     PSMTabBarVerticalOrientation
-} PSMTabBarOrientation;
+};
 
-enum {
+typedef NS_OPTIONS(unsigned int, PSMTabOptions) {
     PSMTab_SelectedMask = 1 << 1,
     PSMTab_LeftIsSelectedMask = 1 << 2,
     PSMTab_RightIsSelectedMask = 1 << 3,

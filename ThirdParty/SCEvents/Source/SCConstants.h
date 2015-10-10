@@ -28,7 +28,7 @@
  *  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-typedef enum 
+typedef NS_ENUM(unsigned int, SCEventFlags)
 { 
     SCEventStreamEventFlagNone            = 0x00000000, 
     SCEventStreamEventFlagMustScanSubDirs = 0x00000001, 
@@ -39,5 +39,4 @@ typedef enum
     SCEventStreamEventFlagRootChanged     = 0x00000020, 
     SCEventStreamEventFlagMount           = 0x00000040, 
     SCEventStreamEventFlagUnmount         = 0x00000080
-} 
-SCEventFlags;
+};

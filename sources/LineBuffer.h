@@ -46,8 +46,8 @@
 
 @property(nonatomic, assign) BOOL mayHaveDoubleWidthCharacter;
 
-- (LineBuffer*)initWithBlockSize:(int)bs;
-- (LineBuffer *)initWithDictionary:(NSDictionary *)dictionary;
+- (instancetype)initWithBlockSize:(int)bs;
+- (instancetype)initWithDictionary:(NSDictionary *)dictionary;
 
 // Returns a copy of this buffer that can be appended to but that you must not
 // pop lines from. Only the last block is deep-copied; references are held to
@@ -126,7 +126,7 @@
 // Set up the find context. See FindContext.h for options bit values.
 - (void)prepareToSearchFor:(NSString*)substring
                 startingAt:(LineBufferPosition *)start
-                   options:(int)options
+                   options:(FindOptions)options
                withContext:(FindContext*)context;
 
 // Performs a search. Use prepareToSearchFor:startingAt:options:withContext: to initialize

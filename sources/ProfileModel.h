@@ -122,12 +122,12 @@ typedef struct {
 
 @end
 
-typedef enum {
+typedef NS_ENUM(int, JournalAction) {
     JOURNAL_ADD,
     JOURNAL_REMOVE,
     JOURNAL_REMOVE_ALL,
     JOURNAL_SET_DEFAULT
-} JournalAction;
+};
 
 @interface BookmarkJournalEntry : NSObject {
   @public
