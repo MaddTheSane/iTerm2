@@ -37,7 +37,7 @@ typedef struct {
 
 @interface iTermCursor : NSObject
 
-@property(nonatomic, assign) id<iTermCursorDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermCursorDelegate> delegate;
 
 + (iTermCursor *)cursorOfType:(ITermCursorType)theType;
 

@@ -45,7 +45,6 @@
     // The logic for cleaning up the dispatch queue isn't written, so just make sure the singleton
     // never gets dealloced.
     assert(false);
-    [super dealloc];
 }
 
 - (void)getAddressForHost:(NSString *)hostname

@@ -14,10 +14,10 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
   id classDescription = [NSClassDescription classDescriptionForClass:[PTYWindow class]];
   NSInteger index = [[self realParentWindow] indexOfTab:self];
-  return [[[NSIndexSpecifier alloc] initWithContainerClassDescription:classDescription
+  return [[NSIndexSpecifier alloc] initWithContainerClassDescription:classDescription
                                                    containerSpecifier:[self.realParentWindow.window objectSpecifier]
                                                                   key:@"tabs"
-                                                                index:index] autorelease];
+                                                                index:index];
 }
 
 - (id)valueInSessionsAtIndex:(unsigned)anIndex {

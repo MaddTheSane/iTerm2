@@ -17,7 +17,7 @@
 
 @interface iTermAnnouncementViewController : NSViewController
 
-@property(nonatomic, assign) id<iTermAnnouncementDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermAnnouncementDelegate> delegate;
 @property(nonatomic, copy) void (^completion)(int);
 
 // NOTE: Once this is set to YES it can never be changed.

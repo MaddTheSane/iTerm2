@@ -4,13 +4,6 @@
 
 @implementation iTermOpenQuicklyItem
 
-- (void)dealloc {
-    [_identifier release];
-    [_title release];
-    [_detail release];
-    [_view release];
-    [super dealloc];
-}
 
 @end
 
@@ -24,10 +17,6 @@
   return self;
 }
 
-- (void)dealloc {
-  [_logoGenerator release];
-  [super dealloc];
-}
 
 - (NSImage *)icon {
   return [_logoGenerator generatedImage];

@@ -15,8 +15,8 @@
 
 @interface iTermOpenQuicklyModel : NSObject
 
-@property(nonatomic, retain) NSMutableArray *items;
-@property(nonatomic, assign) id<iTermOpenQuicklyModelDelegate> delegate;
+@property(nonatomic, strong) NSMutableArray *items;
+@property(nonatomic, unsafe_unretained) id<iTermOpenQuicklyModelDelegate> delegate;
 
 - (void)removeAllItems;
 

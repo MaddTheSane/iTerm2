@@ -25,7 +25,7 @@ extern NSString *const kPasteSpecialViewControllerUnicodeSingleQuotesRegularExpr
 
 @property(nonatomic, assign) int chunkSize;
 @property(nonatomic, assign) NSTimeInterval delayBetweenChunks;
-@property(nonatomic, assign) id<iTermPasteSpecialViewControllerDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermPasteSpecialViewControllerDelegate> delegate;
 
 @property(nonatomic, assign) int numberOfSpacesPerTab;
 @property(nonatomic, assign, getter=areTabTransformsEnabled) BOOL enableTabTransforms;
@@ -47,7 +47,7 @@ extern NSString *const kPasteSpecialViewControllerUnicodeSingleQuotesRegularExpr
 @property(nonatomic, assign, getter=isConvertUnicodePunctuationEnabled) BOOL enableConvertUnicodePunctuation;
 @property(nonatomic, assign) BOOL shouldConvertUnicodePunctuation;
 
-@property(nonatomic, readonly) NSString *stringEncodedSettings;
+@property(weak, nonatomic, readonly) NSString *stringEncodedSettings;
 @property(nonatomic, readonly) iTermPasteFlags flags;
 
 + (NSString *)descriptionForCodedSettings:(NSString *)jsonString;

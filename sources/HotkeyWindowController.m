@@ -83,8 +83,6 @@ static void RollInHotkeyTerm(PseudoTerminal* term)
 
 - (void)dealloc {
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
-    [_restorableState release];
-    [super dealloc];
 }
 
 - (void)bringHotkeyWindowToFore:(NSWindow *)window {
@@ -126,7 +124,7 @@ static void RollInHotkeyTerm(PseudoTerminal* term)
 
 - (BOOL)openHotkeyWindowAndRollIn:(BOOL)rollIn {
     HKWLog(@"Open hotkey window");
-    NSDictionary *arrangement = [[self.restorableState copy] autorelease];
+    NSDictionary *arrangement = [self.restorableState copy];
     if (!arrangement) {
         // If the user had an arrangement saved in user defaults, restore it and delete it. This is
         // how hotkey window state was preserved prior to 12/9/14 when it was moved into application-
@@ -445,7 +443,7 @@ static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEvent
     if (!ad.workspaceSessionActive) {
         return event;
     }
-    HotkeyWindowController* cont = refcon;
+    HotkeyWindowController* cont = (__bridge HotkeyWindowController *)(refcon);
     if (type == kCGEventTapDisabledByTimeout) {
         NSLog(@"kCGEventTapDisabledByTimeout");
         if (cont->machPortRef_) {
@@ -553,7 +551,7 @@ static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEvent
 
 - (NSEvent*)runEventTapHandler:(NSEvent*)event
 {
-    CGEventRef newEvent = OnTappedEvent(nil, kCGEventKeyDown, [event CGEvent], self);
+    CGEventRef newEvent = OnTappedEvent(nil, kCGEventKeyDown, [event CGEvent], (__bridge void *)(self));
     if (newEvent) {
         return [NSEvent eventWithCGEvent:newEvent];
     } else {
@@ -566,7 +564,6 @@ static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEvent
     hotkeyCode_ = 0;
     hotkeyModifiers_ = 0;
     [[GTMCarbonEventDispatcherHandler sharedEventDispatcherHandler] unregisterHotKey:carbonHotKey_];
-    [carbonHotKey_ release];
     carbonHotKey_ = nil;
 }
 
@@ -600,7 +597,7 @@ static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEvent
                                         kCGEventTapOptionDefault,
                                         CGEventMaskBit(kCGEventKeyDown),
                                         (CGEventTapCallBack)OnTappedEvent,
-                                        self);
+                                        (__bridge void * _Nullable)(self));
         if (machPortRef_) {
             eventSrc_ = CFMachPortCreateRunLoopSource(NULL, machPortRef_, 0);
             if (eventSrc_ == NULL) {
@@ -690,13 +687,13 @@ static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEvent
     hotkeyCode_ = keyCode;
     hotkeyModifiers_ = modifiers & (NSCommandKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSShiftKeyMask);
 
-    carbonHotKey_ = [[[GTMCarbonEventDispatcherHandler sharedEventDispatcherHandler]
+    carbonHotKey_ = [[GTMCarbonEventDispatcherHandler sharedEventDispatcherHandler]
                       registerHotKey:keyCode
                       modifiers:hotkeyModifiers_
                       target:self
                       action:@selector(carbonHotkeyPressed:)
                       userInfo:nil
-                      whenPressed:YES] retain];
+                      whenPressed:YES];
     return YES;
 }
 
@@ -716,9 +713,9 @@ static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEvent
     alreadyAsked = YES;
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1090
     NSDictionary *options = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
-                                                        forKey:(NSString *)kAXTrustedCheckOptionPrompt];
+                                                        forKey:(__bridge NSString *)kAXTrustedCheckOptionPrompt];
     // Show a dialog prompting the user to open system prefs.
-    if (!AXIsProcessTrustedWithOptions((CFDictionaryRef)options)) {
+    if (!AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options)) {
         return;
     }
 #endif

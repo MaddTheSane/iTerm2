@@ -17,7 +17,7 @@
 
 @property(nonatomic, readonly) VT100Parser *parser;
 
-@property(nonatomic, assign) id<VT100TerminalDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<VT100TerminalDelegate> delegate;
 @property(nonatomic, copy) NSString *termType;
 // The current encoding. May be changed by ISO2022_* code.
 @property(nonatomic, assign) NSStringEncoding encoding;
@@ -54,7 +54,7 @@
 @property(nonatomic, readonly) BOOL bracketedPasteMode;
 @property(nonatomic, readonly) VT100Output *output;
 
-@property(nonatomic, readonly) NSDictionary *stateDictionary;
+@property(weak, nonatomic, readonly) NSDictionary *stateDictionary;
 
 - (void)setStateFromDictionary:(NSDictionary *)dict;
 

@@ -63,7 +63,7 @@ typedef NS_ENUM(NSInteger, FindContextStatus) {
 @property(nonatomic, assign) int matchLength;
 
 // used for multiple results
-@property(nonatomic, retain) NSMutableArray *results;
+@property(nonatomic, strong) NSMutableArray *results;
 
 // for client use. Not read or written by LineBuffer.
 @property(nonatomic, assign) BOOL hasWrapped;

@@ -52,13 +52,6 @@
     NSObject *restoreState_;
 }
 
-- (void)dealloc
-{
-    [restoreState_ release];
-    [super dealloc];
-
-}
-
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: %p frame=%@>",
             [self class],
@@ -72,8 +65,7 @@
 }
 
 - (void)setRestoreState:(NSObject *)restoreState {
-    [restoreState_ autorelease];
-    restoreState_ = [restoreState retain];
+    restoreState_ = restoreState;
 }
 
 - (void)enableBlur:(double)radius {
@@ -237,7 +229,7 @@
     }
 
 end:
-    [windows release];
+    ;
     PtyLog(@"set frame origin to %@", [NSValue valueWithPoint:bestFrame.origin]);
     [self setFrameOrigin:bestFrame.origin];
 }

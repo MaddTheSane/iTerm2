@@ -64,19 +64,13 @@
     // user@*:path or *:path
     hostname = nil;
   }
-  iTermRule *rule = [[[iTermRule alloc] init] autorelease];
+  iTermRule *rule = [[iTermRule alloc] init];
   rule.username = username;
   rule.hostname = hostname;
   rule.path = path;
   return rule;
 }
 
-- (void)dealloc {
-  [_hostname release];
-  [_username release];
-  [_path release];
-  [super dealloc];
-}
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: %p hostname=%@ username=%@ path=%@>",

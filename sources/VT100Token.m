@@ -48,16 +48,12 @@ static iTermObjectPool *gPool;
         _csi = NULL;
     }
     
-    [_string release];
     _string = nil;
     
-    [_kvpKey release];
     _kvpKey = nil;
     
-    [_kvpValue release];
     _kvpValue = nil;
     
-    [_savedData release];
     _savedData = nil;
     
     if (_asciiData.buffer != _asciiData.staticBuffer) {
@@ -274,9 +270,9 @@ static iTermObjectPool *gPool;
 }
 
 - (NSString *)stringForAsciiData {
-    return [[[NSString alloc] initWithBytes:_asciiData.buffer
+    return [[NSString alloc] initWithBytes:_asciiData.buffer
                                      length:_asciiData.length
-                                   encoding:NSASCIIStringEncoding] autorelease];
+                                   encoding:NSASCIIStringEncoding];
 }
 
 - (ScreenChars *)screenChars {

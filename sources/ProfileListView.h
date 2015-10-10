@@ -58,7 +58,7 @@
   ProfileTableMenuHandler>
 
 @property(nonatomic, readonly) BOOL tagsVisible;
-@property(nonatomic, assign) IBOutlet id<ProfileListViewDelegate> delegate;
+@property(nonatomic, unsafe_unretained) IBOutlet id<ProfileListViewDelegate> delegate;
 
 - (instancetype)initWithFrame:(NSRect)frameRect;
 - (instancetype)initWithFrame:(NSRect)frameRect model:(ProfileModel*)dataSource;
@@ -81,8 +81,8 @@
 - (void)multiColumns;
 
 // Don't use this if you've called allowMultipleSelections
-@property (readonly) NSString *selectedGuid;
-@property (readonly) NSSet<NSString*> *selectedGuids;
+@property (weak, readonly) NSString *selectedGuid;
+@property (weak, readonly) NSSet<NSString*> *selectedGuids;
 @property (readonly) BOOL hasSelection;
 - (NSArray *)orderedSelectedGuids;
 - (void)dataChangeNotification:(id)sender;

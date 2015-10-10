@@ -38,12 +38,6 @@ static NSString *gPrecisionKeys[] = {
 @synthesize hasSelection = hasSelection_;
 @synthesize delegate = delegate_;
 
-- (void)dealloc
-{
-    [guid_ release];
-    [super dealloc];
-}
-
 - (void)awakeFromNib
 {
     [tableView_ setDoubleAction:@selector(onDoubleClick:)];
@@ -56,7 +50,7 @@ static NSString *gPrecisionKeys[] = {
         NSString* plistFile = [[NSBundle bundleForClass:[self class]] pathForResource:@"SmartSelectionRules"
                                                                                ofType:@"plist"];
         NSDictionary* rulesDict = [NSDictionary dictionaryWithContentsOfFile:plistFile];
-        rulesArray = [[rulesDict objectForKey:@"Rules"] retain];
+        rulesArray = [rulesDict objectForKey:@"Rules"];
     }
     return rulesArray;
 }
@@ -131,7 +125,7 @@ static NSString *gPrecisionKeys[] = {
 
 - (void)setRule:(NSDictionary *)rule forRow:(NSInteger)rowIndex
 {
-    NSMutableArray *rules = [[[self rules] mutableCopy] autorelease];
+    NSMutableArray *rules = [[self rules] mutableCopy];
     if (rowIndex < 0) {
         assert(rule);
         [rules addObject:rule];
@@ -178,7 +172,6 @@ static NSString *gPrecisionKeys[] = {
 
 - (void)setGuid:(NSString *)guid
 {
-    [guid_ autorelease];
     guid_ = [guid copy];
     [tableView_ reloadData];
 }
@@ -241,7 +234,7 @@ static NSString *gPrecisionKeys[] = {
                    *)aTableColumn
               row:(NSInteger)rowIndex
 {
-    NSMutableDictionary *rule = [[[[self rules] objectAtIndex:rowIndex] mutableCopy] autorelease];
+    NSMutableDictionary *rule = [[[self rules] objectAtIndex:rowIndex] mutableCopy];
 
     if (aTableColumn == regexColumn_) {
         [rule setObject:anObject forKey:kRegexKey];
@@ -273,7 +266,7 @@ static NSString *gPrecisionKeys[] = {
 {
     if (tableColumn == precisionColumn_) {
         NSPopUpButtonCell *cell =
-            [[[NSPopUpButtonCell alloc] initTextCell:[self displayNameForPrecision:kVeryLowPrecision] pullsDown:NO] autorelease];
+            [[NSPopUpButtonCell alloc] initTextCell:[self displayNameForPrecision:kVeryLowPrecision] pullsDown:NO];
         for (int i = 0; i < sizeof(gPrecisionKeys) / sizeof(NSString *); i++) {
             [cell addItemWithTitle:[self displayNameForPrecision:[self precisionKeyWithIndex:i]]];
         }
@@ -282,7 +275,7 @@ static NSString *gPrecisionKeys[] = {
 
         return cell;
     } else if (tableColumn == regexColumn_) {
-        NSTextFieldCell *cell = [[[NSTextFieldCell alloc] initTextCell:@"regex"] autorelease];
+        NSTextFieldCell *cell = [[NSTextFieldCell alloc] initTextCell:@"regex"];
         [cell setPlaceholderString:@"Enter Regular Expression"];
         [cell setEditable:YES];
         [cell setTruncatesLastVisibleLine:YES];
@@ -290,7 +283,7 @@ static NSString *gPrecisionKeys[] = {
 
         return cell;
     } else if (tableColumn == notesColumn_) {
-        NSTextFieldCell *cell = [[[NSTextFieldCell alloc] initTextCell:@"notes"] autorelease];
+        NSTextFieldCell *cell = [[NSTextFieldCell alloc] initTextCell:@"notes"];
         [cell setPlaceholderString:@"Enter Description"];
         [cell setTruncatesLastVisibleLine:YES];
         [cell setLineBreakMode:NSLineBreakByTruncatingTail];
@@ -350,7 +343,7 @@ static NSString *gPrecisionKeys[] = {
 - (void)contextMenuActionsChanged:(NSArray *)newActions
 {
     int rowIndex = [tableView_ selectedRow];
-    NSMutableDictionary *rule = [[[[self rules] objectAtIndex:rowIndex] mutableCopy] autorelease];
+    NSMutableDictionary *rule = [[[self rules] objectAtIndex:rowIndex] mutableCopy];
     [rule setObject:newActions forKey:kActionsKey];
     [self setRule:rule forRow:rowIndex];
     [NSApp endSheet:[contextMenuPrefsController_ window]];

@@ -29,7 +29,7 @@
 // Hotkey windows' restorable state is saved in the application delegate because these windows are
 // often ordered out, and ordered-out windows are not saved. This is assigned to when the app state
 // is decoded and updated from saveHotkeyWindowState.
-@property(nonatomic, retain) NSDictionary *restorableState;
+@property(nonatomic, strong) NSDictionary *restorableState;
 
 + (instancetype)sharedInstance;
 + (void)closeWindowReturningToHotkeyWindowIfPossible:(NSWindow *)window;

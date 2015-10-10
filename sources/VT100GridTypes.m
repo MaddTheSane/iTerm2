@@ -39,27 +39,27 @@ NSString *VT100GridAbsCoordRangeDescription(VT100GridAbsCoordRange range) {
 @implementation NSValue (VT100Grid)
 
 + (NSValue *)valueWithGridCoord:(VT100GridCoord)coord {
-    return [[[NSValue alloc] initWithBytes:&coord objCType:@encode(VT100GridCoord)] autorelease];
+    return [[NSValue alloc] initWithBytes:&coord objCType:@encode(VT100GridCoord)];
 }
 
 + (NSValue *)valueWithGridSize:(VT100GridSize)size {
-    return [[[NSValue alloc] initWithBytes:&size objCType:@encode(VT100GridSize)] autorelease];
+    return [[NSValue alloc] initWithBytes:&size objCType:@encode(VT100GridSize)];
 }
 
 + (NSValue *)valueWithGridRange:(VT100GridRange)range {
-    return [[[NSValue alloc] initWithBytes:&range objCType:@encode(VT100GridRange)] autorelease];
+    return [[NSValue alloc] initWithBytes:&range objCType:@encode(VT100GridRange)];
 }
 
 + (NSValue *)valueWithGridRect:(VT100GridRect)rect {
-    return [[[NSValue alloc] initWithBytes:&rect objCType:@encode(VT100GridRect)] autorelease];
+    return [[NSValue alloc] initWithBytes:&rect objCType:@encode(VT100GridRect)];
 }
 
 + (NSValue *)valueWithGridRun:(VT100GridRun)run {
-    return [[[NSValue alloc] initWithBytes:&run objCType:@encode(VT100GridRun)] autorelease];
+    return [[NSValue alloc] initWithBytes:&run objCType:@encode(VT100GridRun)];
 }
 
 + (NSValue *)valueWithGridCoordRange:(VT100GridCoordRange)coordRange {
-    return [[[NSValue alloc] initWithBytes:&coordRange objCType:@encode(VT100GridCoordRange)] autorelease];
+    return [[NSValue alloc] initWithBytes:&coordRange objCType:@encode(VT100GridCoordRange)];
 }
 
 - (VT100GridCoord)gridCoordValue {

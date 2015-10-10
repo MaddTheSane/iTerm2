@@ -39,10 +39,10 @@
 @property(nonatomic, readonly) int topMargin;
 @property(nonatomic, readonly) int bottomMargin;
 @property(nonatomic, assign) screen_char_t savedDefaultChar;
-@property(nonatomic, assign) id<VT100GridDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<VT100GridDelegate> delegate;
 
 // Serialized state, but excludes screen contents.
-@property(nonatomic, readonly) NSDictionary *dictionaryValue;
+@property(weak, nonatomic, readonly) NSDictionary *dictionaryValue;
 
 - (id)initWithSize:(VT100GridSize)size delegate:(id<VT100GridDelegate>)delegate;
 

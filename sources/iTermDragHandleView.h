@@ -21,6 +21,6 @@
 // An invisible vertical drag handle that reports horizontal drags to the delegate.
 @interface iTermDragHandleView : NSView
 
-@property(nonatomic, assign) id<iTermDragHandleViewDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermDragHandleViewDelegate> delegate;
 
 @end

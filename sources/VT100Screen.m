@@ -66,14 +66,14 @@ NSString * const kHighlightBackgroundColor = @"kHighlightBackgroundColor";
 static const double kInterBellQuietPeriod = 0.1;
 
 @interface VT100Screen () <iTermTemporaryDoubleBufferedGridControllerDelegate, iTermMarkDelegate>
-@property(nonatomic, retain) VT100ScreenMark *lastCommandMark;
-@property(nonatomic, retain) iTermTemporaryDoubleBufferedGridController *temporaryDoubleBuffer;
+@property(nonatomic, strong) VT100ScreenMark *lastCommandMark;
+@property(nonatomic, strong) iTermTemporaryDoubleBufferedGridController *temporaryDoubleBuffer;
 @end
 
 @implementation VT100Screen {
     NSMutableSet* tabStops_;
     VT100Terminal *terminal_;
-    id<VT100ScreenDelegate> delegate_;  // PTYSession implements this
+    id<VT100ScreenDelegate> __unsafe_unretained delegate_;  // PTYSession implements this
 
     // BOOLs indicating, for each of the characters sets, which ones are in line-drawing mode.
     BOOL charsetUsesLineDrawingMode_[4];
@@ -211,28 +211,11 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 }
 
 - (void)dealloc {
-    [primaryGrid_ release];
-    [altGrid_ release];
-    [tabStops_ release];
-    [printBuffer_ release];
-    [linebuffer_ release];
-    [dvr_ release];
-    [terminal_ release];
-    [findContext_ release];
-    [savedIntervalTree_ release];
-    [intervalTree_ release];
-    [markCache_ release];
-    [inlineFileInfo_ release];
-    [_lastCommandMark release];
     for (NSNumber *code in inlineFileCodes_) {
         ReleaseImage([code intValue]);
     }
-    [inlineFileCodes_ release];
     _temporaryDoubleBuffer.delegate = nil;
     [_temporaryDoubleBuffer reset];
-    [_temporaryDoubleBuffer release];
-    [_animatedLines release];
-    [super dealloc];
 }
 
 - (NSString *)description {
@@ -242,8 +225,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 #pragma mark - APIs
 
 - (void)setTerminal:(VT100Terminal *)terminal {
-    [terminal_ autorelease];
-    terminal_ = [terminal retain];
+    terminal_ = terminal;
     _ansi = [terminal_ isAnsi];
     _wraparoundMode = [terminal_ wraparoundMode];
     _insert = [terminal_ insertMode];
@@ -443,7 +425,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 
     int usedHeight = [currentGrid_ numberOfLinesUsed];
 
-    VT100Grid *copyOfAltGrid = [[altGrid_ copy] autorelease];
+    VT100Grid *copyOfAltGrid = [altGrid_ copy];
     LineBuffer *realLineBuffer = linebuffer_;
 
     // This is an array of tuples:
@@ -469,7 +451,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
             // selection. Later this will be used to set the selection positions
             // relative to the end of the updated linebuffer (which could change as
             // lines from the base screen are pushed onto it).
-            LineBuffer *lineBufferWithAltScreen = [[linebuffer_ newAppendOnlyCopy] autorelease];
+            LineBuffer *lineBufferWithAltScreen = [linebuffer_ newAppendOnlyCopy];
             [self appendScreen:currentGrid_
                   toScrollback:lineBufferWithAltScreen
                 withUsedHeight:usedHeight
@@ -489,7 +471,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
             }
         }
 
-        altScreenLineBuffer = [[[LineBuffer alloc] init] autorelease];
+        altScreenLineBuffer = [[LineBuffer alloc] init];
         [self appendScreen:altGrid_
               toScrollback:altScreenLineBuffer
             withUsedHeight:usedHeight
@@ -505,7 +487,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
             NSArray *notesAtLeastPartiallyOnScreen =
                 [intervalTree_ objectsInInterval:[self intervalForGridCoordRange:screenCoordRange]];
 
-            LineBuffer *appendOnlyLineBuffer = [[realLineBuffer newAppendOnlyCopy] autorelease];
+            LineBuffer *appendOnlyLineBuffer = [realLineBuffer newAppendOnlyCopy];
             [self appendScreen:altGrid_
                   toScrollback:appendOnlyLineBuffer
                 withUsedHeight:usedHeight
@@ -514,7 +496,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 
             for (id<IntervalTreeObject> note in notesAtLeastPartiallyOnScreen) {
                 VT100GridCoordRange range = [self coordRangeForInterval:note.entry.interval];
-                [[note retain] autorelease];
+                //[[note retain] autorelease];
                 [intervalTree_ removeObject:note];
                 LineBufferPositionRange *positionRange =
                     [self positionRangeForCoordRange:range inLineBuffer:appendOnlyLineBuffer];
@@ -593,13 +575,12 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
                     Interval *newInterval = [self intervalForGridCoordRange:newRange
                                                                       width:new_width
                                                                 linesOffset:[self totalScrollbackOverflow]];
-                    [[note retain] autorelease];
+                    //[[note retain] autorelease];
                     [intervalTree_ removeObject:note];
                     [replacementTree addObject:note withInterval:newInterval];
                 }
             }
         }
-        [intervalTree_ release];
         intervalTree_ = replacementTree;
 
         if (wasShowingAltScreen) {
@@ -666,7 +647,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
         // convertRange:toWidth:... happy (the selection's Y values
         // will be able to be looked up) and then after that's done we can swap
         // back to the tempLineBuffer.
-        LineBuffer *appendOnlyLineBuffer = [[realLineBuffer newAppendOnlyCopy] autorelease];
+        LineBuffer *appendOnlyLineBuffer = [realLineBuffer newAppendOnlyCopy];
 
         [self appendScreen:copyOfAltGrid
               toScrollback:appendOnlyLineBuffer
@@ -724,7 +705,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
         // Was showing primary grid. Fix up notes in the alt screen.
 
         // Append alt screen to empty line buffer
-        altScreenLineBuffer = [[[LineBuffer alloc] init] autorelease];
+        altScreenLineBuffer = [[LineBuffer alloc] init];
         [self appendScreen:altGrid_
               toScrollback:altScreenLineBuffer
             withUsedHeight:[altGrid_ numberOfLinesUsed]
@@ -762,7 +743,6 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
                 }
             }
         }
-        [savedIntervalTree_ release];
         savedIntervalTree_ = replacementTree;
         currentGrid_ = primaryGrid_;  // Swap back to primary grid
 
@@ -861,7 +841,6 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 
 - (void)clearScrollbackBuffer
 {
-    [linebuffer_ release];
     linebuffer_ = [[LineBuffer alloc] init];
     [linebuffer_ setMaxLines:maxScrollbackLines_];
     [delegate_ screenClearHighlights];
@@ -872,7 +851,6 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     [self resetScrollbackOverflow];
     [delegate_ screenRemoveSelection];
     [currentGrid_ markAllCharsDirty:YES];
-    [intervalTree_ release];
     intervalTree_ = [[IntervalTree alloc] init];
     [self reloadMarkCache];
 }
@@ -1132,7 +1110,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     // line buffer, grab each wrapped line and trim spaces from it, and then append those modified
     // line (excluding empty ones at the end) to the real line buffer.
     [self clearBuffer];
-    LineBuffer *temp = [[[LineBuffer alloc] init] autorelease];
+    LineBuffer *temp = [[LineBuffer alloc] init];
     temp.mayHaveDoubleWidthCharacter = YES;
     linebuffer_.mayHaveDoubleWidthCharacter = YES;
     NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
@@ -1604,7 +1582,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 - (NSString *)compactLineDumpWithHistoryAndContinuationMarksAndLineNumbers {
     NSMutableString *string =
         [NSMutableString stringWithString:[linebuffer_ compactLineDumpWithWidth:self.width andContinuationMarks:YES]];
-    NSMutableArray *lines = [[[string componentsSeparatedByString:@"\n"] mutableCopy] autorelease];
+    NSMutableArray *lines = [[string componentsSeparatedByString:@"\n"] mutableCopy];
     long long absoluteLineNumber = self.totalScrollbackOverflow;
     for (int i = 0; i < lines.count; i++) {
         lines[i] = [NSString stringWithFormat:@"%8lld:        %@", absoluteLineNumber++, lines[i]];
@@ -1788,15 +1766,15 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 }
 
 - (void)setWorkingDirectory:(NSString *)workingDirectory onLine:(int)line {
-    VT100WorkingDirectory *workingDirectoryObj = [[[VT100WorkingDirectory alloc] init] autorelease];
+    VT100WorkingDirectory *workingDirectoryObj = [[VT100WorkingDirectory alloc] init];
     if (!workingDirectory) {
         workingDirectory = [delegate_ screenCurrentWorkingDirectory];
     }
     if (workingDirectory.length) {
         workingDirectoryObj.workingDirectory = workingDirectory;
 
-        VT100WorkingDirectory *previousWorkingDirectory = [[[self objectOnOrBeforeLine:line
-                                                                               ofClass:[VT100WorkingDirectory class]] retain] autorelease];
+        VT100WorkingDirectory *previousWorkingDirectory = [self objectOnOrBeforeLine:line
+                                                                               ofClass:[VT100WorkingDirectory class]];
         if ([previousWorkingDirectory.workingDirectory isEqualTo:workingDirectory]) {
             // Extend the previous working directory. We used to add a new VT100WorkingDirectory
             // every time but if the window title gets changed a lot then they can pile up really
@@ -1826,7 +1804,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 }
 
 - (VT100RemoteHost *)setRemoteHost:(NSString *)host user:(NSString *)user onLine:(int)line {
-    VT100RemoteHost *remoteHostObj = [[[VT100RemoteHost alloc] init] autorelease];
+    VT100RemoteHost *remoteHostObj = [[VT100RemoteHost alloc] init];
     remoteHostObj.hostname = host;
     remoteHostObj.username = user;
     VT100GridCoordRange range = VT100GridCoordRangeMake(0, line, self.width, line);
@@ -1873,7 +1851,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     } else {
         path = [workingDirectory stringByAppendingPathComponent:filename];
     }
-    SCPPath *scpPath = [[[SCPPath alloc] init] autorelease];
+    SCPPath *scpPath = [[SCPPath alloc] init];
     scpPath.path = path;
     scpPath.hostname = remoteHost.hostname;
     scpPath.username = remoteHost.username;
@@ -1920,7 +1898,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 - (id<iTermMark>)addMarkStartingAtAbsoluteLine:(long long)line
                                        oneLine:(BOOL)oneLine
                                        ofClass:(Class)markClass {
-    id<iTermMark> mark = [[[markClass alloc] init] autorelease];
+    id<iTermMark> mark = [[markClass alloc] init];
     mark.delegate = self;
     mark.sessionGuid = [delegate_ screenSessionGuid];
     int nonAbsoluteLine = line - [self totalScrollbackOverflow];
@@ -2111,15 +2089,12 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 
 - (BOOL)setUseSavedGridIfAvailable:(BOOL)useSavedGrid {
     if (useSavedGrid && !realCurrentGrid_ && self.temporaryDoubleBuffer.savedGrid) {
-        realCurrentGrid_ = [currentGrid_ retain];
-        [currentGrid_ release];
-        currentGrid_ = [self.temporaryDoubleBuffer.savedGrid retain];
+        realCurrentGrid_ = currentGrid_;
+        currentGrid_ = self.temporaryDoubleBuffer.savedGrid;
         self.temporaryDoubleBuffer.drewSavedGrid = YES;
         return YES;
     } else if (!useSavedGrid && realCurrentGrid_) {
-        [currentGrid_ release];
-        currentGrid_ = [realCurrentGrid_ retain];
-        [realCurrentGrid_ release];
+        currentGrid_ = realCurrentGrid_;
         realCurrentGrid_ = nil;
     }
     return NO;
@@ -2170,8 +2145,8 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
         [data appendBytes:line length:length * sizeof(screen_char_t)];
     }
 
-    return [[[iTermStringLine alloc] initWithScreenChars:data.mutableBytes
-                                                  length:data.length / sizeof(screen_char_t)] autorelease];
+    return [[iTermStringLine alloc] initWithScreenChars:data.mutableBytes
+                                                  length:data.length / sizeof(screen_char_t)];
 }
 
 #pragma mark - VT100TerminalDelegate
@@ -2188,9 +2163,9 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 
 - (void)terminalAppendAsciiData:(AsciiData *)asciiData {
     if (collectInputForPrinting_) {
-        NSString *string = [[[NSString alloc] initWithBytes:asciiData->buffer
+        NSString *string = [[NSString alloc] initWithBytes:asciiData->buffer
                                                      length:asciiData->length
-                                                   encoding:NSASCIIStringEncoding] autorelease];
+                                                   encoding:NSASCIIStringEncoding];
         [self terminalAppendString:string];
         return;
     } else {
@@ -2656,9 +2631,6 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 - (void)terminalBeginRedirectingToPrintBuffer {
     if ([delegate_ screenShouldBeginPrinting]) {
         // allocate a string for the stuff to be printed
-        if (printBuffer_ != nil) {
-            [printBuffer_ release];
-        }
         printBuffer_ = [[NSMutableString alloc] init];
         collectInputForPrinting_ = YES;
     }
@@ -2668,7 +2640,6 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     if ([delegate_ screenShouldBeginPrinting]) {
         // Print out the whole screen
         if (printBuffer_ != nil) {
-            [printBuffer_ release];
             printBuffer_ = nil;
         }
         collectInputForPrinting_ = NO;
@@ -2678,7 +2649,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 
 - (void)terminalSetWindowTitle:(NSString *)title {
     if ([delegate_ screenAllowTitleSetting]) {
-        NSString *newTitle = [[title copy] autorelease];
+        NSString *newTitle = [title copy];
         if ([delegate_ screenShouldSyncTitle]) {
             newTitle = [NSString stringWithFormat:@"%@: %@", [delegate_ screenNameExcludingJob], newTitle];
         }
@@ -2696,7 +2667,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 
 - (void)terminalSetIconTitle:(NSString *)title {
     if ([delegate_ screenAllowTitleSetting]) {
-        NSString *newTitle = [[title copy] autorelease];
+        NSString *newTitle = [title copy];
         if ([delegate_ screenShouldSyncTitle]) {
             newTitle = [NSString stringWithFormat:@"%@: %@", [delegate_ screenNameExcludingJob], newTitle];
         }
@@ -2986,9 +2957,9 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     DLog(@"  moveNotes: looking in range %@", VT100GridCoordRangeDescription(screenRange));
     Interval *sourceInterval = [self intervalForGridCoordRange:screenRange];
     self.lastCommandMark = nil;
-    for (id<IntervalTreeObject> obj in [source objectsInInterval:sourceInterval]) {
-        Interval *interval = [[obj.entry.interval retain] autorelease];
-        [[obj retain] autorelease];
+    for (__strong id<IntervalTreeObject> obj in [source objectsInInterval:sourceInterval]) {
+        Interval *interval = obj.entry.interval;
+        //[[obj retain] autorelease];
         DLog(@"  found note with interval %@", interval);
         [source removeObject:obj];
         interval.location = interval.location + offset;
@@ -3017,7 +2988,6 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
                              to:intervalTree_
                          offset:origin.location
                    screenOrigin:0];
-    [savedIntervalTree_ release];
     savedIntervalTree_ = temp;
 }
 
@@ -3199,7 +3169,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     if (length > 0 &&
         message.length > 0 &&
         endVal <= maxVal) {
-        PTYNoteViewController *note = [[[PTYNoteViewController alloc] init] autorelease];
+        PTYNoteViewController *note = [[PTYNoteViewController alloc] init];
         [note setString:message];
         [note sizeToFit];
         [self addNote:note
@@ -3228,14 +3198,13 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
                                     height:(int)height
                                      units:(VT100TerminalUnits)heightUnits
                        preserveAspectRatio:(BOOL)preserveAspectRatio {
-    [inlineFileInfo_ release];
-    inlineFileInfo_ = [@{ kInlineFileName: name,
+    inlineFileInfo_ = @{ kInlineFileName: name,
                           kInlineFileWidth: @(width),
                           kInlineFileWidthUnits: @(widthUnits),
                           kInlineFileHeight: @(height),
                           kInlineFileHeightUnits: @(heightUnits),
                           kInlineFilePreserveAspectRatio: @(preserveAspectRatio),
-                          kInlineFileBase64String: [NSMutableString string] } retain];
+                          kInlineFileBase64String: [NSMutableString string] };
 }
 
 - (void)appendImageAtCursorWithName:(NSString *)name
@@ -3346,7 +3315,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     if (inlineFileInfo_) {
         // TODO: Handle objects other than images.
         NSData *data = [NSData dataWithBase64EncodedString:inlineFileInfo_[kInlineFileBase64String]];
-        NSImage *image = [[[NSImage alloc] initWithData:data] autorelease];
+        NSImage *image = [[NSImage alloc] initWithData:data];
         [self appendImageAtCursorWithName:inlineFileInfo_[kInlineFileName]
                                     width:[inlineFileInfo_[kInlineFileWidth] intValue]
                                     units:(VT100TerminalUnits)[inlineFileInfo_[kInlineFileWidthUnits] intValue]
@@ -3355,7 +3324,6 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
                       preserveAspectRatio:[inlineFileInfo_[kInlineFilePreserveAspectRatio] boolValue]
                                     image:image
                                      data:data];
-        [inlineFileInfo_ release];
         inlineFileInfo_ = nil;
     } else {
         [delegate_ screenDidFinishReceivingFile];
@@ -3865,7 +3833,7 @@ static void SwapInt(int *a, int *b) {
     assert(range.end.y >= 0);
     assert(range.start.y >= 0);
 
-    LineBufferPositionRange *positionRange = [[[LineBufferPositionRange alloc] init] autorelease];
+    LineBufferPositionRange *positionRange = [[LineBufferPositionRange alloc] init];
 
     BOOL endExtends = NO;
     // Use the predecessor of endx,endy so it will have a legal position in the line buffer.
@@ -4041,7 +4009,6 @@ static void SwapInt(int *a, int *b) {
     } else {
         [delegate_ screenPrintVisibleArea];
     }
-    [printBuffer_ release];
     printBuffer_ = nil;
     collectInputForPrinting_ = NO;
 }
@@ -4143,7 +4110,6 @@ static void SwapInt(int *a, int *b) {
                     result->absEndY = xyrange->yEnd + [self totalScrollbackOverflow];
 
                     [results addObject:result];
-                    [result release];
                     if (!(context.options & FindMultipleResults)) {
                         assert([context.results count] == 1);
                         [context reset];
@@ -4171,7 +4137,7 @@ static void SwapInt(int *a, int *b) {
                 } else {
                     // NSLog(@"...wrapping");
                     // wrap around and resume search.
-                    FindContext *tempFindContext = [[[FindContext alloc] init] autorelease];
+                    FindContext *tempFindContext = [[FindContext alloc] init];
                     [linebuffer_ prepareToSearchFor:findContext_.substring
                                          startingAt:(findContext_.dir > 0 ? [linebuffer_ firstPosition] : [[linebuffer_ lastPosition] predecessor])
                                             options:findContext_.options
@@ -4295,7 +4261,7 @@ static void SwapInt(int *a, int *b) {
         numLines = [currentGrid_ numberOfLinesUsed];
     }
     [currentGrid_ appendLines:numLines toLineBuffer:temp];
-    NSMutableDictionary *dict = [[[temp dictionary] mutableCopy] autorelease];
+    NSMutableDictionary *dict = [[temp dictionary] mutableCopy];
     static NSString *const kScreenStateTabStopsKey = @"Tab Stops";
     dict[kScreenStateKey] =
         @{ kScreenStateTabStopsKey: [tabStops_ allObjects] ?: @[],
@@ -4324,7 +4290,7 @@ static void SwapInt(int *a, int *b) {
 }
 
 - (NSDictionary *)contentsOfNonCurrentGrid {
-    LineBuffer *temp = [[[LineBuffer alloc] initWithBlockSize:4096] autorelease];
+    LineBuffer *temp = [[LineBuffer alloc] initWithBlockSize:4096];
     VT100Grid *grid;
     if (currentGrid_ == primaryGrid_) {
         grid = altGrid_;
@@ -4362,7 +4328,6 @@ static void SwapInt(int *a, int *b) {
     if (!unlimitedScrollback_) {
         [lineBuffer dropExcessLinesWithWidth:self.width];
     }
-    [linebuffer_ release];
     linebuffer_ = lineBuffer;
     int maxLinesToRestore;
     if ([iTermAdvancedSettingsModel runJobsInServers] && reattached) {
@@ -4391,21 +4356,19 @@ static void SwapInt(int *a, int *b) {
         }
 
         VT100Grid *otherGrid = (currentGrid_ == primaryGrid_) ? altGrid_ : primaryGrid_;
-        LineBuffer *otherLineBuffer = [[[LineBuffer alloc] initWithDictionary:screenState[kScreenStateNonCurrentGridKey]] autorelease];
+        LineBuffer *otherLineBuffer = [[LineBuffer alloc] initWithDictionary:screenState[kScreenStateNonCurrentGridKey]];
         [otherGrid restoreScreenFromLineBuffer:otherLineBuffer
                                withDefaultChar:[altGrid_ defaultChar]
                              maxLinesToRestore:altGrid_.size.height];
 
         NSString *guidOfLastCommandMark = screenState[kScreenStateLastCommandMarkKey];
 
-        [intervalTree_ release];
         intervalTree_ = [[IntervalTree alloc] initWithDictionary:screenState[kScreenStateIntervalTreeKey]];
         [self fixUpDeserializedIntervalTree:intervalTree_
                               knownTriggers:triggers
                                     visible:YES
                       guidOfLastCommandMark:guidOfLastCommandMark];
 
-        [savedIntervalTree_ release];
         savedIntervalTree_ = [[IntervalTree alloc] initWithDictionary:screenState[kScreenStateSavedIntervalTreeKey]];
         [self fixUpDeserializedIntervalTree:savedIntervalTree_
                               knownTriggers:triggers
@@ -4491,7 +4454,7 @@ static void SwapInt(int *a, int *b) {
 #pragma mark - iTermFullScreenUpdateDetectorDelegate
 
 - (VT100Grid *)temporaryDoubleBufferedGridCopy {
-    VT100Grid *copy = [[currentGrid_ copy] autorelease];
+    VT100Grid *copy = [currentGrid_ copy];
     copy.delegate = nil;
     return copy;
 }

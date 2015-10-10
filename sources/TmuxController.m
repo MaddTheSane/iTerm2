@@ -89,7 +89,7 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
 {
     self = [super init];
     if (self) {
-        gateway_ = [gateway retain];
+        gateway_ = gateway;
         windowPanes_ = [[NSMutableDictionary alloc] init];
         windows_ = [[NSMutableDictionary alloc] init];
         windowPositions_ = [[NSMutableDictionary alloc] init];
@@ -101,23 +101,6 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
         [[TmuxControllerRegistry sharedInstance] setController:self forClient:_clientName];
     }
     return self;
-}
-
-- (void)dealloc {
-    [_clientName release];
-    [gateway_ release];
-    [windowPanes_ release];
-    [windows_ release];
-    [windowPositions_ release];
-    [origins_ release];
-    [pendingWindowOpens_ release];
-    [affinities_ release];
-    [lastSaveAffinityCommand_ release];
-    [hiddenWindows_ release];
-    [lastOrigins_ release];
-    [_sessionGuid release];
-    [_windowFlags release];
-    [super dealloc];
 }
 
 - (void)openWindowWithIndex:(int)windowIndex
@@ -384,7 +367,6 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
     } else if (_sessionGuid) {
         [self.attachedSessionGuids removeObject:_sessionGuid];
     }
-    [_sessionGuid autorelease];
     _sessionGuid = [guid copy];
 }
 
@@ -454,7 +436,6 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
     listWindowsTimer_ = nil;
     detached_ = YES;
     [self closeAllPanes];
-    [gateway_ release];
     gateway_ = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:kTmuxControllerDetachedNotification
                                                         object:self];
@@ -779,7 +760,7 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
     for (NSNumber *n in panes) {
         pos = [windowPositions_ objectForKey:n];
         if (pos) {
-            [[pos retain] autorelease];
+            //[[pos retain] autorelease];
             break;
         }
     }
@@ -917,7 +898,6 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
     NSString *command = [NSString stringWithFormat:@"set -t $%d @origins \"%@\"",
              sessionId_, [enc stringByEscapingQuotes]];
     if (!lastOrigins_ || ![command isEqualToString:lastOrigins_]) {
-        [lastOrigins_ release];
         lastOrigins_ = [command copy];
         haveOutstandingSaveWindowOrigins_ = YES;
         [gateway_ sendCommand:command
@@ -977,8 +957,7 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
         return;
     }
     [self setAffinitiesFromString:arg];
-    [lastSaveAffinityCommand_ release];
-    lastSaveAffinityCommand_ = [command retain];
+    lastSaveAffinityCommand_ = command;
     [gateway_ sendCommand:command responseTarget:nil responseSelector:nil];
 }
 
@@ -1165,7 +1144,6 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
     // For example "1,2,3 4,5,6" has two equivalence classes.
     // 1=2=3 and 4=5=6.
     NSArray *affinities = [result componentsSeparatedByString:@" "];
-    [affinities_ release];
     affinities_ = [[EquivalenceClassSet alloc] init];
 
     if (![result length]) {
@@ -1313,7 +1291,7 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
 {
     // Close all sessions. Iterate over a copy of windowPanes_ because the loop
     // body modifies it by closing sessions.
-    for (NSString *key in [[windowPanes_ copy] autorelease]) {
+    for (NSString *key in [windowPanes_ copy]) {
         PTYSession *session = [windowPanes_ objectForKey:key];
         [[[session tab] realParentWindow] softCloseSession:session];
     }
@@ -1382,7 +1360,7 @@ static NSString *kListWindowsFormat = @"\"#{session_name}\t#{window_id}\t"
                                                  responseObject:nil
                                                           flags:0];
             [commands addObject:dict];
-            NSNumber *temp = [[currentOrder[i] retain] autorelease];
+            NSNumber *temp = currentOrder[i];
             currentOrder[i] = currentOrder[swapIndex];
             currentOrder[swapIndex] = temp;
         }

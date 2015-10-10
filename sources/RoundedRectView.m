@@ -15,16 +15,11 @@
     self = [super initWithFrame:frame];
     if (self) {
         // TODO(georgen): Make these values settable
-        color_ = [[[NSColor darkGrayColor] colorWithAlphaComponent:0.8] retain];
-        borderColor_ = [[NSColor whiteColor] retain];
+        color_ = [[NSColor darkGrayColor] colorWithAlphaComponent:0.8];
+        borderColor_ = [NSColor whiteColor];
     }
     
     return self;
-}
-
-- (void)dealloc {
-    [color_ release];
-    [super dealloc];
 }
 
 - (void)drawRect:(NSRect)dirtyRect

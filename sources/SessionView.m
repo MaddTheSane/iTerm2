@@ -13,6 +13,7 @@
 #import "PTYTextView.h"
 #import "SessionTitleView.h"
 #import "SplitSelectionView.h"
+#import "PSMTabBarCell.h"
 
 static int nextViewId;
 static const double kTitleHeight = 22;
@@ -50,18 +51,16 @@ static NSDate* lastResizeDate_;
 }
 
 + (void)initialize {
-    lastResizeDate_ = [[NSDate date] retain];
+    lastResizeDate_ = [NSDate date];
 }
 
 + (void)windowDidResize {
-    [lastResizeDate_ release];
-    lastResizeDate_ = [[NSDate date] retain];
+    lastResizeDate_ = [NSDate date];
 }
 
 - (void)_initCommon {
     [self registerForDraggedTypes:@[ @"iTermDragPanePBType", @"com.iterm2.psm.controlitem" ]];
-    [lastResizeDate_ release];
-    lastResizeDate_ = [[NSDate date] retain];
+    lastResizeDate_ = [NSDate date];
     _announcements = [[NSMutableArray alloc] init];
 }
 
@@ -105,19 +104,14 @@ static NSDate* lastResizeDate_;
     _inDealloc = YES;
     [_title removeFromSuperview];
     [self unregisterDraggedTypes];
-    [_session release];
     [_currentAnnouncement dismiss];
-    [_currentAnnouncement release];
-    [_announcements release];
     while (self.trackingAreas.count) {
         [self removeTrackingArea:self.trackingAreas[0]];
     }
-    [super dealloc];
 }
 
 - (void)setSession:(PTYSession*)session {
-    [_session autorelease];
-    _session = [session retain];
+    _session = session;
     _session.colorMap.dimmingAmount = [self adjustedDimmingAmount];
 }
 
@@ -189,10 +183,10 @@ static NSDate* lastResizeDate_;
         while (self.trackingAreas.count) {
             [self removeTrackingArea:self.trackingAreas[0]];
         }
-        NSTrackingArea *trackingArea = [[[NSTrackingArea alloc] initWithRect:self.bounds
+        NSTrackingArea *trackingArea = [[NSTrackingArea alloc] initWithRect:self.bounds
                                                                      options:trackingOptions
                                                                        owner:self
-                                                                    userInfo:nil] autorelease];
+                                                                    userInfo:nil];
         [self addTrackingArea:trackingArea];
     }
 }
@@ -283,8 +277,7 @@ static NSDate* lastResizeDate_;
 
 // This is called as part of the live resizing protocol when you let up the mouse button.
 - (void)viewDidEndLiveResize {
-    [lastResizeDate_ release];
-    lastResizeDate_ = [[NSDate date] retain];
+    lastResizeDate_ = [NSDate date];
 }
 
 - (void)saveFrameSize {
@@ -307,7 +300,6 @@ static NSDate* lastResizeDate_;
     [_splitSelectionView setFrameOrigin:NSMakePoint(0, 0)];
     [_splitSelectionView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
     [self addSubview:_splitSelectionView];
-    [_splitSelectionView release];
 }
 
 - (void)setSplitSelectionMode:(SplitSelectionMode)mode move:(BOOL)move {
@@ -418,7 +410,6 @@ static NSDate* lastResizeDate_;
                                                                                frame.size.width,
                                                                                frame.size.height)];
     [self addSubview:_splitSelectionView];
-    [_splitSelectionView release];
     [[self window] orderFront:nil];
     return NSDragOperationMove;
 }
@@ -492,10 +483,10 @@ static NSDate* lastResizeDate_;
     NSRect frame = [scrollView frame];
     if (_showTitle) {
         frame.size.height -= kTitleHeight;
-        _title = [[[SessionTitleView alloc] initWithFrame:NSMakeRect(0,
+        _title = [[SessionTitleView alloc] initWithFrame:NSMakeRect(0,
                                                                      self.frame.size.height - kTitleHeight,
                                                                      self.frame.size.width,
-                                                                     kTitleHeight)] autorelease];
+                                                                     kTitleHeight)];
         if (adjustScrollView) {
             [_title setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
         }
@@ -654,7 +645,7 @@ static NSDate* lastResizeDate_;
 - (iTermAnnouncementViewController *)nextAnnouncement {
     iTermAnnouncementViewController *possibleAnnouncement = nil;
     while (_announcements.count) {
-        possibleAnnouncement = [[_announcements[0] retain] autorelease];
+        possibleAnnouncement = _announcements[0];
         [_announcements removeObjectAtIndex:0];
         if (possibleAnnouncement.shouldBecomeVisible) {
             return possibleAnnouncement;
@@ -664,14 +655,13 @@ static NSDate* lastResizeDate_;
 }
 
 - (void)showNextAnnouncement {
-    [_currentAnnouncement autorelease];
     _currentAnnouncement = nil;
     if (_announcements.count) {
         iTermAnnouncementViewController *possibleAnnouncement = [self nextAnnouncement];
         if (!possibleAnnouncement) {
             return;
         }
-        _currentAnnouncement = [possibleAnnouncement retain];
+        _currentAnnouncement = possibleAnnouncement;
         [self updateAnnouncementFrame];
 
         // Animate in

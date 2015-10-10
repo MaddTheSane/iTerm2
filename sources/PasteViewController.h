@@ -24,7 +24,7 @@
     __weak id<PasteViewControllerDelegate> delegate_;
 }
 
-@property (nonatomic, assign) __weak id<PasteViewControllerDelegate> delegate;
+@property (nonatomic, weak) id<PasteViewControllerDelegate> delegate;
 
 - (instancetype)initWithContext:(PasteContext *)pasteContext_
                length:(int)length;

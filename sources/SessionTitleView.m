@@ -33,7 +33,7 @@ static const CGFloat kButtonSize = 17;
     NSTextField *label_;
     NSButton *closeButton_;
     NSButton *menuButton_;
-    id<SessionTitleViewDelegate> delegate_;
+    id<SessionTitleViewDelegate> __unsafe_unretained delegate_;
     double dimmingAmount_;
 }
 
@@ -48,10 +48,10 @@ static const CGFloat kButtonSize = 17;
         double x = kMargin;
 
         NSImage *closeImage = [NSImage imageNamed:@"closebutton"];
-        closeButton_ = [[[NoFirstResponderButton alloc] initWithFrame:NSMakeRect(x,
+        closeButton_ = [[NoFirstResponderButton alloc] initWithFrame:NSMakeRect(x,
                                                                                  (frame.size.height - kButtonSize) / 2,
                                                                                  kButtonSize,
-                                                                                 kButtonSize)] autorelease];
+                                                                                 kButtonSize)];
         [closeButton_ setButtonType:NSMomentaryPushInButton];
         [closeButton_ setImage:closeImage];
         [closeButton_ setTarget:self];
@@ -84,7 +84,7 @@ static const CGFloat kButtonSize = 17;
         [menuButton_ setAutoresizingMask:NSViewMinXMargin];
         [self addSubview:menuButton_];
 
-        label_ = [[[NSTextField alloc] initWithFrame:NSMakeRect(x, 0, menuButton_.frame.origin.x - x - kMargin, frame.size.height)] autorelease];
+        label_ = [[NSTextField alloc] initWithFrame:NSMakeRect(x, 0, menuButton_.frame.origin.x - x - kMargin, frame.size.height)];
         [label_ setStringValue:@""];
         [label_ setBezeled:NO];
         [label_ setDrawsBackground:NO];
@@ -109,9 +109,7 @@ static const CGFloat kButtonSize = 17;
 }
 
 - (void)dealloc {
-    [title_ release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (void)openMenu:(id)sender {
@@ -206,7 +204,6 @@ static const CGFloat kButtonSize = 17;
 }
 
 - (void)setTitle:(NSString *)title {
-    [title_ autorelease];
     title_ = [title copy];
     [self updateTitle];
 }

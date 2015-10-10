@@ -35,7 +35,7 @@ static NSString * const kHotkeyWindowGeneratedProfileNameKey = @"Hotkey Window";
 
     // Hotkey
     IBOutlet NSButton *_hotkeyEnabled;
-    IBOutlet NSTextField *_hotkeyField;
+    IBOutlet NSTextField *__weak _hotkeyField;
     IBOutlet NSTextField *_hotkeyLabel;
 
     // Hotkey opens dedicated window

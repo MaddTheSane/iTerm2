@@ -4,7 +4,7 @@
 
 @implementation VT100StateMachine {
     NSMutableArray *_states;
-    VT100State *_currentState;  // weak
+    VT100State *__weak _currentState;  // weak
 }
 
 - (instancetype)init {
@@ -15,19 +15,13 @@
     return self;
 }
 
-- (void)dealloc {
-    [_states release];
-    [_userInfo release];
-    [super dealloc];
-}
 
 - (void)addState:(VT100State *)state {
     [_states addObject:state];
 }
 
 - (void)setGroundState:(VT100State *)groundState {
-    [_groundState autorelease];
-    _groundState = [groundState retain];
+    _groundState = groundState;
     if (!_currentState) {
         _currentState = _groundState;
     }

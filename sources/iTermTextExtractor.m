@@ -25,15 +25,15 @@ static const int kNumCharsToSearchForDivider = 8;
 }
 
 + (instancetype)textExtractorWithDataSource:(id<PTYTextViewDataSource>)dataSource {
-    return [[[self alloc] initWithDataSource:dataSource] autorelease];
+    return [[self alloc] initWithDataSource:dataSource];
 }
 
 + (NSCharacterSet *)wordSeparatorCharacterSet
 {
-    NSMutableCharacterSet *charset = [[[NSMutableCharacterSet alloc] init] autorelease];
+    NSMutableCharacterSet *charset = [[NSMutableCharacterSet alloc] init];
     [charset formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
 
-    NSMutableCharacterSet *complement = [[[NSMutableCharacterSet alloc] init] autorelease];
+    NSMutableCharacterSet *complement = [[NSMutableCharacterSet alloc] init];
     [complement formUnionWithCharacterSet:[NSCharacterSet alphanumericCharacterSet]];
     [complement addCharactersInString:[iTermPreferences stringForKey:kPreferenceKeyCharactersConsideredPartOfAWordForSelection]];
     [complement addCharactersInRange:NSMakeRange(DWC_RIGHT, 1)];
@@ -218,7 +218,7 @@ static const int kNumCharsToSearchForDivider = 8;
                     double score = precision * (double) temp.length;
                     SmartMatch* oldMatch = [matches objectForKey:result];
                     if (!oldMatch || score > oldMatch.score) {
-                        SmartMatch* match = [[[SmartMatch alloc] init] autorelease];
+                        SmartMatch* match = [[SmartMatch alloc] init];
                         match.score = score;
                         VT100GridCoord startCoord = [coords[i + temp.location] gridCoordValue];
                         VT100GridCoord endCoord = [coords[MIN(numCoords - 1,
@@ -638,7 +638,7 @@ static const int kNumCharsToSearchForDivider = 8;
         };
 
     if (attributeProvider) {
-        result = [[[NSMutableAttributedString alloc] init] autorelease];
+        result = [[NSMutableAttributedString alloc] init];
     } else {
         result = [NSMutableString string];
     }

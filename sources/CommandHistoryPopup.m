@@ -14,12 +14,6 @@
 
 @implementation CommandHistoryPopupEntry
 
-- (void)dealloc {
-    [_command release];
-    [_date release];
-    [super dealloc];
-}
-
 @end
 
 @implementation CommandHistoryPopupWindowController {
@@ -31,7 +25,7 @@
 {
     self = [super initWithWindowNibName:@"CommandHistoryPopup"
                                tablePtr:nil
-                                  model:[[[PopupModel alloc] init] autorelease]];
+                                  model:[[PopupModel alloc] init]];
     if (self) {
         [self setTableView:_tableView];
     }
@@ -42,7 +36,6 @@
 - (void)dealloc {
     [_tableView setDelegate:nil];
     [_tableView setDataSource:nil];
-    [super dealloc];
 }
 
 - (NSArray *)commandsForHost:(VT100RemoteHost *)host
@@ -60,7 +53,7 @@
     [[self unfilteredModel] removeAllObjects];
     _partialCommandLength = partialCommand.length;
     for (id obj in commands) {
-        CommandHistoryPopupEntry *popupEntry = [[[CommandHistoryPopupEntry alloc] init] autorelease];
+        CommandHistoryPopupEntry *popupEntry = [[CommandHistoryPopupEntry alloc] init];
         if ([obj isKindOfClass:[CommandUse class]]) {
             CommandUse *commandUse = obj;
             popupEntry.command = commandUse.command;

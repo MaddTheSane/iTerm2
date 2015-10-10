@@ -20,9 +20,9 @@ static NSString *const kImageInfoCodeKey = @"Code";
 
 @interface iTermImageInfo ()
 
-@property(nonatomic, retain) NSMutableDictionary *embeddedImages;  // frame number->downscaled image
+@property(nonatomic, strong) NSMutableDictionary *embeddedImages;  // frame number->downscaled image
 @property(nonatomic, assign) unichar code;
-@property(nonatomic, retain) iTermAnimatedImageInfo *animatedImage;  // If animated GIF, this is nonnil
+@property(nonatomic, strong) iTermAnimatedImageInfo *animatedImage;  // If animated GIF, this is nonnil
 @end
 
 @implementation iTermImageInfo {
@@ -41,7 +41,7 @@ static NSString *const kImageInfoCodeKey = @"Code";
     self = [super init];
     if (self) {
         _size = [dictionary[kImageInfoSizeKey] sizeValue];
-        _data = [dictionary[kImageInfoImageKey] retain];
+        _data = dictionary[kImageInfoImageKey];
         _animatedImage = [[iTermAnimatedImageInfo alloc] initWithData:_data];
         if (!_animatedImage) {
             _image = [[NSImage alloc] initWithData:dictionary[kImageInfoImageKey]];
@@ -52,31 +52,19 @@ static NSString *const kImageInfoCodeKey = @"Code";
         if (!_size.width ||
             !_size.height ||
             (!_image && !_animatedImage)) {
-            [self release];
             return nil;
         }
     }
     return self;
 }
 
-- (void)dealloc {
-    [_filename release];
-    [_image release];
-    [_embeddedImages release];
-    [_animatedImage release];
-    [_data release];
-    [super dealloc];
-}
 
 - (void)setImageFromImage:(NSImage *)image data:(NSData *)data {
-    [_animatedImage autorelease];
     _animatedImage = [[iTermAnimatedImageInfo alloc] initWithData:data];
 
-    [_data autorelease];
-    _data = [data retain];
+    _data = data;
 
-    [_image autorelease];
-    _image = [image retain];
+    _image = image;
 }
 
 - (NSString *)imageType {
@@ -120,7 +108,7 @@ static NSString *const kImageInfoCodeKey = @"Code";
     NSImage *embeddedImage = _embeddedImages[@(frame)];
 
     if (!NSEqualSizes(embeddedImage.size, region)) {
-        NSImage *canvas = [[[NSImage alloc] init] autorelease];
+        NSImage *canvas = [[NSImage alloc] init];
         NSSize size;
         NSImage *theImage;
         if (_animatedImage) {
@@ -176,7 +164,7 @@ static NSString *const kImageInfoCodeKey = @"Code";
 }
 
 - (NSPasteboardItem *)pasteboardItem {
-    NSPasteboardItem *pbItem = [[[NSPasteboardItem alloc] init] autorelease];
+    NSPasteboardItem *pbItem = [[NSPasteboardItem alloc] init];
     NSArray *types;
     NSString *imageType = self.imageType;
     if (imageType) {

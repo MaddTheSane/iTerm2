@@ -67,7 +67,7 @@ void LoadPrefsFromCustomFolder(void);
     NSWindowDelegate,
     NSMenuDelegate>
 
-@property(nonatomic, readonly) NSString *currentProfileGuid;
+@property(weak, nonatomic, readonly) NSString *currentProfileGuid;
 
 + (instancetype)sharedInstance;
 + (instancetype)sessionsInstance;

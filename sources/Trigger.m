@@ -34,7 +34,7 @@ NSString * const kTriggerPartialLineKey = @"partial";
 {
     NSString *className = [dict objectForKey:kTriggerActionKey];
     Class class = NSClassFromString(className);
-    Trigger *trigger = [[[class alloc] init] autorelease];
+    Trigger *trigger = [[class alloc] init];
     trigger.regex = dict[kTriggerRegexKey];
     trigger.param = dict[kTriggerParameterKey];
     trigger.partialLine = [dict[kTriggerPartialLineKey] boolValue];
@@ -96,13 +96,6 @@ NSString * const kTriggerPartialLineKey = @"partial";
   }
 }
 
-- (void)dealloc {
-    [regex_ release];
-    [action_ release];
-    [param_ release];
-    [super dealloc];
-}
-
 - (BOOL)performActionWithCapturedStrings:(NSString *const *)capturedStrings
                           capturedRanges:(const NSRange *)capturedRanges
                             captureCount:(NSInteger)captureCount
@@ -134,7 +127,7 @@ NSString * const kTriggerPartialLineKey = @"partial";
     NSString *s = stringLine.stringValue;
     [s enumerateStringsMatchedByRegex:regex_
                            usingBlock:^(NSInteger captureCount,
-                                        NSString *const *capturedStrings,
+                                        NSString *const __unsafe_unretained *capturedStrings,
                                         const NSRange *capturedRanges,
                                         volatile BOOL *const stopEnumerating) {
                                _lastLineNumber = lineNumber;

@@ -14,14 +14,14 @@
 @class SessionView;
 @interface MovePaneController : NSObject <SplitSelectionViewDelegate> {
     // The session being moved.
-    PTYSession *session_;  // weak
+    PTYSession *__weak session_;  // weak
 
     BOOL dragFailed_;
     BOOL didSplit_;
 }
 
 @property (nonatomic, assign) BOOL dragFailed;
-@property (nonatomic, assign) PTYSession *session;
+@property (nonatomic, weak) PTYSession *session;
 
 + (instancetype)sharedInstance;
 // Initiate click-to-move mode.

@@ -12,6 +12,7 @@
 #import "iTermApplicationDelegate.h"
 #import "NSStringITerm.h"
 #import "VT100Token.h"
+#import "PTYSession.h"
 
 NSString * const kTmuxGatewayErrorDomain = @"kTmuxGatewayErrorDomain";;
 const int kTmuxGatewayCommandShouldTolerateErrors = (1 << 0);
@@ -51,17 +52,6 @@ static NSString *kCommandIsLastInList = @"lastInList";
         strayMessages_ = [[NSMutableString alloc] init];
     }
     return self;
-}
-
-- (void)dealloc
-{
-    [commandQueue_ release];
-    [currentCommand_ release];
-    [currentCommandResponse_ release];
-    [currentCommandData_ release];
-    [strayMessages_ release];
-
-    [super dealloc];
 }
 
 - (void)abortWithErrorMessage:(NSString *)message
@@ -119,6 +109,7 @@ static NSString *kCommandIsLastInList = @"lastInList";
     // Null terminate so we can do some string parsing without too much pain.
     NSMutableData *data = [NSMutableData dataWithData:input];
     [data appendBytes:"" length:1];
+    NSData *decodedData;
 
     // This one is tricky to parse because the string version of the command could have bogus UTF-8.
     // %output %<pane id> <data...><newline>
@@ -146,7 +137,7 @@ static NSString *kCommandIsLastInList = @"lastInList";
         goto error;
     }
 
-    NSData *decodedData = [self decodeEscapedOutput:space + 1];
+    decodedData = [self decodeEscapedOutput:space + 1];
 
     TmuxLog(@"Run tmux command: \"%%output %%%d %.*s", windowPane, (int)[decodedData length], [decodedData bytes]);
     [[[delegate_ tmuxController] sessionForWindowPane:windowPane] tmuxReadTask:decodedData];
@@ -309,11 +300,8 @@ error:
     if ([[currentCommand_ objectForKey:kCommandIsInitial] boolValue]) {
         acceptNotifications_ = YES;
     }
-    [currentCommand_ release];
     currentCommand_ = nil;
-    [currentCommandResponse_ release];
     currentCommandResponse_ = nil;
-    [currentCommandData_ release];
     currentCommandData_ = nil;
 }
 
@@ -336,20 +324,16 @@ error:
     if (!(flags & 1)) {
         // Not a client-originated command.
         TmuxLog(@"Begin auto response");
-        currentCommand_ = [[NSMutableDictionary dictionaryWithObjectsAndKeys:
+        currentCommand_ = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                [components objectAtIndex:1], kCommandId,
-                               nil] retain];
-        [currentCommandResponse_ release];
-        [currentCommandData_ release];
+                               nil];
         currentCommandResponse_ = [[NSMutableString alloc] init];
         currentCommandData_ = [[NSMutableData alloc] init];
     } else {
-        currentCommand_ = [[commandQueue_ objectAtIndex:0] retain];
+        currentCommand_ = [commandQueue_ objectAtIndex:0];
         NSString *commandId = [components objectAtIndex:1];
         [currentCommand_ setObject:commandId forKey:kCommandId];
         TmuxLog(@"Begin response to %@", [currentCommand_ objectForKey:kCommandString]);
-        [currentCommandResponse_ release];
-        [currentCommandData_ release];
         currentCommandResponse_ = [[NSMutableString alloc] init];
         currentCommandData_ = [[NSMutableData alloc] init];
         [commandQueue_ removeObjectAtIndex:0];

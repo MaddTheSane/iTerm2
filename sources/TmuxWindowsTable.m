@@ -41,13 +41,6 @@ NSString *kWindowPasteboardType = @"kWindowPasteboardType";
     [tableView_ setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
 }
 
-- (void)dealloc
-{
-    [model_ release];
-    [filteredModel_ release];
-    [super dealloc];
-}
-
 - (void)setDelegate:(id<TmuxWindowsTableProtocol>)delegate
 {
     delegate_ = delegate;
@@ -302,7 +295,6 @@ NSString *kWindowPasteboardType = @"kWindowPasteboardType";
 
 - (void)resetFilteredModel
 {
-    [filteredModel_ release];
     filteredModel_ = nil;
 }
 

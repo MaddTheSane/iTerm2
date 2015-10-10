@@ -116,7 +116,7 @@ typedef struct {
     // In FinalTerm command mode (user is at the prompt typing a command).
     BOOL inCommand_;
 
-    id<VT100TerminalDelegate> delegate_;
+    id<VT100TerminalDelegate> __unsafe_unretained delegate_;
 
     BOOL ansiMode_;         // YES=ANSI, NO=VT52
     BOOL numLock_;           // YES=ON, NO=OFF, default=YES;
@@ -221,14 +221,6 @@ static const int kMaxScreenRows = 4096;
     return self;
 }
 
-- (void)dealloc
-{
-    [_output release];
-    [_parser release];
-    [_termType release];
-
-    [super dealloc];
-}
 
 - (void)stopReceivingFile {
     receivingFile_ = NO;
@@ -248,7 +240,6 @@ static const int kMaxScreenRows = 4096;
 
 - (void)setTermType:(NSString *)termtype
 {
-    [_termType autorelease];
     _termType = [termtype copy];
 
     self.allowKeypadMode = [_termType rangeOfString:@"xterm"].location != NSNotFound;
@@ -1000,8 +991,8 @@ static const int kMaxScreenRows = 4096;
     }
     [data setLength:outputLength];
 
-    NSString *resultString = [[[NSString alloc] initWithData:data
-                                                    encoding:[self encoding]] autorelease];
+    NSString *resultString = [[NSString alloc] initWithData:data
+                                                    encoding:[self encoding]];
     return resultString;
 }
 

@@ -65,7 +65,7 @@ typedef NS_ENUM(NSInteger, VT100DCSState) {
 @property(nonatomic, readonly) BOOL isHooked;
 
 // For debug logging; nil if no hook.
-@property(nonatomic, readonly) NSString *hookDescription;
+@property(weak, nonatomic, readonly) NSString *hookDescription;
 
 + (NSDictionary *)termcapTerminfoNameDictionary;  // string name -> DcsTermcapTerminfoRequestName
 + (NSDictionary *)termcapTerminfoInverseNameDictionary;  // DcsTermcapTerminfoRequestName -> string name

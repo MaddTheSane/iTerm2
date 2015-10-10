@@ -30,7 +30,7 @@ static NSString *const kGridSizeKey = @"Size";
     int screenTop_;  // Index into lines_ and dirty_ of first line visible in the grid.
     NSMutableArray *lines_;  // Array of NSMutableData. Each data has size_.width+1 screen_char_t's.
     NSMutableArray *lineInfos_;  // Array of VT100LineInfo.
-    id<VT100GridDelegate> delegate_;
+    id<VT100GridDelegate> __unsafe_unretained delegate_;
     VT100GridCoord cursor_;
     VT100GridRange scrollRegionRows_;
     VT100GridRange scrollRegionCols_;
@@ -60,13 +60,6 @@ static NSString *const kGridSizeKey = @"Size";
         scrollRegionCols_ = VT100GridRangeMake(0, size_.width);
     }
     return self;
-}
-
-- (void)dealloc {
-    [lines_ release];
-    [lineInfos_ release];
-    [cachedDefaultLine_ release];
-    [super dealloc];
 }
 
 - (NSMutableData *)lineDataAtLineNumber:(int)lineNumber {
@@ -1353,7 +1346,6 @@ static NSString *const kGridSizeKey = @"Size";
 - (screen_char_t *)resultLine {
     const int length = sizeof(screen_char_t) * (size_.width + 1);
     if (resultLine_.length != length) {
-        [resultLine_ release];
         resultLine_ = [[NSMutableData alloc] initWithLength:length];
     }
     return (screen_char_t *)[resultLine_ mutableBytes];
@@ -1432,7 +1424,7 @@ static NSString *const kGridSizeKey = @"Size";
 
 - (NSString *)compactLineDumpWithTimestamps {
     NSMutableString *dump = [NSMutableString string];
-    NSDateFormatter *fmt = [[[NSDateFormatter alloc] init] autorelease];
+    NSDateFormatter *fmt = [[NSDateFormatter alloc] init];
     [fmt setTimeStyle:NSDateFormatterLongStyle];
 
     for (int y = 0; y < size_.height; y++) {
@@ -1603,9 +1595,9 @@ static NSString *const kGridSizeKey = @"Size";
 #pragma mark - Private
 
 - (NSMutableArray *)linesWithSize:(VT100GridSize)size {
-    NSMutableArray *lines = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray *lines = [[NSMutableArray alloc] init];
     for (int i = 0; i < size.height; i++) {
-        [lines addObject:[[[self defaultLineOfWidth:size.width] mutableCopy] autorelease]];
+        [lines addObject:[[self defaultLineOfWidth:size.width] mutableCopy]];
     }
     return lines;
 }
@@ -1613,7 +1605,7 @@ static NSString *const kGridSizeKey = @"Size";
 - (NSMutableArray *)lineInfosWithSize:(VT100GridSize)size {
     NSMutableArray *dirty = [NSMutableArray array];
     for (int i = 0; i < size.height; i++) {
-        [dirty addObject:[[[VT100LineInfo alloc] initWithWidth:size_.width] autorelease]];
+        [dirty addObject:[[VT100LineInfo alloc] initWithWidth:size_.width]];
     }
     return dirty;
 }
@@ -1655,11 +1647,10 @@ static NSString *const kGridSizeKey = @"Size";
 
     NSMutableData *line = [NSMutableData dataWithLength:length];
 
-    [cachedDefaultLine_ release];
     cachedDefaultLine_ = nil;
     [self clearLineData:line];
 
-    cachedDefaultLine_ = [line retain];
+    cachedDefaultLine_ = line;
 
     return line;
 }
@@ -1762,10 +1753,8 @@ static NSString *const kGridSizeKey = @"Size";
 - (void)setSize:(VT100GridSize)newSize {
     if (newSize.width != size_.width || newSize.height != size_.height) {
         size_ = newSize;
-        [lines_ release];
-        [lineInfos_ release];
-        lines_ = [[self linesWithSize:newSize] retain];
-        lineInfos_ = [[self lineInfosWithSize:newSize] retain];
+        lines_ = [self linesWithSize:newSize];
+        lineInfos_ = [self lineInfosWithSize:newSize];
         scrollRegionRows_.location = MIN(scrollRegionRows_.location, size_.width - 1);
         scrollRegionRows_.length = MIN(scrollRegionRows_.length,
                                        size_.width - scrollRegionRows_.location);
@@ -1991,15 +1980,13 @@ static void DumpBuf(screen_char_t* p, int n) {
 - (id)copyWithZone:(NSZone *)zone {
     VT100Grid *theCopy = [[VT100Grid alloc] initWithSize:size_
                                                 delegate:delegate_];
-    [theCopy->lines_ release];
     theCopy->lines_ = [[NSMutableArray alloc] init];
     for (NSObject *line in lines_) {
-        [theCopy->lines_ addObject:[[line mutableCopy] autorelease]];
+        [theCopy->lines_ addObject:[line mutableCopy]];
     }
-    [theCopy->lineInfos_ release];
     theCopy->lineInfos_ = [[NSMutableArray alloc] init];
     for (VT100LineInfo *line in lineInfos_) {
-        [theCopy->lineInfos_ addObject:[[line copy] autorelease]];
+        [theCopy->lineInfos_ addObject:[line copy]];
     }
     theCopy->screenTop_ = screenTop_;
     theCopy->cursor_ = cursor_;  // Don't use property to avoid delegate call

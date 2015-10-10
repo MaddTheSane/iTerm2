@@ -19,7 +19,7 @@
 
 
 @interface iTermTwoColorWellsCell : NSCell
-@property(nonatomic, retain) NSColor *textColor;
-@property(nonatomic, retain) NSColor *backgroundColor;
+@property(nonatomic, strong) NSColor *textColor;
+@property(nonatomic, strong) NSColor *backgroundColor;
 @end
 

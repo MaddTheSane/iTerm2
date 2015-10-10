@@ -45,7 +45,7 @@ static const CGFloat kMargin = 4;
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        spareCell_ = [[self cell] retain];
+        spareCell_ = [self cell];
         
         help_ = [[NSButton alloc] initWithFrame:CGRectZero];
         [help_ setBezelStyle:NSHelpButtonBezelStyle];
@@ -74,7 +74,7 @@ static const CGFloat kMargin = 4;
 
         tableView_ = [[NSTableView alloc] initWithFrame:NSMakeRect(0, 0, contentSize.width, contentSize.height)];
         NSTableColumn *col;
-        col = [[[NSTableColumn alloc] initWithIdentifier:@"contents"] autorelease];
+        col = [[NSTableColumn alloc] initWithIdentifier:@"contents"];
         [col setEditable:NO];
         [tableView_ addTableColumn:col];
         [[col headerCell] setStringValue:@"Contents"];
@@ -91,7 +91,7 @@ static const CGFloat kMargin = 4;
         [tableView_ setDoubleAction:@selector(doubleClickOnTableView:)];
         [tableView_ setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
 
-        tableView_.menu = [[[NSMenu alloc] init] autorelease];
+        tableView_.menu = [[NSMenu alloc] init];
         tableView_.menu.delegate = self;
         NSMenuItem *item;
         item = [[NSMenuItem alloc] initWithTitle:@"Toggle Checkmark"
@@ -119,10 +119,6 @@ static const CGFloat kMargin = 4;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [tableView_ release];
-    [scrollView_ release];
-    [spareCell_ release];
-    [super dealloc];
 }
 
 - (void)updateCapturedOutput {
@@ -139,15 +135,12 @@ static const CGFloat kMargin = 4;
     theArray = mark.capturedOutput;
     if (mark != mark_) {
         [tableView_ selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
-        [mark_ autorelease];
-        mark_ = [mark retain];
+        mark_ = mark;
     }
 
-    [allCapturedOutput_ release];
     allCapturedOutput_ = [theArray copy];
 
     // Now update filtered entries based on search string.
-    [filteredEntries_ release];
     NSMutableArray *temp = [NSMutableArray array];
     for (CapturedOutput *capturedOutput in allCapturedOutput_) {
         if (!searchField_.stringValue.length ||
@@ -156,7 +149,7 @@ static const CGFloat kMargin = 4;
             [temp addObject:capturedOutput];
         }
     }
-    filteredEntries_ = [temp retain];
+    filteredEntries_ = temp;
 
     [tableView_ reloadData];
 
@@ -241,7 +234,7 @@ static const CGFloat kMargin = 4;
 }
 
 - (NSCell *)cell {
-    NSCell *cell = [[[NSTextFieldCell alloc] init] autorelease];
+    NSCell *cell = [[NSTextFieldCell alloc] init];
     [cell setEditable:NO];
     [cell setLineBreakMode:NSLineBreakByWordWrapping];
     [cell setWraps:YES];

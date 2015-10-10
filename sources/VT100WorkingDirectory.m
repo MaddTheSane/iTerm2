@@ -22,11 +22,6 @@ static NSString *const kWorkingDirectoryStateWorkingDirectoryKey = @"Working Dir
     return self;
 }
 
-- (void)dealloc {
-    [_workingDirectory release];
-    [super dealloc];
-}
-
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: %p workingDirectory=%@ interval=%@>",
             self.class, self, self.workingDirectory, self.entry.interval];

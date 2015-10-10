@@ -206,7 +206,6 @@ typedef enum {
                @133: @(XTERMCC_FINAL_TERM),
                @1337: @(XTERMCC_SET_KVP),
            };
-        [theMap retain];
     });
 
 
@@ -223,10 +222,10 @@ typedef enum {
                                      encoding:(NSStringEncoding)encoding {
     VT100Token *headerToken = [VT100Token token];
     headerToken->type = XTERMCC_MULTITOKEN_HEADER_SET_KVP;
-    headerToken.string = [[[NSString alloc] initWithData:data
-                                                encoding:encoding] autorelease];
+    headerToken.string = [[NSString alloc] initWithData:data
+                                                encoding:encoding];
     [self parseKeyValuePairInToken:headerToken];
-    CVectorAppend(vector, headerToken);
+    CVectorAppend(vector, (__bridge void *)(headerToken));
 }
 
 + (void)emitIncidentalForMultitokenBodyInVector:(CVector *)vector
@@ -234,9 +233,9 @@ typedef enum {
                                        encoding:(NSStringEncoding)encoding {
     VT100Token *token = [VT100Token token];
     token->type = XTERMCC_MULTITOKEN_BODY;
-    token.string = [[[NSString alloc] initWithData:data
-                                          encoding:encoding] autorelease];
-    CVectorAppend(vector, token);
+    token.string = [[NSString alloc] initWithData:data
+                                          encoding:encoding];
+    CVectorAppend(vector, (__bridge void *)(token));
 }
 
 + (void)decodeFromContext:(iTermParserContext *)context
@@ -323,8 +322,8 @@ typedef enum {
                     }
                     result->type = XTERMCC_MULTITOKEN_END;
                 } else {
-                    result.string = [[[NSString alloc] initWithData:data
-                                                           encoding:encoding] autorelease];
+                    result.string = [[NSString alloc] initWithData:data
+                                                           encoding:encoding];
                     result->type = [self tokenTypeForMode:mode];
                     if (result->type == XTERMCC_SET_KVP) {
                         [self parseKeyValuePairInToken:result];

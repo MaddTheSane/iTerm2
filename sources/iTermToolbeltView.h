@@ -21,9 +21,9 @@ extern NSString *const kToolbeltShouldHide;
 
 @interface iTermToolbeltView : NSView <NSSplitViewDelegate, ToolWrapperDelegate>
 
-@property(nonatomic, assign) id<iTermToolbeltViewDelegate> delegate;
-@property(nonatomic, readonly) ToolDirectoriesView *directoriesView;
-@property(nonatomic, readonly) ToolCapturedOutputView *capturedOutputView;
+@property(nonatomic, unsafe_unretained) id<iTermToolbeltViewDelegate> delegate;
+@property(weak, nonatomic, readonly) ToolDirectoriesView *directoriesView;
+@property(weak, nonatomic, readonly) ToolCapturedOutputView *capturedOutputView;
 
 // Returns an array of tool keys.
 + (NSArray *)allTools;

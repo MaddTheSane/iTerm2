@@ -315,15 +315,9 @@ NSString *PID_INFO_NAME = @"name";
     NSMutableDictionary* temp = [NSMutableDictionary dictionaryWithCapacity:100];
     [self _refreshProcessCache:temp];
 
-    // Quickly swap the pointer to minimize lock time, and then free the old cache.
-    NSMutableDictionary* old = pidInfoCache_;
-    [temp retain];
-   
     @synchronized ([ProcessCache class]) {
         pidInfoCache_ = temp;
     }
-    
-    [old release];
 }
 
 - (BOOL)testAndClearNewOutput
@@ -346,14 +340,14 @@ NSString *PID_INFO_NAME = @"name";
 - (void)_run
 {
     while (1) {
-        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-        [self _update];
-        // As long as there's no output, don't update the process cache. Otherwise the CPU usage
-        // appears to spike periodically.
-        while (![self testAndClearNewOutput]) {
-            [NSThread sleepForTimeInterval:[NSApp isActive] ? 0.5 : 5];
+        @autoreleasepool {
+            [self _update];
+            // As long as there's no output, don't update the process cache. Otherwise the CPU usage
+            // appears to spike periodically.
+            while (![self testAndClearNewOutput]) {
+                [NSThread sleepForTimeInterval:[NSApp isActive] ? 0.5 : 5];
+            }
         }
-        [pool release];
     }
 }
 
@@ -364,7 +358,7 @@ NSString *PID_INFO_NAME = @"name";
         jobName = [pidInfoCache_ objectForKey:[NSNumber numberWithInt:pid]];
         // Move jobName into this thread's autorelease pool so it will survive until we return to
         // mainloop.
-        [[jobName retain] autorelease];
+        //[[jobName retain] autorelease];
     }
     
     return jobName;

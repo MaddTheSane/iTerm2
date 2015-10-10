@@ -35,23 +35,23 @@ extern const CGFloat kLeftTabsWidth;
 @interface iTermRootTerminalView : SolidColorView
 
 // TODO: Get rid of this
-@property(nonatomic, assign) id<iTermRootTerminalViewDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermRootTerminalViewDelegate> delegate;
 
 // The tabview occupies almost the entire window. Each tab has an identifier
 // which is a PTYTab.
-@property(nonatomic, readonly) PTYTabView *tabView;
+@property(nonatomic, readonly, strong) PTYTabView *tabView;
 
 // This is a sometimes-visible control that shows the tabs and lets the user
 // change which is visible.
-@property(nonatomic, readonly) iTermTabBarControlView *tabBarControl;
+@property(nonatomic, readonly, strong) iTermTabBarControlView *tabBarControl;
 
 // Gray line dividing tab/title bar from content. Will be nil if a division
 // view isn't needed such as for fullscreen windows or windows without a
 // title bar (e.g., top-of-screen).
-@property(nonatomic, readonly) SolidColorView *divisionView;
+@property(nonatomic, readonly, strong) SolidColorView *divisionView;
 
 // Toolbelt view. Goes on the right side of the terminal window, if visible.
-@property(nonatomic, readonly) iTermToolbeltView *toolbelt;
+@property(nonatomic, readonly, strong) iTermToolbeltView *toolbelt;
 
 // Should the toolbelt be visible?
 @property(nonatomic, assign) BOOL shouldShowToolbelt;

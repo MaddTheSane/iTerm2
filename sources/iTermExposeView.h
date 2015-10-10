@@ -16,7 +16,7 @@
 @interface iTermExposeView : NSView <GlobalSearchDelegate>
 {
     // Not explicitly retained, but a subview.
-    iTermExposeGridView* grid_;
+    iTermExposeGridView* __weak grid_;
     GlobalSearch* search_;
     iTermExposeTabView* resultView_;
     PTYSession* resultSession_;
@@ -24,7 +24,7 @@
 }
 
 - (instancetype)initWithFrame:(NSRect)frameRect;
-@property (nonatomic, assign) iTermExposeGridView *grid;
+@property (nonatomic, weak) iTermExposeGridView *grid;
 @property (readonly) NSRect searchFrame;
 - (iTermExposeTabView*)resultView;
 - (PTYSession*)resultSession;

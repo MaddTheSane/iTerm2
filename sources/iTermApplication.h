@@ -35,7 +35,7 @@
 @interface iTermApplication : NSApplication
 
 // Sets the return value for -currentEvent. Only for testing.
-@property(atomic, retain) NSEvent *fakeCurrentEvent;
+@property(atomic, strong) NSEvent *fakeCurrentEvent;
 
 - (void)sendEvent:(NSEvent *)anEvent;
 - (iTermApplicationDelegate *)delegate;

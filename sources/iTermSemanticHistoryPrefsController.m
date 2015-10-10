@@ -54,17 +54,12 @@ enum {
     return @{ kSemanticHistoryActionKey: kSemanticHistoryBestEditorAction };
 }
 
-- (void)dealloc
-{
-    [guid_ release];
-    [super dealloc];
-}
 
 + (BOOL)applicationExists:(NSString *)bundle_id
 {
     CFURLRef appURL = nil;
     OSStatus result = LSFindApplicationForInfo(kLSUnknownCreator,
-                                               (CFStringRef)bundle_id,
+                                               (__bridge CFStringRef)bundle_id,
                                                NULL,
                                                NULL,
                                                &appURL);
@@ -289,7 +284,6 @@ enum {
 
 - (void)setGuid:(NSString *)guid
 {
-    [guid_ autorelease];
     guid_ = [guid copy];
     Profile* bookmark = [[ProfileModel sharedInstance] bookmarkWithGuid:self.guid];
     if (!bookmark) {

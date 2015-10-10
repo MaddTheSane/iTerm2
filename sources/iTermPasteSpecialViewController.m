@@ -90,7 +90,7 @@ static NSString *const kShouldWaitForPrompts = @"WaitForPrompts";
         chunkSize /= multiplier;
         exponent++;
     }
-    NSNumberFormatter *formatter = [[[NSNumberFormatter alloc] init] autorelease];
+    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     [formatter setMaximumFractionDigits:2];
     [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
     NSString *description = [NSString stringWithFormat:@"%@ %@B",
@@ -116,7 +116,7 @@ static NSString *const kShouldWaitForPrompts = @"WaitForPrompts";
         multiplier = 60;
     }
 
-    NSNumberFormatter *formatter = [[[NSNumberFormatter alloc] init] autorelease];
+    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     [formatter setMaximumFractionDigits:2];
     [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
     NSString *description = [NSString stringWithFormat:@"%@ %@",
@@ -354,7 +354,7 @@ static NSString *const kShouldWaitForPrompts = @"WaitForPrompts";
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict
                                                        options:0
                                                          error:nil];
-    return [[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] autorelease];
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
 }
 
 + (NSString *)descriptionForCodedSettings:(NSString *)jsonString {

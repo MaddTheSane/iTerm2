@@ -29,7 +29,7 @@
 
 @interface Popup : NSWindowController
 
-@property(nonatomic, assign) id<PopupDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<PopupDelegate> delegate;
 
 - (instancetype)initWithWindowNibName:(NSString*)nibName tablePtr:(NSTableView**)table model:(PopupModel*)model;
 

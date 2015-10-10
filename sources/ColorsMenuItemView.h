@@ -34,7 +34,7 @@
 - (NSGradient *)gradientForColorIndex:(NSInteger)colorIndex;
 - (void)drawRect:(NSRect)rect;
 - (void)mouseUp:(NSEvent*) event;
-@property (readonly, retain) NSColor *color;
+@property (readonly, strong) NSColor *color;
 
 @end
 

@@ -70,18 +70,18 @@ static NSString *kToolbeltPrefKey = @"ToolbeltTools";
 + (void)populateMenu:(NSMenu *)menu {
     NSArray *names = [[iTermToolbeltView allTools] sortedArrayUsingSelector:@selector(compare:)];
     for (NSString *theName in names) {
-        NSMenuItem *i = [[[NSMenuItem alloc] initWithTitle:theName
+        NSMenuItem *i = [[NSMenuItem alloc] initWithTitle:theName
                                                     action:@selector(toggleToolbeltTool:)
-                                             keyEquivalent:@""] autorelease];
+                                             keyEquivalent:@""];
         [i setState:[iTermToolbeltView shouldShowTool:theName] ? NSOnState : NSOffState];
         [menu addItem:i];
     }
 }
 
 + (void)toggleShouldShowTool:(NSString *)theName {
-    NSMutableArray *tools = [[[iTermToolbeltView configuredTools] mutableCopy] autorelease];
+    NSMutableArray *tools = [[iTermToolbeltView configuredTools] mutableCopy];
     if (!tools) {
-        tools = [[[iTermToolbeltView defaultTools] mutableCopy] autorelease];
+        tools = [[iTermToolbeltView defaultTools] mutableCopy];
     }
     if ([tools indexOfObject:theName] == NSNotFound) {
         [tools addObject:theName];
@@ -120,7 +120,7 @@ static NSString *kToolbeltPrefKey = @"ToolbeltTools";
 + (NSDictionary *)toolsDictionary {
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     for (NSString *toolName in gRegisteredTools) {
-        [dict setObject:[[[[gRegisteredTools objectForKey:toolName] alloc] init] autorelease]
+        [dict setObject:[[[gRegisteredTools objectForKey:toolName] alloc] init]
                  forKey:toolName];
     }
     return dict;
@@ -157,8 +157,7 @@ static NSString *kToolbeltPrefKey = @"ToolbeltTools";
                 [self addToolWithName:theName];
             }
         }
-        _dragHandle = [[[iTermDragHandleView alloc] initWithFrame:NSMakeRect(0, 0, 3, frame.size.height)]
-                       autorelease];
+        _dragHandle = [[iTermDragHandleView alloc] initWithFrame:NSMakeRect(0, 0, 3, frame.size.height)];
         _dragHandle.delegate = self;
         _dragHandle.autoresizingMask = (NSViewHeightSizable | NSViewMaxXMargin);
         [self addSubview:_dragHandle];
@@ -166,11 +165,6 @@ static NSString *kToolbeltPrefKey = @"ToolbeltTools";
     return self;
 }
 
-- (void)dealloc {
-    [_splitter release];
-    [_tools release];
-    [super dealloc];
-}
 
 #pragma mark - NSView
 
@@ -196,7 +190,7 @@ static NSString *kToolbeltPrefKey = @"ToolbeltTools";
         }
         [wrapper setDelegate:nil];
         [_tools removeObjectForKey:theName];
-        [[wrapper retain] autorelease];
+        //[[wrapper retain] autorelease];
         [wrapper removeToolSubviews];
         [wrapper removeFromSuperview];
     }
@@ -285,7 +279,7 @@ static NSString *kToolbeltPrefKey = @"ToolbeltTools";
     [wrapper setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [theTool setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [_splitter adjustSubviews];
-    [_tools setObject:wrapper forKey:[[wrapper.name copy] autorelease]];
+    [_tools setObject:wrapper forKey:[wrapper.name copy]];
 }
 
 - (void)addToolWithName:(NSString *)toolName {
@@ -293,18 +287,18 @@ static NSString *kToolbeltPrefKey = @"ToolbeltTools";
         // User could have a plist from a future version with a tool that doesn't exist here.
         return;
     }
-    iTermToolWrapper *wrapper = [[[iTermToolWrapper alloc] initWithFrame:NSMakeRect(0,
+    iTermToolWrapper *wrapper = [[iTermToolWrapper alloc] initWithFrame:NSMakeRect(0,
                                                                           0,
                                                                           self.frame.size.width,
-                                                                          self.frame.size.height / MAX(1, [iTermToolbeltView numberOfVisibleTools ] - 1))] autorelease];
+                                                                          self.frame.size.height / MAX(1, [iTermToolbeltView numberOfVisibleTools ] - 1))];
     wrapper.name = toolName;
     wrapper.delegate = self;
     Class c = [gRegisteredTools objectForKey:toolName];
     if (c) {
-        [self addTool:[[[c alloc] initWithFrame:NSMakeRect(0,
+        [self addTool:[[c alloc] initWithFrame:NSMakeRect(0,
                                                            0,
                                                            wrapper.container.frame.size.width,
-                                                           wrapper.container.frame.size.height)] autorelease]
+                                                           wrapper.container.frame.size.height)]
             toWrapper:wrapper];
     }
 }

@@ -111,7 +111,7 @@ const double GLOBAL_SEARCH_MARGIN = 10;
     assert(theContext);
     self = [super init];
     if (self) {
-        instance_ = [instance retain];
+        instance_ = instance;
         context_ = [theContext copy];
         x_ = x;
         endX_ = endX;
@@ -120,14 +120,6 @@ const double GLOBAL_SEARCH_MARGIN = 10;
         findString_ = [findString copy];
     }
     return self;
-}
-
-- (void)dealloc
-{
-    [instance_ release];
-    [context_ release];
-    [findString_ release];
-    [super dealloc];
 }
 
 - (NSString*)context
@@ -194,7 +186,7 @@ const double GLOBAL_SEARCH_MARGIN = 10;
         textView_ = [session textview];
         textViewDataSource_ = [session screen];
         theSession_ = session;
-        label_ = [label retain];
+        label_ = label;
         findContext_ = [[FindContext alloc] init];
         [textViewDataSource_ setFindString:findString_
                           forwardDirection:NO
@@ -210,16 +202,6 @@ const double GLOBAL_SEARCH_MARGIN = 10;
         findContext_.hasWrapped = YES;
     }
     return self;
-}
-
-- (void)dealloc
-{
-    [matchLocations_ release];
-    [results_ release];
-    [findString_ release];
-    [label_ release];
-    [findContext_ release];
-    [super dealloc];
 }
 
 - (BOOL)more
@@ -263,13 +245,13 @@ const double GLOBAL_SEARCH_MARGIN = 10;
                                               coords:nil];
     theContext = [theContext stringByReplacingOccurrencesOfString:@"\n"
                                                        withString:@" "];
-    [results_ addObject:[[[GlobalSearchResult alloc] initWithInstance:self
+    [results_ addObject:[[GlobalSearchResult alloc] initWithInstance:self
                                                               context:theContext
                                                                     x:startX
                                                                  absY:absY
                                                                  endX:endX
                                                                     y:absEndY
-                                                           findString:findString_] autorelease]];
+                                                           findString:findString_]];
     return YES;
 }
 
@@ -307,7 +289,7 @@ const double GLOBAL_SEARCH_MARGIN = 10;
     myFrame.size.width -= 2 * GLOBAL_SEARCH_MARGIN;
 
 
-    NSShadow *dropShadow = [[[NSShadow alloc] init] autorelease];
+    NSShadow *dropShadow = [[NSShadow alloc] init];
     [dropShadow setShadowColor:[NSColor colorWithCalibratedHue:0
                                                     saturation:0
                                                     brightness:0.2
@@ -375,10 +357,7 @@ const double GLOBAL_SEARCH_MARGIN = 10;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [combinedResults_ release];
     [timer_ invalidate];
-    [searches_ release];
-    [super dealloc];
 }
 
 - (void)_resizeView
@@ -468,14 +447,12 @@ const double GLOBAL_SEARCH_MARGIN = 10;
     const float kMaxTime = 0.1;
     while ([searches_ count]) {
         GlobalSearchInstance* inst = [searches_ objectAtIndex:0];
-        [inst retain];
         [searches_ removeObjectAtIndex:0];
         int newResults = [inst doSearch];
         if ([inst more]) {
             [searches_ addObject:inst]; 
         }
         [self _addLastResultsToTable:newResults fromInstance:inst];
-        [inst release];
         
         NSDate* now = [NSDate date];
         if ([now timeIntervalSinceDate:begin] > kMaxTime) {
@@ -550,11 +527,11 @@ const double GLOBAL_SEARCH_MARGIN = 10;
                 }
             }
             GlobalSearchInstance* aSearch;
-            aSearch = [[[GlobalSearchInstance alloc] initWithSession:aSession
+            aSearch = [[GlobalSearchInstance alloc] initWithSession:aSession
                                                            findString:findString
                                                                 label:[iTermExpose labelForTab:[aSession tab]
                                                                                   windowNumber:i+1
-                                                                                     tabNumber:j+1]] autorelease];
+                                                                                     tabNumber:j+1]];
             [searches_ addObject:aSearch];
         }
         i++;
@@ -600,7 +577,7 @@ const double GLOBAL_SEARCH_MARGIN = 10;
 
 - (NSAttributedString*)_snippetForResult:(GlobalSearchResult*)theResult isSelected:(BOOL)isSelected maxWidth:(CGFloat)maxWidth
 {
-    NSMutableAttributedString* as = [[[NSMutableAttributedString alloc] init] autorelease];
+    NSMutableAttributedString* as = [[NSMutableAttributedString alloc] init];
     NSColor* textColor;
     if (isSelected) {
         textColor = [NSColor whiteColor];
@@ -622,7 +599,7 @@ const double GLOBAL_SEARCH_MARGIN = 10;
     assert(findString);
     NSMutableString* contextTail = [NSMutableString stringWithString:[theResult context]];
     
-    NSAttributedString* matchStr = [[[NSAttributedString alloc] initWithString:findString attributes:boldAttributes] autorelease];
+    NSAttributedString* matchStr = [[NSAttributedString alloc] initWithString:findString attributes:boldAttributes];
     CGFloat matchLen = [matchStr size].width;
     CGFloat maxPrefixWidth = (maxWidth - matchLen) / 2;
     if (maxPrefixWidth < 0) {
@@ -649,8 +626,8 @@ const double GLOBAL_SEARCH_MARGIN = 10;
             end = [contextTail length];
         }
         if (plainPart) {
-            NSAttributedString* substr = [[[NSAttributedString alloc] initWithString:plainPart
-                                                                          attributes:plainAttributes] autorelease];
+            NSAttributedString* substr = [[NSAttributedString alloc] initWithString:plainPart
+                                                                          attributes:plainAttributes];
             // Append the first plain part only if it doesn't take more than
             // half the space remaining after including the findString.
             if ([as length] == 0 && 
@@ -662,8 +639,8 @@ const double GLOBAL_SEARCH_MARGIN = 10;
             [as appendAttributedString:substr];
         }
         if (matchPart) {
-            [as appendAttributedString:[[[NSAttributedString alloc] initWithString:matchPart
-                                                                        attributes:boldAttributes] autorelease]];
+            [as appendAttributedString:[[NSAttributedString alloc] initWithString:matchPart
+                                                                        attributes:boldAttributes]];
         }
         [contextTail deleteCharactersInRange:NSMakeRange(0, end)];
     }

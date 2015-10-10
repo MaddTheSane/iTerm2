@@ -23,9 +23,9 @@ extern NSString * const kTriggerPartialLineKey;
 @property (nonatomic, assign) BOOL partialLine;
 // A non-cryptographic hash for content addressed triggers (helpful for letting serialized data
 // reference a trigger).
-@property (nonatomic, readonly) NSData *digest;
-@property (nonatomic, retain) NSColor *textColor;
-@property (nonatomic, retain) NSColor *backgroundColor;
+@property (weak, nonatomic, readonly) NSData *digest;
+@property (nonatomic, strong) NSColor *textColor;
+@property (nonatomic, strong) NSColor *backgroundColor;
 
 + (Trigger *)triggerFromDict:(NSDictionary *)dict;
 - (NSString *)action;

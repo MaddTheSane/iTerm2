@@ -45,7 +45,7 @@
 // there's a clean interface here.
 @interface iTermTextViewAccessibilityHelper : NSObject
 
-@property(nonatomic, assign) id<iTermTextViewAccessibilityHelperDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermTextViewAccessibilityHelperDelegate> delegate;
 
 - (NSArray *)accessibilityAttributeNames;
 - (NSArray *)accessibilityParameterizedAttributeNames;

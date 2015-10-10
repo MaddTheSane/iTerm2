@@ -35,7 +35,7 @@ const int kColorMapAnsiWhite = kColorMap8bitBase + 7;
 const int kColorMapAnsiBrightModifier = 8;
 
 @interface iTermColorMap ()
-@property(nonatomic, retain) NSMutableDictionary *map;
+@property(nonatomic, strong) NSMutableDictionary *map;
 @end
 
 @implementation iTermColorMap {
@@ -68,12 +68,6 @@ const int kColorMapAnsiBrightModifier = 8;
     return self;
 }
 
-- (void)dealloc {
-    [_map release];
-    [_lastTextColor release];
-    [_lastBackgroundColor release];
-    [super dealloc];
-}
 
 - (void)setDimmingAmount:(double)dimmingAmount {
     _dimmingAmount = dimmingAmount;
@@ -188,11 +182,10 @@ const int kColorMapAnsiBrightModifier = 8;
     if (!memcmp(_lastTextComponents, dimmedRgb, sizeof(CGFloat) * 3)) {
         return _lastTextColor;
     } else {
-        [_lastTextColor autorelease];
         memmove(_lastTextComponents, dimmedRgb, sizeof(CGFloat) * 3);
-        _lastTextColor = [[NSColor colorWithColorSpace:textColor.colorSpace
+        _lastTextColor = [NSColor colorWithColorSpace:textColor.colorSpace
                                             components:dimmedRgb
-                                                 count:4] retain];
+                                                 count:4];
         return _lastTextColor;
     }
 }
@@ -298,11 +291,10 @@ const int kColorMapAnsiBrightModifier = 8;
     if (!memcmp(_lastBackgroundComponents, dimmedRgb, sizeof(CGFloat) * 4)) {
         return _lastBackgroundColor;
     } else {
-        [_lastBackgroundColor autorelease];
         memmove(_lastBackgroundComponents, dimmedRgb, sizeof(CGFloat) * 4);
-        _lastBackgroundColor = [[NSColor colorWithColorSpace:backgroundColor.colorSpace
+        _lastBackgroundColor = [NSColor colorWithColorSpace:backgroundColor.colorSpace
                                                   components:dimmedRgb
-                                                       count:4] retain];
+                                                       count:4];
         return _lastBackgroundColor;
     }
 }

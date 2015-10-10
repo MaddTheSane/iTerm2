@@ -7,8 +7,8 @@ typedef void (^VT100StateAction)(unsigned char character);
 
 @interface VT100State : NSObject
 
-@property(nonatomic, readonly) NSString *name;
-@property(nonatomic, retain) NSObject *identifier;
+@property(nonatomic, readonly, copy) NSString *name;
+@property(nonatomic, strong) NSObject *identifier;
 @property(nonatomic, copy) VT100StateAction entryAction;
 @property(nonatomic, copy) VT100StateAction exitAction;
 

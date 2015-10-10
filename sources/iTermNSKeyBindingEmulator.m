@@ -19,10 +19,10 @@
 // The key binding dictionary forms a tree. This is the root of the tree.
 // Entries map a "normalized key" (as produced by dictionaryKeyForCharacters:andFlags:) to either a
 // dictionary subtree, or to an array with a selector and its arguments.
-@property(nonatomic, retain) NSDictionary *rootDict;
+@property(nonatomic, strong) NSDictionary *rootDict;
 
 // The current subtree.
-@property(nonatomic, retain) NSDictionary *currentDict;
+@property(nonatomic, strong) NSDictionary *currentDict;
 
 @end
 
@@ -56,18 +56,13 @@ static struct {
                 [paths[0] stringByAppendingPathComponent:@"KeyBindings/DefaultKeyBinding.dict"];
             NSDictionary *theDict = [NSDictionary dictionaryWithContentsOfFile:bindPath];
             DLog(@"Loaded key bindings dictionary:\n%@", theDict);
-            _rootDict = [[self keyBindingDictionaryByNormalizingModifiersInKeys:theDict] retain];
+            _rootDict = [self keyBindingDictionaryByNormalizingModifiersInKeys:theDict];
         }
-        _currentDict = [_rootDict retain];
+        _currentDict = _rootDict;
     }
     return self;
 }
 
-- (void)dealloc {
-    [_rootDict release];
-    [_currentDict release];
-    [super dealloc];
-}
 
 + (instancetype)sharedInstance
 {
@@ -319,10 +314,10 @@ static struct {
                    unicodeString);
     CFRelease(keyboard);
 
-    NSString *theString = (NSString *)CFStringCreateWithCharacters(kCFAllocatorDefault,
+    NSString *theString = (NSString *)CFBridgingRelease(CFStringCreateWithCharacters(kCFAllocatorDefault,
                                                                    unicodeString,
-                                                                   1);
-    return [theString autorelease];
+                                                                   1));
+    return theString;
 }
 
 // Returns all possible keys for an event, from most preferred to least.

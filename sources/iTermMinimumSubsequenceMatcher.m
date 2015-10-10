@@ -23,18 +23,11 @@
         for (int i = 0; i < query.length; i++) {
             [temp addObject:@([query characterAtIndex:i])];
         }
-        _queryChars = [temp retain];
+        _queryChars = temp;
     }
     return self;
 }
 
-- (void)dealloc {
-    [_query release];
-    [_postingLists release];
-    [_indexes release];
-    [_queryChars release];
-    [super dealloc];
-}
 
 // Dictionary mapping letter->array(indexes into document where letter occurs)
 // Returns nil if no matches are possible.
@@ -181,14 +174,12 @@
 }
 
 - (NSIndexSet *)indexSetForDocument:(NSString *)document {
-    [_postingLists release];
-    _postingLists = [[self postingListsForDocument:document] retain];
+    _postingLists = [self postingListsForDocument:document];
     if (!_postingLists.count) {
         return nil;
     }
 
-    [_indexes release];
-    _indexes = [[self initialIndexes] retain];
+    _indexes = [self initialIndexes];
     if (!_indexes) {
         return nil;
     }

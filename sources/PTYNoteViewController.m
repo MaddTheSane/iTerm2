@@ -17,8 +17,8 @@ NSString * const PTYNoteViewControllerShouldUpdatePosition = @"PTYNoteViewContro
 static const CGFloat kBottomPadding = 3;
 
 @interface PTYNoteViewController ()
-@property(nonatomic, retain) NSTextView *textView;
-@property(nonatomic, retain) NSScrollView *scrollView;
+@property(nonatomic, strong) NSTextView *textView;
+@property(nonatomic, strong) NSScrollView *scrollView;
 @property(nonatomic, assign) BOOL watchForUpdate;
 @end
 
@@ -45,26 +45,21 @@ static const CGFloat kBottomPadding = 3;
 - (void)dealloc {
     [noteView_ removeFromSuperview];
     noteView_.delegate = nil;
-    [noteView_ release];
-    [textView_ release];
-    [scrollView_ release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (void)setNoteView:(PTYNoteView *)noteView {
-    [noteView_ autorelease];
-    noteView_ = [noteView retain];
+    noteView_ = noteView;
     [self setView:noteView];
 }
 
 - (void)loadView {
     const CGFloat kWidth = 300;
     const CGFloat kHeight = 10;
-    self.noteView = [[[PTYNoteView alloc] initWithFrame:NSMakeRect(0, 0, kWidth, kHeight)] autorelease];
+    self.noteView = [[PTYNoteView alloc] initWithFrame:NSMakeRect(0, 0, kWidth, kHeight)];
     self.noteView.autoresizesSubviews = YES;
     self.noteView.delegate = self;
-    NSShadow *shadow = [[[NSShadow alloc] init] autorelease];
+    NSShadow *shadow = [[NSShadow alloc] init];
     shadow.shadowColor = [[NSColor blackColor] colorWithAlphaComponent:0.5];
     shadow.shadowOffset = NSMakeSize(1, -1);
     shadow.shadowBlurRadius = 1.0;
@@ -75,17 +70,16 @@ static const CGFloat kBottomPadding = 3;
                               3,
                               kWidth,
                               kHeight);
-    self.scrollView = [[[NSScrollView alloc] initWithFrame:frame] autorelease];
+    self.scrollView = [[NSScrollView alloc] initWithFrame:frame];
     scrollView_.drawsBackground = NO;
     scrollView_.hasVerticalScroller = YES;
     scrollView_.hasHorizontalScroller = NO;
     scrollView_.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
-    self.textView = [[[NSTextView alloc] initWithFrame:NSMakeRect(0,
+    self.textView = [[NSTextView alloc] initWithFrame:NSMakeRect(0,
                                                                   0,
                                                                   scrollView_.contentSize.width,
-                                                                  scrollView_.contentSize.height)]
-                     autorelease];
+                                                                  scrollView_.contentSize.height)];
     textView_.allowsUndo = YES;
     textView_.minSize = scrollView_.frame.size;
     textView_.maxSize = NSMakeSize(FLT_MAX, FLT_MAX);
@@ -102,7 +96,7 @@ static const CGFloat kBottomPadding = 3;
     // at the bottom.
     NSRect wrapperFrame = scrollView_.frame;
     wrapperFrame.size.height += kBottomPadding;
-    NSView *wrapper = [[[NSView alloc] initWithFrame:wrapperFrame] autorelease];
+    NSView *wrapper = [[NSView alloc] initWithFrame:wrapperFrame];
     wrapper.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     wrapper.autoresizesSubviews = YES;
     [wrapper addSubview:scrollView_];

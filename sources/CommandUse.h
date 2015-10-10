@@ -15,17 +15,17 @@
 @property(nonatomic, assign) NSTimeInterval time;
 
 // Optional.
-@property(nonatomic, retain) NSString *command;
+@property(nonatomic, strong) NSString *command;
 
 // Setting this actually sets the markGuid.
-@property(nonatomic, retain) VT100ScreenMark *mark;
-@property(nonatomic, retain) NSString *directory;
+@property(nonatomic, strong) VT100ScreenMark *mark;
+@property(nonatomic, strong) NSString *directory;
 
 // This is used to figure out which mark matches this command use when deserializing marks.
-@property(nonatomic, readonly) NSString *markGuid;
+@property(nonatomic, readonly, copy) NSString *markGuid;
 
 // Optional status code. Unset implies code 0.
-@property(nonatomic, retain) NSNumber *code;
+@property(nonatomic, strong) NSNumber *code;
 
 + (instancetype)commandUseFromSerializedValue:(NSArray *)serializedValue;
 - (NSArray *)serializedValue;

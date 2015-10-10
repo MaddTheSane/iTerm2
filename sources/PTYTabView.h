@@ -36,7 +36,7 @@
 @interface PTYTabView : NSTabView
 
 // Override setDelegate so that it accepts PSMTabBarControl without warning
-@property(atomic, assign) id<PSMTabViewDelegate> delegate;
+@property(atomic, unsafe_unretained) id<PSMTabViewDelegate> delegate;
 
 // Selects a tab where sender's -representedObject is a NSTabViewItem. Used from a window's
 // context menu.

@@ -43,11 +43,11 @@ extern int kVT100ScreenMinRows;
     LineBuffer* linebuffer_;
 }
 
-@property(nonatomic, retain) VT100Terminal *terminal;
+@property(nonatomic, strong) VT100Terminal *terminal;
 @property(nonatomic, assign) BOOL audibleBell;
 @property(nonatomic, assign) BOOL showBellIndicator;
 @property(nonatomic, assign) BOOL flashBell;
-@property(nonatomic, assign) id<VT100ScreenDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<VT100ScreenDelegate> delegate;
 @property(nonatomic, assign) BOOL postGrowlNotifications;
 @property(nonatomic, assign) BOOL cursorBlinks;
 @property(nonatomic, assign) BOOL allowTitleReporting;
@@ -55,7 +55,7 @@ extern int kVT100ScreenMinRows;
 @property(nonatomic, assign) BOOL unlimitedScrollback;
 @property(nonatomic, assign) BOOL useColumnScrollRegion;
 @property(nonatomic, assign) BOOL saveToScrollbackInAlternateScreen;
-@property(nonatomic, retain) DVR *dvr;
+@property(nonatomic, strong) DVR *dvr;
 @property(nonatomic, assign) BOOL trackCursorLineMovement;
 @property(nonatomic, assign) BOOL appendToScrollbackWithStatusBar;
 @property(nonatomic, readonly) VT100GridAbsCoordRange lastCommandOutputRange;

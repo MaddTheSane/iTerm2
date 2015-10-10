@@ -50,7 +50,7 @@
 @interface iTermFindOnPageHelper : NSObject
 
 @property(nonatomic, readonly) BOOL findInProgress;
-@property(nonatomic, assign) NSView<iTermFindOnPageHelperDelegate> *delegate;
+@property(nonatomic, weak) NSView<iTermFindOnPageHelperDelegate> *delegate;
 @property(nonatomic, readonly) NSDictionary *highlightMap;
 @property(nonatomic, readonly) BOOL haveFindCursor;
 @property(nonatomic, readonly) VT100GridAbsCoord findCursorAbsCoord;

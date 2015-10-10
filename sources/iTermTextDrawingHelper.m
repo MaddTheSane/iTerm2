@@ -70,8 +70,8 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _markImage = [[NSImage imageNamed:@"mark"] retain];
-        _markErrImage = [[NSImage imageNamed:@"mark_err"] retain];
+        _markImage = [NSImage imageNamed:@"mark"];
+        _markErrImage = [NSImage imageNamed:@"mark_err"];
         if ([iTermAdvancedSettingsModel logDrawingPerformance]) {
             NSLog(@"** Drawing performance timing enabled **");
             _drawRectDuration = [[MovingAverage alloc] init];
@@ -83,24 +83,6 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     return self;
 }
 
-- (void)dealloc {
-    [_selection release];
-    [_cursorGuideColor release];
-    [_badgeImage release];
-    [_unfocusedSelectionColor release];
-    [_markedText release];
-    [_colorMap release];
-
-    [_selectedFont release];
-    [_markImage release];
-    [_markErrImage release];
-    [_drawRectDuration release];
-    [_drawRectInterval release];
-
-    [_backgroundStripesImage release];
-
-    [super dealloc];
-}
 
 #pragma mark - Drawing: General
 
@@ -261,7 +243,6 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
                                   ctx:ctx];
     _blinkingFound |= self.cursorBlinking;
     
-    [_selectedFont release];
     _selectedFont = nil;
 }
 
@@ -398,7 +379,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
 - (void)drawStripesInRect:(NSRect)rect {
     if (!_backgroundStripesImage) {
-        _backgroundStripesImage = [[NSImage imageNamed:@"BackgroundStripes"] retain];
+        _backgroundStripesImage = [NSImage imageNamed:@"BackgroundStripes"];
     }
     NSColor *color = [NSColor colorWithPatternImage:_backgroundStripesImage];
     [color set];
@@ -498,7 +479,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
 - (void)drawTimestampForLine:(int)line {
     NSDate *timestamp = [_delegate drawingHelperTimestampForLine:line];
-    NSDateFormatter *fmt = [[[NSDateFormatter alloc] init] autorelease];
+    NSDateFormatter *fmt = [[NSDateFormatter alloc] init];
     const NSTimeInterval day = -86400;
     const NSTimeInterval timeDelta = timestamp.timeIntervalSinceReferenceDate - self.now;
     if (timeDelta < day * 180) {
@@ -550,8 +531,8 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
     const CGFloat alpha = self.isRetina ? 0.75 : 0.9;
     NSGradient *gradient =
-        [[[NSGradient alloc] initWithStartingColor:[bgColor colorWithAlphaComponent:0]
-                                       endingColor:[bgColor colorWithAlphaComponent:alpha]] autorelease];
+        [[NSGradient alloc] initWithStartingColor:[bgColor colorWithAlphaComponent:0]
+                                       endingColor:[bgColor colorWithAlphaComponent:alpha]];
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
     [gradient drawInRect:NSMakeRect(x - 20, y, 20, _cellSize.height) angle:0];
 
@@ -559,7 +540,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
     NSRectFillUsingOperation(NSMakeRect(x, y, w, _cellSize.height), NSCompositeSourceOver);
 
-    NSShadow *shadow = [[[NSShadow alloc] init] autorelease];
+    NSShadow *shadow = [[NSShadow alloc] init];
     shadow.shadowColor = shadowColor;
     shadow.shadowBlurRadius = 0.2f;
     shadow.shadowOffset = CGSizeMake(0.5, -0.5);
@@ -719,7 +700,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
     // Draw underline
     if (currentRun->attrs.underline) {
-        [self drawUnderlineOfColor:currentRun->attrs.color
+        [self drawUnderlineOfColor:(__bridge NSColor *)(currentRun->attrs.color)
                       atCellOrigin:startPoint
                               font:currentRun->attrs.fontInfo.font
                              width:runWidth];
@@ -756,11 +737,11 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         length = firstMissingGlyph;
     }
     [self selectFont:currentRun->attrs.fontInfo.font inContext:ctx];
-    CGContextSetFillColorSpace(ctx, [[currentRun->attrs.color colorSpace] CGColorSpace]);
-    int componentCount = [currentRun->attrs.color numberOfComponents];
+    CGContextSetFillColorSpace(ctx, [[(__bridge NSColor*)currentRun->attrs.color colorSpace] CGColorSpace]);
+    int componentCount = [(__bridge NSColor*)currentRun->attrs.color numberOfComponents];
 
     CGFloat components[componentCount];
-    [currentRun->attrs.color getComponents:components];
+    [(__bridge NSColor*)currentRun->attrs.color getComponents:components];
     CGContextSetFillColor(ctx, components);
 
     double y = initialPoint.y + _cellSize.height + currentRun->attrs.fontInfo.baselineOffset;
@@ -847,20 +828,20 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     NSAffineTransform *transform = [NSAffineTransform transform];
     [transform translateXBy:pos.x yBy:pos.y];
     [transform concat];
-    [complexRun->attrs.color set];
+    [(__bridge NSColor*)complexRun->attrs.color set];
     [path stroke];
     [ctx restoreGraphicsState];
 }
 
 - (NSAttributedString *)attributedStringForComplexRun:(CRun *)complexRun {
     PTYFontInfo *fontInfo = complexRun->attrs.fontInfo;
-    NSColor *color = complexRun->attrs.color;
-    NSString *str = complexRun->string;
+    NSColor *color = (__bridge NSColor *)(complexRun->attrs.color);
+    NSString *str = (__bridge NSString *)(complexRun->string);
     NSDictionary *attrs = @{ NSFontAttributeName: fontInfo.font,
                              NSForegroundColorAttributeName: color };
 
-    return [[[NSAttributedString alloc] initWithString:str
-                                            attributes:attrs] autorelease];
+    return [[NSAttributedString alloc] initWithString:str
+                                            attributes:attrs];
 }
 
 - (void)drawStringWithCombiningMarksInRun:(CRun *)complexRun at:(NSPoint)pos {
@@ -870,7 +851,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     BOOL antiAlias = complexRun->attrs.antiAlias;
 
     NSGraphicsContext *ctx = [NSGraphicsContext currentContext];
-    NSColor *color = complexRun->attrs.color;
+    NSColor *color = (__bridge NSColor *)(complexRun->attrs.color);
 
     [ctx saveGraphicsState];
     [ctx setCompositingOperation:NSCompositeSourceOver];
@@ -906,14 +887,14 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         const CGGlyph *buffer = CTRunGetGlyphsPtr(run);
         if (!buffer) {
             NSMutableData *tempBuffer =
-                [[[NSMutableData alloc] initWithLength:sizeof(CGGlyph) * length] autorelease];
+                [[NSMutableData alloc] initWithLength:sizeof(CGGlyph) * length];
             CTRunGetGlyphs(run, CFRangeMake(0, length), (CGGlyph *)tempBuffer.mutableBytes);
             buffer = tempBuffer.mutableBytes;
         }
         const CGPoint *positions = CTRunGetPositionsPtr(run);
         if (!positions) {
             NSMutableData *tempBuffer =
-                [[[NSMutableData alloc] initWithLength:sizeof(CGPoint) * length] autorelease];
+                [[NSMutableData alloc] initWithLength:sizeof(CGPoint) * length];
             CTRunGetPositions(run, CFRangeMake(0, length), (CGPoint *)tempBuffer.mutableBytes);
             positions = tempBuffer.mutableBytes;
         }
@@ -989,7 +970,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     } else if ([self complexRunIsBoxDrawingCell:complexRun]) {
         // Special box-drawing cells don't use the font so they look prettier.
         [self drawBoxDrawingCellInRun:complexRun at:pos];
-    } else if (StringContainsCombiningMark(complexRun->string)) {
+    } else if (StringContainsCombiningMark((__bridge NSString *)(complexRun->string))) {
         // High-quality but slow rendering, needed especially for multiple combining marks.
         [self drawStringWithCombiningMarksInRun:complexRun at:pos];
     } else {
@@ -1187,7 +1168,6 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     }
 
     _oldCursorPosition = _cursorCoord;
-    [_selectedFont release];
     _selectedFont = nil;
 }
 
@@ -1293,7 +1273,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
                                                                       bold:theLine[i].bold
                                                                      faint:theLine[i].faint
                                                               isBackground:NO]);
-                    lastColor = attrs.color;
+                    lastColor = (__bridge NSColor *)(attrs.color);
                 }
             }
         }
@@ -1314,12 +1294,12 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
                         mutingAmount > 0.001 ||
                         theLine[i].faint)) {  // faint implies alpha<1 and is faster than getting the alpha component
             NSColor *processedColor;
-            if (attrs.color == lastUnprocessedColor) {
+            if (attrs.color == (__bridge CFTypeRef)(lastUnprocessedColor)) {
                 processedColor = lastProcessedColor;
             } else {
-                processedColor = [colorMap processedTextColorForTextColor:attrs.color
+                processedColor = [colorMap processedTextColorForTextColor:(__bridge NSColor *)(attrs.color)
                                                       overBackgroundColor:bgColor];
-                lastUnprocessedColor = attrs.color;
+                lastUnprocessedColor = (__bridge NSColor *)(attrs.color);
                 lastProcessedColor = processedColor;
             }
             
@@ -1387,7 +1367,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
                 thisCharString = @"I";
             }
             if (inUnderlinedRange && !_haveUnderlinedHostname) {
-                attrs.color = [colorMap colorForKey:kColorMapLink];
+                attrs.color = (__bridge CFTypeRef)([colorMap colorForKey:kColorMapLink]);
             }
             if (!currentRun) {
                 firstRun = currentRun = malloc(sizeof(CRun));
@@ -1617,7 +1597,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
     [color getComponents:(CGFloat *)&components];
 
-    return (CGColorRef)[(id)CGColorCreate(colorSpace, components) autorelease];
+    return (CGColorRef)CFAutorelease(CGColorCreate(colorSpace, components));
 }
 
 - (NSBezierPath *)bezierPathForBoxDrawingCode:(int)code {
@@ -1722,8 +1702,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
                             [[font fontName] UTF8String],
                             [font pointSize],
                             kCGEncodingMacRoman);
-        [_selectedFont release];
-        _selectedFont = [font retain];
+        _selectedFont = font;
     }
 }
 
@@ -1818,9 +1797,9 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         if (overrideColor) {
             while (run) {
                 if (run->attrs.fontInfo.font) {
-                    theFont = [[run->attrs.fontInfo.font retain] autorelease];
+                    theFont = run->attrs.fontInfo.font;
                 }
-                CRunAttrsSetColor(&run->attrs, run->storage, overrideColor);
+                CRunAttrsSetColor(&run->attrs, (__bridge CRunStorage *)(run->storage), overrideColor);
                 run = run->next;
             }
         }

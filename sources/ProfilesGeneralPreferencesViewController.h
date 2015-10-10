@@ -19,10 +19,10 @@
 
 @interface ProfilesGeneralPreferencesViewController : iTermProfilePreferencesBaseViewController
 
-@property(nonatomic, assign) IBOutlet id<ProfilesGeneralPreferencesViewControllerDelegate> profileDelegate;
-@property(nonatomic, readonly) NSTextField *profileNameField;
-@property(nonatomic, readonly) NSTextField *profileNameFieldForEditCurrentSession;
-@property(nonatomic, readonly) NSString *selectedGuid;
+@property(nonatomic, unsafe_unretained) IBOutlet id<ProfilesGeneralPreferencesViewControllerDelegate> profileDelegate;
+@property(weak, nonatomic, readonly) NSTextField *profileNameField;
+@property(weak, nonatomic, readonly) NSTextField *profileNameFieldForEditCurrentSession;
+@property(weak, nonatomic, readonly) NSString *selectedGuid;
 
 - (void)layoutSubviewsForEditCurrentSessionMode;
 - (void)updateShortcutTitles;

@@ -43,15 +43,6 @@ typedef enum {
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_sourceGuid release];
-    [_keysForColors release];
-    [_keysForText release];
-    [_keysForWindow release];
-    [_keysForTerminal release];
-    [_keysForSession release];
-    [_keysForKeyboard release];
-    [_keysForAdvanced release];
-    [super dealloc];
 }
 
 - (void)awakeFromNib {
@@ -64,7 +55,6 @@ typedef enum {
 }
 
 - (void)setSourceGuid:(NSString *)sourceGuid {
-    [_sourceGuid autorelease];
     _sourceGuid = [sourceGuid copy];
     [self updateLabel];
 }
@@ -138,7 +128,7 @@ typedef enum {
     
     Profile* dest = [profileModel bookmarkWithGuid:destGuid];
     Profile* src = [[ProfileModel sharedInstance] bookmarkWithGuid:guid];
-    NSMutableDictionary* newDict = [[[NSMutableDictionary alloc] initWithDictionary:dest] autorelease];
+    NSMutableDictionary* newDict = [[NSMutableDictionary alloc] initWithDictionary:dest];
     NSArray *keys = nil;
     
     switch (attributes) {

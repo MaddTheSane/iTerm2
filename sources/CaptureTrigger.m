@@ -73,7 +73,7 @@ static NSString *const kSuppressCaptureOutputToolNotVisibleWarning =
             [self showCapturedOutputToolNotVisibleAnnouncementInSession:aSession];
         }
     }
-    CapturedOutput *output = [[[CapturedOutput alloc] init] autorelease];
+    CapturedOutput *output = [[CapturedOutput alloc] init];
     output.line = stringLine.stringValue;
     output.trigger = self;
     output.values = [NSArray arrayWithObjects:capturedStrings count:captureCount];
@@ -84,11 +84,10 @@ static NSString *const kSuppressCaptureOutputToolNotVisibleWarning =
 
 - (void)showCapturedOutputToolNotVisibleAnnouncementInSession:(PTYSession *)aSession {
     NSString *theTitle = @"A Capture Output trigger fired, but the Captured Output tool is not visible.";
-    [aSession retain];
     void (^completion)(int selection) = ^(int selection) {
         switch (selection) {
             case -2:
-                [aSession release];
+                aSession;
                 break;
 
             case 0:
@@ -113,11 +112,10 @@ static NSString *const kSuppressCaptureOutputToolNotVisibleWarning =
 
 - (void)showShellIntegrationRequiredAnnouncementInSession:(PTYSession *)aSession {
     NSString *theTitle = @"A Capture Output trigger fired, but Shell Integration is not installed.";
-    [aSession retain];
     void (^completion)(int selection) = ^(int selection) {
         switch (selection) {
             case -2:
-                [aSession release];
+                aSession;
                 break;
 
             case 0:

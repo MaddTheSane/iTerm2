@@ -39,7 +39,7 @@ extern NSString *const kSemanticHistoryWorkingDirectorySubstitutionKey;
 @interface iTermSemanticHistoryController : NSObject
 
 @property (nonatomic, copy) NSDictionary *prefs;
-@property (nonatomic, assign) id<iTermSemanticHistoryControllerDelegate> delegate;
+@property (nonatomic, unsafe_unretained) id<iTermSemanticHistoryControllerDelegate> delegate;
 @property (nonatomic, readonly) BOOL activatesOnAnyString;  // Doesn't have to be a real file?
 
 // Given a possibly relative |path| and |workingDirectory|, returns the absolute path. If |path|
@@ -108,7 +108,7 @@ extern NSString *const kSemanticHistoryWorkingDirectorySubstitutionKey;
 
 // Tests can subclass and override -fileManager to fake the filesystem. The following methods are
 // called: fileExistsAtPathLocally:, fileExistsAtPath:, fileExistsAtPath:isDirectory:
-@property (nonatomic, readonly) NSFileManager *fileManager;
+@property (weak, nonatomic, readonly) NSFileManager *fileManager;
 
 // Tests can subclass and override these methods to avoid interacting with the filesystem.
 - (void)launchTaskWithPath:(NSString *)path arguments:(NSArray *)arguments wait:(BOOL)wait;

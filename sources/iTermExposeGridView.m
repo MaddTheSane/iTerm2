@@ -71,9 +71,7 @@ static BOOL SizesEqual(NSSize a, NSSize b) {
     for (iTermExposeTabView* tabView in [self subviews]) {
         [self removeTrackingRect:[tabView trackingRectTag]];
     }
-    [cache_ release];
     free(frames_);
-    [super dealloc];
 }
 
 - (iTermExposeTabView*)_tabViewForTab:(PTYTab*)theTab
@@ -165,13 +163,12 @@ static BOOL SizesEqual(NSSize a, NSSize b) {
 - (void)drawRect:(NSRect)rect
 {
     if (!cache_ || !SizesEqual([cache_ size], [self frame].size)) {
-        [cache_ release];
         cache_ = [[NSImage alloc] initWithSize:[self frame].size];
         [cache_ lockFocus];
         // Can't use alpha 0 because clicks would pass through to windows below.
-        NSGradient* aGradient = [[[NSGradient alloc]
+        NSGradient* aGradient = [[NSGradient alloc]
                                   initWithStartingColor:[[NSColor blackColor] colorWithAlphaComponent:0.1]
-                                  endingColor:[[NSColor blackColor] colorWithAlphaComponent:0.7]] autorelease];
+                                  endingColor:[[NSColor blackColor] colorWithAlphaComponent:0.7]];
         [aGradient drawInRect:[self frame] relativeCenterPosition:NSMakePoint(0, 0)];
         [cache_ unlockFocus];
     }
@@ -250,7 +247,6 @@ static BOOL SizesEqual(NSSize a, NSSize b) {
                                                                     index:theIndex
                                                              wasMaximized:wasMaximized];
     [self addSubview:aView];
-    [aView release];
     [[aView animator] setFrame:dest];
     [self performSelector:@selector(viewIsReady:)
                withObject:aView
@@ -334,7 +330,7 @@ static BOOL SizesEqual(NSSize a, NSSize b) {
     if ([aView tabObject]) {
         [aView setTrackingRectTag:[self addTrackingRect:rect
                                                   owner:self
-                                               userData:aView
+                                               userData:(__bridge void * _Nullable)(aView)
                                            assumeInside:NO]];
     }
 }

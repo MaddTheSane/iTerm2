@@ -16,11 +16,11 @@
     PTYFontInfo *italicVersion_;
 }
 
-@property (nonatomic, retain) NSFont *font;
+@property (nonatomic, strong) NSFont *font;
 @property (nonatomic, assign) double baselineOffset;
-@property (nonatomic, retain) PTYFontInfo *boldVersion;
-@property (nonatomic, retain) PTYFontInfo *italicVersion;
-@property (nonatomic, retain) PTYFontInfo *boldItalicVersion;
+@property (nonatomic, strong) PTYFontInfo *boldVersion;
+@property (nonatomic, strong) PTYFontInfo *italicVersion;
+@property (nonatomic, strong) PTYFontInfo *boldItalicVersion;
 
 + (PTYFontInfo *)fontInfoWithFont:(NSFont *)font baseline:(double)baseline;
 

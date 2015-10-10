@@ -60,12 +60,12 @@ static NSString *const kOldStyleUrlHandlersUserDefaultsKey = @"URLHandlers";
 }
 
 - (void)connectBookmarkWithGuid:(NSString*)guid toScheme:(NSString*)scheme {
-    NSURL *appURL = nil;
+    CFURLRef appURL = nil;
     OSStatus err;
     BOOL set = YES;
     
-    err = LSGetApplicationForURL((CFURLRef)[NSURL URLWithString:[scheme stringByAppendingString:@":"]],
-                                 kLSRolesAll, NULL, (CFURLRef *)&appURL);
+    err = LSGetApplicationForURL((__bridge CFURLRef)[NSURL URLWithString:[scheme stringByAppendingString:@":"]],
+                                 kLSRolesAll, NULL, &appURL);
     if (err != noErr) {
         set = NSRunAlertPanel([NSString stringWithFormat:@"iTerm is not the default handler for %@. "
                                                          @"Would you like to set iTerm as the default handler?",
@@ -74,7 +74,7 @@ static NSString *const kOldStyleUrlHandlersUserDefaultsKey = @"URLHandlers";
                               @"OK",
                               @"Cancel",
                               nil) == NSAlertDefaultReturn;
-    } else if (![[[NSFileManager defaultManager] displayNameAtPath:[appURL path]] isEqualToString:@"iTerm 2"]) {
+    } else if (![[[NSFileManager defaultManager] displayNameAtPath:[(__bridge NSURL*)appURL path]] isEqualToString:@"iTerm 2"]) {
         NSString *theTitle = [NSString stringWithFormat:@"iTerm is not the default handler for %@. "
                                                         @"Would you like to set iTerm as the default handler?", scheme];
         set = NSRunAlertPanel(theTitle,
@@ -82,13 +82,13 @@ static NSString *const kOldStyleUrlHandlersUserDefaultsKey = @"URLHandlers";
                               @"OK",
                               @"Cancel",
                               nil,
-                              [[NSFileManager defaultManager] displayNameAtPath:[appURL path]]) == NSAlertDefaultReturn;
+                              [[NSFileManager defaultManager] displayNameAtPath:[(__bridge NSURL*)appURL path]]) == NSAlertDefaultReturn;
     }
     
     if (set) {
         _urlHandlersByGuid[scheme] = guid;
-        LSSetDefaultHandlerForURLScheme((CFStringRef)scheme,
-                                        (CFStringRef)[[NSBundle mainBundle] bundleIdentifier]);
+        LSSetDefaultHandlerForURLScheme((__bridge CFStringRef)scheme,
+                                        (__bridge CFStringRef)[[NSBundle mainBundle] bundleIdentifier]);
     }
     [self updateUserDefaults];
 }
@@ -108,14 +108,11 @@ static NSString *const kOldStyleUrlHandlersUserDefaultsKey = @"URLHandlers";
 }
 
 - (Profile *)profileForScheme:(NSString *)url {
-    NSString* handlerId = (NSString *)LSCopyDefaultHandlerForURLScheme((CFStringRef)url);
+    NSString* handlerId = (NSString *)CFBridgingRelease(LSCopyDefaultHandlerForURLScheme((__bridge CFStringRef)url));
     Profile *profile = nil;
     if ([handlerId isEqualToString:@"com.googlecode.iterm2"] ||
         [handlerId isEqualToString:@"net.sourceforge.iterm"]) {
         profile = [[ProfileModel sharedInstance] bookmarkWithGuid:[self guidForScheme:url]];
-    }
-    if (handlerId) {
-        CFRelease(handlerId);
     }
     return profile;
 }

@@ -47,18 +47,18 @@ static const double kProfileNameMultiplierForArrangementItem = 0.11;
 
     queryString = [queryString lowercaseString];
     iTermMinimumSubsequenceMatcher *matcher =
-        [[[iTermMinimumSubsequenceMatcher alloc] initWithQuery:queryString] autorelease];
+        [[iTermMinimumSubsequenceMatcher alloc] initWithQuery:queryString];
 
     NSMutableArray *items = [NSMutableArray array];
     for (PTYSession *session in sessions) {
         NSMutableArray *features = [NSMutableArray array];
-        iTermOpenQuicklySessionItem *item = [[[iTermOpenQuicklySessionItem alloc] init] autorelease];
+        iTermOpenQuicklySessionItem *item = [[iTermOpenQuicklySessionItem alloc] init];
         item.logoGenerator.textColor = session.foregroundColor;
         item.logoGenerator.backgroundColor = session.backgroundColor;
         item.logoGenerator.tabColor = session.tabColor;
         item.logoGenerator.cursorColor = session.cursorColor;
 
-        NSMutableAttributedString *attributedName = [[[NSMutableAttributedString alloc] init] autorelease];
+        NSMutableAttributedString *attributedName = [[NSMutableAttributedString alloc] init];
         item.score = [self scoreForSession:session
                                    matcher:matcher
                                   features:features
@@ -80,8 +80,8 @@ static const double kProfileNameMultiplierForArrangementItem = 0.11;
 
     BOOL haveCurrentWindow = [[iTermController sharedInstance] currentTerminal] != nil;
     for (Profile *profile in [[ProfileModel sharedInstance] bookmarks]) {
-        iTermOpenQuicklyProfileItem *item = [[[iTermOpenQuicklyProfileItem alloc] init] autorelease];
-        NSMutableAttributedString *attributedName = [[[NSMutableAttributedString alloc] init] autorelease];
+        iTermOpenQuicklyProfileItem *item = [[iTermOpenQuicklyProfileItem alloc] init];
+        NSMutableAttributedString *attributedName = [[NSMutableAttributedString alloc] init];
         item.score = [self scoreForProfile:profile matcher:matcher attributedName:attributedName];
         if (item.score > 0) {
             NSString *theValue;
@@ -100,8 +100,8 @@ static const double kProfileNameMultiplierForArrangementItem = 0.11;
     }
 
     for (NSString *arrangementName in [WindowArrangements allNames]) {
-        iTermOpenQuicklyArrangementItem *item = [[[iTermOpenQuicklyArrangementItem alloc] init] autorelease];
-        NSMutableAttributedString *attributedName = [[[NSMutableAttributedString alloc] init] autorelease];
+        iTermOpenQuicklyArrangementItem *item = [[iTermOpenQuicklyArrangementItem alloc] init];
+        NSMutableAttributedString *attributedName = [[NSMutableAttributedString alloc] init];
         item.score = [self scoreForArrangementWithName:arrangementName
                                                matcher:matcher
                                         attributedName:attributedName];
@@ -316,7 +316,7 @@ static const double kProfileNameMultiplierForArrangementItem = 0.11;
         if (value > highestValue) {
             highestValue = value;
             bestFeature = document;
-            bestIndexSet = [[indexSet copy] autorelease];
+            bestIndexSet = [indexSet copy];
         }
         score += value * multipler;
         if (score > limit) {

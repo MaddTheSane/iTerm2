@@ -41,8 +41,8 @@ static const NSInteger kInitialDirectoryTypeAdvancedTag = 3;
     IBOutlet NSTextField *_schemesLabel;
 
     // Controls
-    IBOutlet NSTextField *_profileNameField;
-    IBOutlet NSTextField *_profileNameFieldForEditCurrentSession;
+    IBOutlet NSTextField *__weak _profileNameField;
+    IBOutlet NSTextField *__weak _profileNameFieldForEditCurrentSession;
     IBOutlet NSPopUpButton *_profileShortcut;
     IBOutlet NSTokenField *_tagsTokenField;
     IBOutlet NSMatrix *_commandType;  // Login shell vs custom command radio buttons
@@ -66,7 +66,6 @@ static const NSInteger kInitialDirectoryTypeAdvancedTag = 3;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (void)awakeFromNib {
@@ -429,7 +428,7 @@ static const NSInteger kInitialDirectoryTypeAdvancedTag = 3;
     NSMutableArray *result = [NSMutableArray array];
     for (NSString *aTag in allTags) {
         if ([aTag hasPrefix:substring]) {
-            [result addObject:[aTag retain]];
+            [result addObject:aTag];
         }
     }
     return result;

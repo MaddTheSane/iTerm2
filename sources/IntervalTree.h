@@ -32,15 +32,15 @@
 
 // A node in the interval tree will contain one or more entries, each of which has an interval and an object. All intervals should have the same location.
 @interface IntervalTreeEntry : NSObject
-@property(nonatomic, retain) Interval *interval;
-@property(nonatomic, retain) id<IntervalTreeObject> object;
+@property(nonatomic, strong) Interval *interval;
+@property(nonatomic, strong) id<IntervalTreeObject> object;
 
 + (IntervalTreeEntry *)entryWithInterval:(Interval *)interval object:(id<IntervalTreeObject>)object;
 @end
 
 @interface IntervalTreeValue : NSObject
 @property(nonatomic, assign) long long maxLimitAtSubtree;
-@property(nonatomic, retain) NSMutableArray *entries;
+@property(nonatomic, strong) NSMutableArray *entries;
 
 // Largest limit of all entries
 @property (readonly) long long maxLimit;

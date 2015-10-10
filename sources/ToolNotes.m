@@ -22,8 +22,8 @@ static NSString *kToolNotesSetTextNotification = @"kToolNotesSetTextNotification
     if (self) {
         filemanager_ = [[NSFileManager alloc] init];
 
-        NSScrollView *scrollview = [[[NSScrollView alloc]
-                                     initWithFrame:NSMakeRect(0, 0, frame.size.width, frame.size.height)] autorelease];
+        NSScrollView *scrollview = [[NSScrollView alloc]
+                                     initWithFrame:NSMakeRect(0, 0, frame.size.width, frame.size.height)];
         [scrollview setBorderType:NSBezelBorder];
         [scrollview setHasVerticalScroller:YES];
         [scrollview setHasHorizontalScroller:NO];
@@ -58,8 +58,6 @@ static NSString *kToolNotesSetTextNotification = @"kToolNotesSetTextNotification
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [textView_ writeRTFDToFile:[self filename] atomically:NO];
-    [filemanager_ release];
-    [super dealloc];
 }
 
 - (NSString *)filename

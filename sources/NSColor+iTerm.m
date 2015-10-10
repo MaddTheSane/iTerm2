@@ -31,13 +31,13 @@ CGFloat PerceivedBrightness(CGFloat r, CGFloat g, CGFloat b) {
 @implementation NSColor (iTerm)
 
 + (NSColor *)colorWithString:(NSString *)s {
-    NSData *data = [[[NSData alloc] initWithBase64Encoding:s] autorelease];
+    NSData *data = [[NSData alloc] initWithBase64Encoding:s];
     if (!data.length) {
         return nil;
     }
     @try {
-        NSKeyedUnarchiver *decoder = [[[NSKeyedUnarchiver alloc] initForReadingWithData:data] autorelease];
-        NSColor *color = [[[NSColor alloc] initWithCoder:decoder] autorelease];
+        NSKeyedUnarchiver *decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
+        NSColor *color = [[NSColor alloc] initWithCoder:decoder];
         return color;
     }
     @catch (NSException *exception) {
@@ -49,7 +49,7 @@ CGFloat PerceivedBrightness(CGFloat r, CGFloat g, CGFloat b) {
 
 - (NSString *)stringValue {
     NSMutableData *data = [NSMutableData data];
-    NSKeyedArchiver *coder = [[[NSKeyedArchiver alloc] initForWritingWithMutableData:data] autorelease];
+    NSKeyedArchiver *coder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
     coder.outputFormat = NSPropertyListBinaryFormat_v1_0;
     [self encodeWithCoder:coder];
     [coder finishEncoding];
@@ -298,7 +298,7 @@ CGFloat PerceivedBrightness(CGFloat r, CGFloat g, CGFloat b) {
 
     CGColorSpaceRef colorSpace = [[self colorSpace] CGColorSpace];
     [self getComponents:(CGFloat *)&components];
-    return (CGColorRef)[(id)CGColorCreate(colorSpace, components) autorelease];
+    return (CGColorRef)CFAutorelease(CGColorCreate(colorSpace, components));
 }
 
 @end

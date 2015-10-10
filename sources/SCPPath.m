@@ -10,13 +10,6 @@
 
 @implementation SCPPath
 
-- (void)dealloc {
-    [_path release];
-    [_hostname release];
-    [_username release];
-    [super dealloc];
-}
-
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: %p hostname=%@ username=%@ path=%@>",
             self.class, self, self.hostname, self.username, self.path];

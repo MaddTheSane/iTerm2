@@ -11,7 +11,7 @@
 @implementation NSBezierPath (iTerm)
 
 + (NSBezierPath *)smoothPathAroundBottomOfFrame:(NSRect)frame {
-    NSBezierPath* path = [[[NSBezierPath alloc] init] autorelease];
+    NSBezierPath* path = [[NSBezierPath alloc] init];
     [path setLineWidth:1];
     float radius = 4;
     float height = frame.size.height - 1;
@@ -99,7 +99,7 @@
     CGPathRef theCopy = CGPathCreateCopy(path);
     CGPathRelease(path);
 
-    return (CGPathRef)[(id)theCopy autorelease];
+    return (CGPathRef)CFAutorelease(theCopy);
 }
 
 @end

@@ -20,7 +20,7 @@
 // A customized verison of PSMTabBarControl.
 @interface iTermTabBarControlView : PSMTabBarControl
 
-@property(nonatomic, assign) id<iTermTabBarControlViewDelegate> itermTabBarDelegate;
+@property(nonatomic, unsafe_unretained) id<iTermTabBarControlViewDelegate> itermTabBarDelegate;
 
 // Set to yes when cmd pressed, no when released. We take care of the timing.
 @property(nonatomic, assign) BOOL cmdPressed;

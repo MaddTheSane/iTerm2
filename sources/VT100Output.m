@@ -120,7 +120,6 @@ typedef enum {
             free(_keyStrings[i]);
         }
     }
-    [super dealloc];
 }
 
 - (void)setTermTypeIsValid:(BOOL)termTypeIsValid {
@@ -260,7 +259,7 @@ typedef enum {
         theSuffix = [NSData dataWithBytes:KEY_PAGE_UP
                                    length:STATIC_STRLEN(KEY_PAGE_UP)];
     }
-    NSMutableData* data = [[[NSMutableData alloc] init] autorelease];
+    NSMutableData* data = [[NSMutableData alloc] init];
     if (modflag & NSAlternateKeyMask) {
         char esc = ESC;
         [data appendData:[NSData dataWithBytes:&esc length:1]];
@@ -279,7 +278,7 @@ typedef enum {
         theSuffix = [NSData dataWithBytes:KEY_PAGE_DOWN
                                    length:STATIC_STRLEN(KEY_PAGE_DOWN)];
     }
-    NSMutableData* data = [[[NSMutableData alloc] init] autorelease];
+    NSMutableData* data = [[NSMutableData alloc] init];
     if (modflag & NSAlternateKeyMask) {
         char esc = ESC;
         [data appendData:[NSData dataWithBytes:&esc length:1]];
@@ -639,7 +638,7 @@ typedef enum {
             }
         }
     }
-    NSMutableData* data = [[[NSMutableData alloc] init] autorelease];
+    NSMutableData* data = [[NSMutableData alloc] init];
     if (prefix) {
         [data appendData:prefix];
     }

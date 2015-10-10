@@ -28,9 +28,8 @@ static const int kPopupHeight = 26;
         [listView_.tableView setHeaderView:nil];
 
         [self addSubview:listView_];
-        [listView_ release];
 
-        popup_ = [[[NSPopUpButton alloc] initWithFrame:NSMakeRect(0, frame.size.height - kPopupHeight, frame.size.width, kPopupHeight)] autorelease];
+        popup_ = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(0, frame.size.height - kPopupHeight, frame.size.width, kPopupHeight)];
         [[popup_ cell] setControlSize:NSSmallControlSize];
         [[popup_ cell] setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
         [[popup_ menu] addItemWithTitle:@"New Tab"
@@ -59,7 +58,6 @@ static const int kPopupHeight = 26;
 - (void)dealloc
 {
     [popup_ unbind:@"enabled"];
-    [super dealloc];
 }
 
 - (void)relayout

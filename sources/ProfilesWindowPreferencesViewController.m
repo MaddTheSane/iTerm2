@@ -46,8 +46,6 @@
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_backgroundImageFilename release];
-    [super dealloc];
 }
 
 - (void)awakeFromNib {
@@ -204,7 +202,7 @@
 - (void)loadBackgroundImageWithFilename:(NSString *)filename {
     NSImage *anImage = filename.length > 0 ? [[NSImage alloc] initWithContentsOfFile:filename] : nil;
     if (anImage) {
-        [_backgroundImagePreview setImage:[anImage autorelease]];
+        [_backgroundImagePreview setImage:anImage];
         [_useBackgroundImage setState:NSOnState];
         self.backgroundImageFilename = filename;
     } else {

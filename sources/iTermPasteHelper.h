@@ -37,7 +37,7 @@ extern const int kNumberOfSpacesPerTabNoConversion;
 
 @interface iTermPasteHelper : NSObject
 
-@property(nonatomic, assign) id<iTermPasteHelperDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermPasteHelperDelegate> delegate;
 @property(nonatomic, readonly) BOOL isPasting;
 
 + (NSMutableCharacterSet *)unsafeControlCodeSet;

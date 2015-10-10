@@ -29,9 +29,9 @@ static NSMutableArray *visibleToast;
 
 + (void)showToastWithMessage:(NSString *)message
 {
-    ToastWindowController *toast = [[[ToastWindowController alloc] init] autorelease];
+    ToastWindowController *toast = [[ToastWindowController alloc] init];
 
-    NSTextField *textField = [[[NSTextField alloc] init] autorelease];
+    NSTextField *textField = [[NSTextField alloc] init];
     [textField setTextColor:[NSColor whiteColor]];
     [textField setBackgroundColor:[NSColor clearColor]];
     [textField setFont:[NSFont boldSystemFontOfSize:24]];
@@ -40,7 +40,7 @@ static NSMutableArray *visibleToast;
     [textField setEditable:NO];
     [textField sizeToFit];
 
-    RoundedRectView *roundedRect = [[[RoundedRectView alloc] init] autorelease];
+    RoundedRectView *roundedRect = [[RoundedRectView alloc] init];
     const int hPadding = 20;
     const int vPadding = 10;
     [roundedRect setFrame:NSMakeRect(0,
@@ -58,11 +58,11 @@ static NSMutableArray *visibleToast;
     if (term) {
         screen = [[term window] screen];
     }
-    NSPanel *panel = [[[NSPanel alloc] initWithContentRect:NSZeroRect
+    NSPanel *panel = [[NSPanel alloc] initWithContentRect:NSZeroRect
                                                  styleMask:NSBorderlessWindowMask
                                                    backing:NSBackingStoreBuffered
                                                      defer:NO
-                                                    screen:screen] autorelease];
+                                                    screen:screen];
     [panel setOpaque:NO];
     [panel setFrame:NSMakeRect((screen.visibleFrame.size.width - roundedRect.frame.size.width) / 2,
                                (screen.visibleFrame.size.height - roundedRect.frame.size.height) * 0.7,

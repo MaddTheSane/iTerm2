@@ -273,9 +273,9 @@ static NSString* SetReplacementCharInArray(unsigned char* datap, int* lenPtr, in
     memmove(datap + badIndex, kUtf8Replacement, 3);
     // q###x
     *lenPtr += 2;
-    return [[[NSString alloc] initWithBytes:datap
+    return [[NSString alloc] initWithBytes:datap
                                      length:*lenPtr
-                                   encoding:NSUTF8StringEncoding] autorelease];
+                                   encoding:NSUTF8StringEncoding];
 }
 
 static void DecodeASCIIBytes(unsigned char *datap,
@@ -349,9 +349,9 @@ void ParseString(unsigned char *datap,
         result.string = ReplacementString();
         result->type = VT100_STRING;
     } else if (result->type != VT100_WAIT && !isAscii) {
-        result.string = [[[NSString alloc] initWithBytes:datap
+        result.string = [[NSString alloc] initWithBytes:datap
                                                     length:*rmlen
-                                                  encoding:encoding] autorelease];
+                                                  encoding:encoding];
         if (result.string == nil) {
             // Invalid bytes, can't encode.
             int i;
@@ -367,9 +367,9 @@ void ParseString(unsigned char *datap,
                 // Replace every byte with ?, the replacement char for non-unicode encodings.
                 for (i = *rmlen - 1; i >= 0 && !result.string; i--) {
                     datap[i] = ONECHAR_UNKNOWN;
-                    result.string = [[[NSString alloc] initWithBytes:datap
+                    result.string = [[NSString alloc] initWithBytes:datap
                                                                  length:*rmlen
-                                                               encoding:encoding] autorelease];
+                                                               encoding:encoding];
                 }
             }
         }

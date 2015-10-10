@@ -32,9 +32,9 @@ extern NSString * const PTYNoteViewControllerShouldUpdatePosition;
     BOOL hidden_;
 }
 
-@property(nonatomic, retain) PTYNoteView *noteView;
+@property(nonatomic, strong) PTYNoteView *noteView;
 @property(nonatomic, assign) NSPoint anchor;
-@property(nonatomic, assign) id<PTYNoteViewControllerDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<PTYNoteViewControllerDelegate> delegate;
 
 - (void)beginEditing;
 - (BOOL)isEmpty;

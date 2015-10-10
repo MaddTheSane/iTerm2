@@ -14,7 +14,7 @@
 
 @interface VT100Parser : NSObject
 
-@property(nonatomic, readonly) NSData *streamData;
+@property(weak, nonatomic, readonly) NSData *streamData;
 @property(atomic, assign) NSStringEncoding encoding;
 @property(nonatomic, readonly) int streamLength;
 

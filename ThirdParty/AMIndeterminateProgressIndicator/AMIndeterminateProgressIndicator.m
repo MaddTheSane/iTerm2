@@ -29,15 +29,9 @@
 	return self;
 }
 
-- (void)dealloc {
-	[_color release];
-	[super dealloc];
-}
-
 - (void)setColor:(NSColor *)value {
 	if (_color != value) {
-		[_color autorelease];
-		_color = [value retain];
+		_color = value;
     assert([_color alphaComponent] > 0.999);
 	}
 }

@@ -14,7 +14,7 @@
 - (NSArray *)filenamesOnPasteboardWithShellEscaping:(BOOL)escape {
     NSMutableArray *results = [NSMutableArray array];
     NSArray *propertyList = [self propertyListForType:NSFilenamesPboardType];
-    for (NSString *filename in propertyList) {
+    for (__strong NSString *filename in propertyList) {
         NSDictionary *filenamesAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:filename
                                                                                              error:nil];
         if (([filenamesAttributes fileHFSTypeCode] == 'clpt' &&

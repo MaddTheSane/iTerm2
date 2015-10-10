@@ -26,7 +26,7 @@ typedef NS_ENUM(NSInteger, iTermSavePanelReplaceorAppend) {
 @property(nonatomic, readonly) iTermSavePanelReplaceorAppend replaceOrAppend;
 
 // Path the user selected.
-@property(nonatomic, readonly) NSString *path;
+@property(nonatomic, readonly, copy) NSString *path;
 
 // Prompts the user and returns a new iTermSavePanel.
 + (iTermSavePanel *)showWithOptions:(NSInteger)options

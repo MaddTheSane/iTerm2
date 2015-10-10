@@ -16,7 +16,7 @@
 #import "iTermRemotePreferences.h"
 #import "WindowArrangements.h"
 
-#define BLOCK(x) [[^id() { return [self x]; } copy] autorelease]
+#define BLOCK(x) [^id() { return [self x]; } copy]
 
 NSString *const kPreferenceKeyOpenBookmark = @"OpenBookmark";
 NSString *const kPreferenceKeyOpenArrangementAtStartup = @"OpenArrangementAtStartup";
@@ -258,7 +258,6 @@ static NSMutableDictionary *gObservers;
 
                   kPreferenceKeyPasteWarningNumberOfSpacesPerTab: @4,
               };
-        [dict retain];
     }
     return dict;
 }
@@ -311,7 +310,6 @@ static NSMutableDictionary *gObservers;
         dict = @{ kPreferenceKeyOpenArrangementAtStartup: BLOCK(computedOpenArrangementAtStartup),
                   kPreferenceKeyCustomFolder: BLOCK(computedCustomFolder),
                   kPreferenceKeyCharactersConsideredPartOfAWordForSelection: BLOCK(computedWordChars) };
-        [dict retain];
     }
     return dict;
 }
@@ -414,7 +412,7 @@ static NSMutableDictionary *gObservers;
         observersForKey = [NSMutableArray array];
         gObservers[key] = observersForKey;
     }
-    [observersForKey addObject:[[block copy] autorelease]];
+    [observersForKey addObject:[block copy]];
 }
 
 + (NSUInteger)maskForModifierTag:(iTermPreferencesModifierTag)tag {

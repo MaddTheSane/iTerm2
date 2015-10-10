@@ -82,7 +82,7 @@
 
         // Load new-style bookmarks.
         id newBookmarks = [prefs objectForKey:KEY_NEW_BOOKMARKS];
-        NSString *originalDefaultGuid = [[[prefs objectForKey:KEY_DEFAULT_GUID] copy] autorelease];
+        NSString *originalDefaultGuid = [[prefs objectForKey:KEY_DEFAULT_GUID] copy];
         if ([newBookmarks isKindOfClass:[NSArray class]]) {
             [self setBookmarks:newBookmarks
                    defaultGuid:[prefs objectForKey:KEY_DEFAULT_GUID]];
@@ -113,7 +113,6 @@
             NSMutableDictionary* aDict = [[NSMutableDictionary alloc] init];
             [ITAddressBookMgr setDefaultsInBookmark:aDict];
             [[ProfileModel sharedInstance] addBookmark:aDict];
-            [aDict release];
         }
 
         if ([iTermPreferences boolForKey:kPreferenceKeyAddBonjourHostsToProfiles]) {
@@ -149,16 +148,10 @@
 - (void)dealloc
 {
     [bonjourServices removeAllObjects];
-    [bonjourServices release];
 
     [sshBonjourBrowser stop];
     [ftpBonjourBrowser stop];
     [telnetBonjourBrowser stop];
-    [sshBonjourBrowser release];
-    [ftpBonjourBrowser release];
-    [telnetBonjourBrowser release];
-    [_events release];
-    [super dealloc];
 }
 
 - (void)removeBonjourProfiles {
@@ -195,18 +188,14 @@
 
 - (void)stopLocatingBonjourServices {
     [sshBonjourBrowser stop];
-    [sshBonjourBrowser release];
     sshBonjourBrowser = nil;
 
     [ftpBonjourBrowser stop];
-    [ftpBonjourBrowser release];
     ftpBonjourBrowser = nil;
 
     [telnetBonjourBrowser stop];
-    [telnetBonjourBrowser release];
     telnetBonjourBrowser = nil;
 
-    [bonjourServices release];
     bonjourServices = nil;
 }
 
@@ -352,7 +341,7 @@
     }
 
     // remove host entry from this group
-    NSMutableArray* toRemove = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray* toRemove = [[NSMutableArray alloc] init];
 #ifdef SUPPORT_SFTP
     NSString* sftpName = [NSString stringWithFormat:@"%@-sftp", [aNetService name]];
 #endif
@@ -821,7 +810,7 @@
 // mutable dictionary.
 - (NSMutableDictionary *)profileByMergingProfile:(Profile *)profile
                                      intoProfile:(Profile *)prototype {
-    NSMutableDictionary *merged = [[profile mutableCopy] autorelease];
+    NSMutableDictionary *merged = [profile mutableCopy];
     for (NSString *key in prototype) {
         if (profile[key]) {
             merged[key] = profile[key];

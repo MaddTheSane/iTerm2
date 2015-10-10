@@ -29,9 +29,9 @@
 @property(nonatomic, assign) int uniqueId;
 @property(nonatomic, readonly) BOOL isMaximized;
 // Sessions ordered in a similar-to-reading-order fashion.
-@property(nonatomic, readonly) NSArray *orderedSessions;
+@property(weak, nonatomic, readonly) NSArray *orderedSessions;
 @property(nonatomic, readonly) int tabNumberForItermSessionId;
-@property(nonatomic, assign) id<PTYTabDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<PTYTabDelegate> delegate;
 
 // Save the contents of all sessions. Used during window restoration so that if
 // the sessions are later restored from a saved arrangement during startup

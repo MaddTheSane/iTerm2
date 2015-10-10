@@ -46,7 +46,7 @@
         
         [_dynamicText setLinkTextAttributes:linkTextViewAttributes];
         [[_dynamicText textStorage] deleteCharactersInRange:NSMakeRange(0, [[_dynamicText textStorage] length])];
-        [[_dynamicText textStorage] appendAttributedString:[[[NSAttributedString alloc] initWithString:versionString] autorelease]];
+        [[_dynamicText textStorage] appendAttributedString:[[NSAttributedString alloc] initWithString:versionString]];
         [[_dynamicText textStorage] appendAttributedString:webAString];
         [[_dynamicText textStorage] appendAttributedString:bugsAString];
         [[_dynamicText textStorage] appendAttributedString:creditsAString];
@@ -58,8 +58,8 @@
 - (NSAttributedString *)attributedStringWithLinkToURL:(NSString *)urlString title:(NSString *)title {
     NSDictionary *linkAttributes = @{ NSLinkAttributeName: [NSURL URLWithString:urlString] };
     NSString *localizedTitle = title;
-    return [[[NSAttributedString alloc] initWithString:localizedTitle
-                                            attributes:linkAttributes] autorelease];
+    return [[NSAttributedString alloc] initWithString:localizedTitle
+                                            attributes:linkAttributes];
 }
 
 @end

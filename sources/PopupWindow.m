@@ -30,11 +30,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [parentWindow_ release];
-    [super dealloc];
-}
 
 - (BOOL)canBecomeKeyWindow
 {
@@ -55,8 +50,7 @@
 }
 
 - (void)setParentWindow:(NSWindow*)parentWindow {
-    [parentWindow_ autorelease];
-    parentWindow_ = [parentWindow retain];
+    parentWindow_ = parentWindow;
 }
 
 - (void)close

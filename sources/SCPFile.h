@@ -11,7 +11,7 @@
 
 @interface SCPFile : TransferrableFile
 
-@property(nonatomic, retain) SCPPath *path;
+@property(nonatomic, strong) SCPPath *path;
 @property(atomic, copy) NSString *localPath;
 
 @end

@@ -24,7 +24,7 @@ static const NSTimeInterval kFlashDuration = 0.3;
 CGFloat kiTermIndicatorStandardHeight = 20;
 
 @interface iTermIndicator : NSObject
-@property(nonatomic, retain) NSImage *image;
+@property(nonatomic, strong) NSImage *image;
 @property(nonatomic, readonly) CGFloat alpha;
 
 - (void)startFlash;
@@ -34,10 +34,6 @@ CGFloat kiTermIndicatorStandardHeight = 20;
     NSTimeInterval _flashStartTime;
 }
 
-- (void)dealloc {
-    [_image release];
-    [super dealloc];
-}
 
 - (void)startFlash {
     _flashStartTime = [NSDate timeIntervalSinceReferenceDate];
@@ -70,7 +66,6 @@ CGFloat kiTermIndicatorStandardHeight = 20;
                               kiTermIndicatorAlert: [NSImage imageNamed:@"Alert"],
                               kiTermIndicatorAllOutputSuppressed: [NSImage imageNamed:@"SuppressAllOutput"],
                               kiTermIndicatorZoomedIn: [NSImage imageNamed:@"Zoomed"] };
-        [gIndicatorImages retain];
     });
 
     return gIndicatorImages;
@@ -84,14 +79,10 @@ CGFloat kiTermIndicatorStandardHeight = 20;
     return self;
 }
 
-- (void)dealloc {
-    [_visibleIndicators release];
-    [super dealloc];
-}
 
 - (void)setIndicator:(NSString *)identifier visible:(BOOL)visible {
     if (visible && !_visibleIndicators[identifier]) {
-        iTermIndicator *indicator = [[[iTermIndicator alloc] init] autorelease];
+        iTermIndicator *indicator = [[iTermIndicator alloc] init];
         indicator.image = [[self class] indicatorImages][identifier];
         _visibleIndicators[identifier] = indicator;;
         [_delegate setNeedsDisplay:YES];
@@ -185,7 +176,7 @@ CGFloat kiTermIndicatorStandardHeight = 20;
     }
 
     // Remove any indicators that became invisible since the last check.
-    NSArray *visibleIdentifiers = [[_visibleIndicators.allKeys copy] autorelease];
+    NSArray *visibleIdentifiers = [_visibleIndicators.allKeys copy];
     for (NSString *identifier in visibleIdentifiers) {
         if ([_visibleIndicators[identifier] alpha] == 0) {
             [_visibleIndicators removeObjectForKey:identifier];

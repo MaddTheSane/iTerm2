@@ -26,7 +26,7 @@ typedef NS_ENUM(NSInteger, TransferrableFileStatus) {
 @property(atomic, assign) TransferrableFileStatus status;
 @property(atomic, assign) NSUInteger bytesTransferred;
 @property(atomic, assign) int fileSize;  // -1 if unknown
-@property(atomic, retain) TransferrableFile *successor;
+@property(atomic, strong) TransferrableFile *successor;
 @property(atomic, assign) BOOL hasPredecessor;
 
 // These two are only needed for keyboard-interactive auth

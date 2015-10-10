@@ -37,9 +37,6 @@
 
 - (void)dealloc {
     free(_stream);
-    [_savedStateForPartialParse release];
-    [_controlParser release];
-    [super dealloc];
 }
 
 - (void)forceUnhookDCS {
@@ -100,7 +97,7 @@
                     break;
 
                 case DCS_TMUX_CODE_WRAP: {
-                    VT100Parser *tempParser = [[[VT100Parser alloc] init] autorelease];
+                    VT100Parser *tempParser = [[VT100Parser alloc] init];
                     tempParser.encoding = self.encoding;
                     NSData *data = [token.string dataUsingEncoding:self.encoding];
                     [tempParser putStreamData:data.bytes length:data.length];
@@ -182,7 +179,7 @@
         // Don't append the outer wrapper to the output. Earlier, it was unwrapped and the inner
         // tokens were already added.
         if (token->type != DCS_TMUX_CODE_WRAP) {
-            CVectorAppend(vector, token);
+            CVectorAppend(vector, (__bridge void *)(token));
             return YES;
         }
     }

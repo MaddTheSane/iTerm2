@@ -89,11 +89,6 @@ static const CGFloat kMarginBetweenTitleAndBody = 8;
     NSRect _postAnimationFrame;
 }
 
-- (void)dealloc {
-    [_actionButtons release];
-    [_fakeBottomDivider release];
-    [super dealloc];
-}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -101,7 +96,7 @@ static const CGFloat kMarginBetweenTitleAndBody = 8;
     _coverView.color = [NSColor whiteColor];
 
     // Add a shadow to the card.
-    NSShadow *dropShadow = [[[NSShadow alloc] init] autorelease];
+    NSShadow *dropShadow = [[NSShadow alloc] init];
     [dropShadow setShadowColor:[[NSColor blackColor] colorWithAlphaComponent:0.3]];
     [dropShadow setShadowOffset:NSMakeSize(0, 1.5)];
     [dropShadow setShadowBlurRadius:2];
@@ -128,13 +123,13 @@ static const CGFloat kMarginBetweenTitleAndBody = 8;
 
 - (void)setBodyText:(NSString *)body {
     NSMutableAttributedString *attributedString =
-        [[[NSMutableAttributedString alloc] init] autorelease];
+        [[NSMutableAttributedString alloc] init];
 
     NSDictionary *bigTextAttributes =
         @{ NSFontAttributeName: [NSFont fontWithName:@"Helvetica Neue Light" size:16],
            NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.2 alpha:1] };
 
-    NSMutableParagraphStyle *paragraphStyle = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     [paragraphStyle setAlignment:NSRightTextAlignment];
 
     NSDictionary *signatureAttributes =
@@ -166,7 +161,7 @@ static const CGFloat kMarginBetweenTitleAndBody = 8;
         _actionButtons = [[NSMutableArray alloc] init];
     }
 
-    iTermTipCardActionButton *button = [[[iTermTipCardActionButton alloc] initWithFrame:NSMakeRect(kButtonSideInset, 0, _container.bounds.size.width - kButtonSideInset * 2, 0)] autorelease];
+    iTermTipCardActionButton *button = [[iTermTipCardActionButton alloc] initWithFrame:NSMakeRect(kButtonSideInset, 0, _container.bounds.size.width - kButtonSideInset * 2, 0)];
     button.autoresizingMask = 0;
     button.title = title;
     button.shortcut = shortcut;
@@ -201,7 +196,6 @@ static const CGFloat kMarginBetweenTitleAndBody = 8;
     right.indexInRow = 1;
     right.numberOfButtonsInRow = 2;
 
-    [[left retain] autorelease];
     [_actionButtons removeObject:left];
     [_actionButtons insertObject:left atIndex:[_actionButtons indexOfObject:right]];
 }
@@ -450,13 +444,11 @@ static const CGFloat kMarginBetweenTitleAndBody = 8;
                  superviewWidth:(CGFloat)superviewWidth
                           block:(void (^)())block {
     [CATransaction begin];
-    [self retain];
     [CATransaction setCompletionBlock:^{
         self.showFakeBottomDivider = NO;
         [self hideCollapsedButtons];
         block();
         self.view.frame = postAnimationFrame;
-        [self release];
     }];
 
     NSMutableArray *buttonsToCollapse = [NSMutableArray array];

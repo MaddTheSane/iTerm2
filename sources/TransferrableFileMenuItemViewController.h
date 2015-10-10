@@ -11,11 +11,11 @@
 
 @interface TransferrableFileMenuItemViewController : NSViewController
 
-@property(nonatomic, retain) TransferrableFile *transferrableFile;
-@property(nonatomic, retain) NSMenuItem *stopSubItem;
-@property(nonatomic, retain) NSMenuItem *showInFinderSubItem;
-@property(nonatomic, retain) NSMenuItem *removeFromListSubItem;
-@property(nonatomic, retain) NSMenuItem *openSubItem;
+@property(nonatomic, strong) TransferrableFile *transferrableFile;
+@property(nonatomic, strong) NSMenuItem *stopSubItem;
+@property(nonatomic, strong) NSMenuItem *showInFinderSubItem;
+@property(nonatomic, strong) NSMenuItem *removeFromListSubItem;
+@property(nonatomic, strong) NSMenuItem *openSubItem;
 
 - (id)initWithTransferrableFile:(TransferrableFile *)transferrableFile;
 - (void)update;

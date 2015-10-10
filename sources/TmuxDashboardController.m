@@ -81,10 +81,6 @@
     return self;
 }
 
-- (void)dealloc {
-    [super dealloc];
-}
-
 - (void)windowDidLoad
 {
     [super windowDidLoad];
@@ -299,7 +295,7 @@
 }
 
 - (void)tmuxControllerRegistryDidChange:(NSNotification *)notification {
-    NSString *previousSelection = [[[self currentClient] copy] autorelease];
+    NSString *previousSelection = [[self currentClient] copy];
     [connectionsButton_.menu cancelTracking];
     [connectionsButton_.cell dismissPopUp];
     [connectionsButton_ removeAllItems];

@@ -14,7 +14,7 @@
 #import "VT100OtherParser.h"
 
 @interface VT100ControlParser ()
-@property(nonatomic, retain) VT100DCSParser *dcsParser;
+@property(nonatomic, strong) VT100DCSParser *dcsParser;
 @end
 
 @implementation VT100ControlParser
@@ -25,11 +25,6 @@
         _dcsParser = [[VT100DCSParser alloc] init];
     }
     return self;
-}
-
-- (void)dealloc {
-    [_dcsParser release];
-    [super dealloc];
 }
 
 - (void)unhookDCS {

@@ -11,8 +11,8 @@
 #import "NSMutableData+iTerm.h"
 
 @interface VT100TmuxParser ()
-@property(nonatomic, retain) NSString *currentCommandId;
-@property(nonatomic, retain) NSString *currentCommandNumber;
+@property(nonatomic, strong) NSString *currentCommandId;
+@property(nonatomic, strong) NSString *currentCommandNumber;
 @end
 
 @implementation VT100TmuxParser {
@@ -27,13 +27,6 @@
         _recoveryMode = YES;
     }
     return self;
-}
-
-- (void)dealloc {
-    [_currentCommandId release];
-    [_currentCommandNumber release];
-    [_line release];
-    [super dealloc];
 }
 
 - (instancetype)init {
@@ -76,14 +69,14 @@
 
 // Return YES if we should unhook.
 - (BOOL)processLineIntoToken:(VT100Token *)result {
-    result.savedData = [[_line copy] autorelease];
+    result.savedData = [_line copy];
     NSString *command =
-        [[[NSString alloc] initWithData:_line encoding:NSUTF8StringEncoding] autorelease];
+        [[NSString alloc] initWithData:_line encoding:NSUTF8StringEncoding];
 
     if (!command) {
         // The command was not UTF-8. Unfortunately, this can happen. If tmux has a non-UTF-8
         // character in a pane, it will just output it in capture-pane.
-        command = [[[NSString alloc] initWithUTF8DataIgnoringErrors:_line] autorelease];
+        command = [[NSString alloc] initWithUTF8DataIgnoringErrors:_line];
     }
 
     if (_recoveryMode) {

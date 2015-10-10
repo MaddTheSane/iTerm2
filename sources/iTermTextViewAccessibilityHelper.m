@@ -16,11 +16,6 @@
     NSMutableArray *_lineBreakIndexOffsets;
 }
 
-- (void)dealloc {
-    [_allText release];
-    [_lineBreakIndexOffsets release];
-    [super dealloc];
-}
 
 #pragma mark - Parameterized attributes
 
@@ -206,7 +201,7 @@
         return nil;
     } else {
         NSString *theString = [_allText substringWithRange:range];
-        NSAttributedString *attributedString = [[[NSAttributedString alloc] initWithString:theString] autorelease];
+        NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:theString];
         return attributedString;
     }
 }
@@ -219,8 +214,6 @@
 // NSAttributedString's with custom attributes, but unfortunately that would
 // have been a lot easier to do about five years ago.
 - (NSString*)allText {
-    [_allText release];
-    [_lineBreakIndexOffsets release];
 
     _allText = [[NSMutableString alloc] init];
     _lineBreakIndexOffsets = [[NSMutableArray alloc] init];

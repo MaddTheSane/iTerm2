@@ -250,14 +250,14 @@ enum {
 
 - (void)setTextColor:(NSColor *)textColor {
     [super setTextColor:textColor];
-    NSMutableArray *temp = [[[self stringsForColors] mutableCopy] autorelease];
+    NSMutableArray *temp = [[self stringsForColors] mutableCopy];
     temp[0] = textColor ? textColor.stringValue: @"";
     self.param = [NSString stringWithFormat:@"{%@,%@}", temp[0], temp[1]];
 }
 
 - (void)setBackgroundColor:(NSColor *)backgroundColor {
     [super setBackgroundColor:backgroundColor];
-    NSMutableArray *temp = [[[self stringsForColors] mutableCopy] autorelease];
+    NSMutableArray *temp = [[self stringsForColors] mutableCopy];
     temp[1] = backgroundColor ? backgroundColor.stringValue: @"";
     self.param = [NSString stringWithFormat:@"{%@,%@}", temp[0], temp[1]];
 }

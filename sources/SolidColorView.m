@@ -12,7 +12,7 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        color_ = [color retain];
+        color_ = color;
     }
     return self;
 }
@@ -31,8 +31,7 @@
 
 - (void)setColor:(NSColor*)color
 {
-    [color_ autorelease];
-    color_ = [color retain];
+    color_ = color;
     [self setNeedsDisplay:YES];
 }
 
@@ -51,9 +50,4 @@
     isFlipped_ = value;
 }
 
-- (void)dealloc
-{
-    [color_ release];
-    [super dealloc];
-}
 @end

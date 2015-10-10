@@ -33,7 +33,7 @@
     NSRect normalFrame_;
     NSTrackingRectTag trackingRectTag_;
     BOOL highlight_;
-    id tabObject_;
+    id __unsafe_unretained tabObject_;
     id<iTermExposeTabViewDelegate> delegate_;
     BOOL dirty_;
     BOOL hasResult_;
@@ -62,9 +62,9 @@
 - (void)bringTabToFore;
 - (NSInteger)tabIndex;
 - (NSInteger)windowIndex;
-@property (nonatomic, retain) NSImage *image;
-@property (nonatomic, retain) NSString *label;
-@property (assign) id tabObject;
+@property (nonatomic, strong) NSImage *image;
+@property (nonatomic, strong) NSString *label;
+@property (unsafe_unretained) id tabObject;
 - (void)clear;
 @property BOOL dirty;
 - (void)setWindowIndex:(int)windowIndex tabIndex:(int)tabIndex;

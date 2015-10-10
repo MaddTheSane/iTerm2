@@ -13,14 +13,14 @@
 
 @property(nonatomic, copy) NSString *string;
 @property(nonatomic, copy) NSDictionary *rule;
-@property(nonatomic, retain) id identifier;
+@property(nonatomic, strong) id identifier;
 
 @end
 
 @implementation URLAction
 
 + (instancetype)urlAction {
-    return [[[self alloc] init] autorelease];
+    return [[self alloc] init];
 }
 
 + (instancetype)urlActionToOpenURL:(NSString *)filename {
@@ -52,15 +52,6 @@
     action.actionType = kURLActionOpenImage;
     action.identifier = imageInfo;
     return action;
-}
-
-- (void)dealloc {
-    [_string release];
-    [_rule release];
-    [_fullPath release];
-    [_workingDirectory release];
-    [_identifier release];
-    [super dealloc];
 }
 
 - (NSString *)description {

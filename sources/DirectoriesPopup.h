@@ -13,7 +13,7 @@
 @class VT100RemoteHost;
 
 @interface DirectoriesPopupEntry : PopupEntry
-@property(nonatomic, retain) iTermDirectoryEntry *entry;
+@property(nonatomic, strong) iTermDirectoryEntry *entry;
 @end
 
 @interface DirectoriesPopupWindowController : Popup

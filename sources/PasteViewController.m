@@ -33,7 +33,7 @@ static float kAnimationDuration = 0.25;
             frame.origin.y = NSMaxY([self.view bounds]) - NSMaxY([view frame]);
             [view setFrame:frame];
         }
-        pasteContext_ = [pasteContext retain];
+        pasteContext_ = pasteContext;
         totalLength_ = remainingLength_ = length;
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(themeDidChange:)
@@ -45,8 +45,6 @@ static float kAnimationDuration = 0.25;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [pasteContext_ release];
-    [super dealloc];
 }
 
 - (void)viewDidAppear {

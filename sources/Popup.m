@@ -50,11 +50,11 @@
         [self window];
 
         if (table) {
-            tableView_ = [*table retain];
+            tableView_ = *table;
         }
         model_ = [[PopupModel alloc] init];
         substring_ = [[NSMutableString alloc] init];
-        unfilteredModel_ = [model retain];
+        unfilteredModel_ = model;
         selectionMainValue_ = [[NSMutableString alloc] init];
     }
     return self;
@@ -64,12 +64,6 @@
 {
     [tableView_ setDelegate:nil];
     [tableView_ setDataSource:nil];
-    [selectionMainValue_ release];
-    [unfilteredModel_ release];
-    [substring_ release];
-    [model_ release];
-    [tableView_ release];
-    [super dealloc];
 }
 
 - (void)shutdown
@@ -85,8 +79,7 @@
 }
 
 - (void)setTableView:(NSTableView *)table {
-    [tableView_ autorelease];
-    tableView_ = [table retain];
+    tableView_ = table;
 }
 
 - (BOOL)disableFocusFollowsMouse
@@ -351,9 +344,9 @@
 {
     float size = [NSFont systemFontSize];
     NSFont* sysFont = [NSFont systemFontOfSize:size];
-    NSMutableAttributedString* as = [[[NSMutableAttributedString alloc] init] autorelease];
+    NSMutableAttributedString* as = [[NSMutableAttributedString alloc] init];
 
-    NSMutableParagraphStyle *paragraphStyle = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineBreakMode = NSLineBreakByTruncatingMiddle;
 
     NSColor* textColor;
@@ -373,8 +366,8 @@
                                       NSForegroundColorAttributeName: textColor,
                                       NSParagraphStyleAttributeName: paragraphStyle };
 
-    [as appendAttributedString:[[[NSAttributedString alloc] initWithString:[entry prefix]
-                                                                attributes:lightAttributes] autorelease]];
+    [as appendAttributedString:[[NSAttributedString alloc] initWithString:[entry prefix]
+                                                                attributes:lightAttributes]];
     NSString *truncatedMainValue = [self truncatedMainValueForEntry:entry];
     NSString* value = [truncatedMainValue stringByReplacingOccurrencesOfString:@"\n" withString:@" "];
 
@@ -395,16 +388,16 @@
         if (prefix.length > 0) {
             NSString* substr = [temp substringWithRange:prefix];
             attributedSubstr =
-                [[[NSAttributedString alloc] initWithString:substr
-                                                 attributes:plainAttributes] autorelease];
+                [[NSAttributedString alloc] initWithString:substr
+                                                 attributes:plainAttributes];
             [as appendAttributedString:attributedSubstr];
         }
 
         unichar matchChar = [temp characterAtIndex:r.location];
         attributedSubstr =
-            [[[NSAttributedString alloc] initWithString:[NSString stringWithCharacters:&matchChar
+            [[NSAttributedString alloc] initWithString:[NSString stringWithCharacters:&matchChar
                                                                                 length:1]
-                                             attributes:boldAttributes] autorelease];
+                                             attributes:boldAttributes];
         [as appendAttributedString:attributedSubstr];
 
         r.length = [temp length] - r.location - 1;
@@ -414,8 +407,8 @@
 
     if ([temp length] > 0) {
         NSAttributedString* attributedSubstr =
-            [[[NSAttributedString alloc] initWithString:temp
-                                             attributes:plainAttributes] autorelease];
+            [[NSAttributedString alloc] initWithString:temp
+                                             attributes:plainAttributes];
         [as appendAttributedString:attributedSubstr];
     }
 

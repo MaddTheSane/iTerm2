@@ -109,7 +109,7 @@ enum {
             break;
     }
 
-    return [gradient autorelease];
+    return gradient;
 }
 
 // Draw the menu item (label and colors)
@@ -145,14 +145,12 @@ enum {
         NSGradient *gradient = [self gradientForColorIndex:i];
         [gradient drawInRect:colorArea angle:-90.0];
     }
-    [outlineGradient release];
 
     // draw the menu label
     NSMutableDictionary *fontAtts = [[NSMutableDictionary alloc] init];
     [fontAtts setObject: [NSFont menuFontOfSize: kMenuFontOfSize] forKey: NSFontAttributeName];
     NSString *labelTitle = @"Tab Color:";
     [labelTitle drawAtPoint:NSMakePoint(kMenuLabelOffsetX, kMenuLabelOffsetY) withAttributes:fontAtts];
-    [fontAtts release];
     [NSBezierPath setDefaultLineWidth:savedWidth];
 }
 
