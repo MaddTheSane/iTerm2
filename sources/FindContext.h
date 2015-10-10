@@ -8,11 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_OPTIONS(unsigned int, FindOptions) {
-	FindOptCaseInsensitive	= (1 << 0),
-	FindOptBackwards		= (1 << 1),
-	FindOptRegex			= (1 << 2),
-	FindMultipleResults		= (1 << 3)
+typedef NS_OPTIONS(NSUInteger, FindOptions) {
+    FindOptCaseInsensitive  = (1 << 0),
+    FindOptBackwards        = (1 << 1),
+    FindOptRegex            = (1 << 2),
+    FindMultipleResults     = (1 << 3)
 };
 
 typedef NS_ENUM(NSInteger, FindContextStatus) {
@@ -63,7 +63,7 @@ typedef NS_ENUM(NSInteger, FindContextStatus) {
 @property(nonatomic, assign) int matchLength;
 
 // used for multiple results
-@property(nonatomic, retain) NSMutableArray *results;
+@property(nonatomic, strong) NSMutableArray *results;
 
 // for client use. Not read or written by LineBuffer.
 @property(nonatomic, assign) BOOL hasWrapped;

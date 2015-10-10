@@ -12,13 +12,8 @@
     NSColor *_dividerColor;
 }
 
-- (void)dealloc {
-    [_dividerColor release];
-    [super dealloc];
-}
 
 - (void)setDividerColor:(NSColor *)dividerColor {
-    [_dividerColor autorelease];
     _dividerColor = [dividerColor copy];
     [self setNeedsDisplay:YES];
 }

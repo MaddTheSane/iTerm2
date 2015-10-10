@@ -14,6 +14,15 @@
 #import "PseudoTerminal.h"
 
 @implementation iTermExposeTabView
+@synthesize tabObject = tabObject_;
+@synthesize dirty = dirty_;
+@synthesize originalFrame = originalFrame_;
+@synthesize normalFrame = normalFrame_;
+@synthesize fullSizeFrame = fullSizeFrame_;
+@synthesize image = image_;
+@synthesize index = index_;
+@synthesize label = label_;
+@synthesize wasMaximized = wasMaximized_;
 
 - (id)initWithImage:(NSImage*)image
               label:(NSString*)label
@@ -28,11 +37,11 @@
     self = [super initWithFrame:frame];
     if (self) {
         wasMaximized_ = wasMaximized;
-        image_ = [image retain];
-        label_ = [label retain];
+        image_ = image;
+        label_ = label;
         tabIndex_ = [[tab realParentWindow] indexOfTab:tab];
         assert(tabIndex_ != NSNotFound);
-        windowIndex_ = [[[iTermController sharedInstance] terminals] indexOfObjectIdenticalTo:[tab realParentWindow]];
+        windowIndex_ = [[[iTermController sharedInstance] terminals] indexOfObjectIdenticalTo:(PseudoTerminal*)[tab realParentWindow]];
         fullSizeFrame_ = fullSizeFrame;
         normalFrame_ = normalFrame;
         showLabel_ = NO;
@@ -46,33 +55,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [label_ release];
-    [image_ release];
-    
-    [super dealloc];
-}
-
-- (id)tabObject
-{
-    return tabObject_;
-}
-
-- (void)setTabObject:(id)tab
-{
-    tabObject_ = tab;
-}
-
-- (void)setDirty:(BOOL)dirty
-{
-    dirty_ = dirty;
-}
-
-- (BOOL)dirty
-{
-    return dirty_;
-}
 
 - (void)setWindowIndex:(int)windowIndex tabIndex:(int)tabIndex
 {
@@ -85,22 +67,11 @@
     hasResult_ = hasResult;
 }
 
-- (NSImage*)image
-{
-    return image_;
-}
-
-- (NSRect)originalFrame
-{
-    return originalFrame_;
-}
-
 - (void)clear
 {
     windowIndex_ = -1;
     tabIndex_ = -1;
     NSSize size = [image_ size];
-    [image_ release];
     image_ = [[NSImage alloc] initWithSize:size];
     [image_ lockFocus];
     [[[NSColor whiteColor] colorWithAlphaComponent:0] set];
@@ -116,11 +87,6 @@
 - (void)setTrackingRectTag:(NSTrackingRectTag)tag
 {
     trackingRectTag_ = tag;
-}
-
-- (NSRect)normalFrame
-{
-    return normalFrame_;
 }
 
 static BOOL RectsApproxEqual(NSRect a, NSRect b)
@@ -141,11 +107,9 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
 
 - (void)moveToTop
 {
-    [self retain];
     NSView* superView = [self superview];
     [self removeFromSuperview];
     [superView addSubview:self];
-    [self release];
     
     [self setNeedsDisplay:YES];
 }
@@ -205,21 +169,14 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
 
 - (void)setImage:(NSImage*)newImage
 {
-    [image_ autorelease];
-    image_ = [newImage retain];
+    image_ = newImage;
     [self setNeedsDisplay:YES];
 }
 
 - (void)setLabel:(NSString*)newLabel
 {
-    [label_ autorelease];
-    label_ = [newLabel retain];
+    label_ = newLabel;
     [self setNeedsDisplay:YES];
-}
-
-- (NSString*)label
-{
-    return label_;
 }
 
 - (NSRect)imageFrame:(NSSize)thumbSize
@@ -259,15 +216,15 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
 - (void)_drawLabel
 {
     // Draw a label in a rounded rectangle at the bottom of the frame.
-    NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    NSMutableParagraphStyle* paragraph = [[NSMutableParagraphStyle alloc] init];
     [paragraph setAlignment:NSCenterTextAlignment];
     NSDictionary* attrs = [NSDictionary dictionaryWithObjectsAndKeys:
                            hasResult_ ? [NSColor yellowColor] : [NSColor whiteColor], NSForegroundColorAttributeName,
                            [NSFont systemFontOfSize:12], NSFontAttributeName,
                            paragraph, NSParagraphStyleAttributeName,
                            NULL];
-    NSAttributedString* str = [[[NSMutableAttributedString alloc] initWithString:label_
-                                                                      attributes:attrs] autorelease];
+    NSAttributedString* str = [[NSMutableAttributedString alloc] initWithString:label_
+                                                                      attributes:attrs];
     
     const NSSize thumbSize = [self frame].size;
     NSRect strRect = [str boundingRectWithSize:thumbSize options:0];
@@ -301,7 +258,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
 - (void)_drawDropShadow:(NSRect)aRect
 {
     // create the shadow
-    NSShadow *dropShadow = [[[NSShadow alloc] init] autorelease];
+    NSShadow *dropShadow = [[NSShadow alloc] init];
     NSColor* theColor = [NSColor darkGrayColor];
     [dropShadow setShadowColor:[theColor colorWithAlphaComponent:1]];
     [dropShadow setShadowBlurRadius:5];
@@ -322,7 +279,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
 - (void)_drawGlow:(NSRect)aRect
 {
     // create the shadow
-    NSShadow *dropShadow = [[[NSShadow alloc] init] autorelease];
+    NSShadow *dropShadow = [[NSShadow alloc] init];
     NSColor* theColor = [NSColor yellowColor];
     [dropShadow setShadowColor:[theColor colorWithAlphaComponent:1]];
     [dropShadow setShadowBlurRadius:5];
@@ -342,7 +299,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
 
 - (void)drawRect:(NSRect)rect
 {
-    NSImage* image = [[image_ copy] autorelease];
+    NSImage* image = [image_ copy];
     NSRect imageFrame = [self imageFrame:[self frame].size];
     
     if (windowIndex_ >= 0 && tabIndex_ >= 0) {
@@ -384,24 +341,9 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
     showLabel_ = YES;
 }
 
-- (void)setNormalFrame:(NSRect)normalFrame
-{
-    normalFrame_ = normalFrame;
-}
-
-- (void)setFullSizeFrame:(NSRect)fullSizeFrame
-{
-    fullSizeFrame_ = fullSizeFrame;
-}
-
 - (NSSize)origSize
 {
     return origSize_;
-}
-
-- (int)index
-{
-    return index_;
 }
 
 - (PTYTab*)tab
@@ -416,11 +358,6 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
         return nil;
     }
     return [[window tabs] objectAtIndex:tabIndex_];
-}
-
-- (BOOL)wasMaximized
-{
-    return wasMaximized_;
 }
 
 @end

@@ -68,7 +68,6 @@ static const CGFloat kHelpMargin = 5;
         [clear_ sizeToFit];
         [clear_ setAutoresizingMask:NSViewMinYMargin];
         [self addSubview:clear_];
-        [clear_ release];
 
         scrollView_ = [[NSScrollView alloc] initWithFrame:NSMakeRect(0,
                                                                      searchField_.frame.size.height + kMargin,
@@ -82,7 +81,7 @@ static const CGFloat kHelpMargin = 5;
 
         tableView_ = [[NSTableView alloc] initWithFrame:NSMakeRect(0, 0, contentSize.width, contentSize.height)];
         NSTableColumn *col;
-        col = [[[NSTableColumn alloc] initWithIdentifier:@"commands"] autorelease];
+        col = [[NSTableColumn alloc] initWithIdentifier:@"commands"];
         [col setEditable:NO];
         [tableView_ addTableColumn:col];
         [[col headerCell] setStringValue:@"Commands"];
@@ -107,10 +106,10 @@ static const CGFloat kHelpMargin = 5;
         // Save the bold version of the table's default font
         NSFontManager *fontManager = [NSFontManager sharedFontManager];
         NSFont *font = [[col dataCell] font];
-        boldFont_ = [[fontManager fontWithFamily:font.familyName
+        boldFont_ = [fontManager fontWithFamily:font.familyName
                                           traits:NSBoldFontMask
                                           weight:0
-                                            size:font.pointSize] retain];
+                                            size:font.pointSize];
 
         [self relayout];
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -125,12 +124,6 @@ static const CGFloat kHelpMargin = 5;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [tableView_ release];
-    [scrollView_ release];
-    [boldFont_ release];
-    [filteredEntries_ release];
-    [_paragraphStyle release];
-    [super dealloc];
 }
 
 - (void)shutdown
@@ -192,7 +185,7 @@ static const CGFloat kHelpMargin = 5;
             static dispatch_once_t onceToken;
             static BOOL egg;
             dispatch_once(&onceToken, ^{
-                NSCalendar *calendar = [[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] autorelease];
+                NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
                 NSDateComponents *components = [calendar components:(NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:[NSDate date]];
                 egg = (components.month == 4 && components.day == 1);
             });
@@ -207,12 +200,12 @@ static const CGFloat kHelpMargin = 5;
         iTermToolWrapper *wrapper = self.toolWrapper;
         if (commandUse.mark &&
             [wrapper.delegate.delegate toolbeltCurrentSessionHasGuid:commandUse.mark.sessionGuid]) {
-            return [[[NSAttributedString alloc] initWithString:value
+            return [[NSAttributedString alloc] initWithString:value
                                                    attributes:@{ NSFontAttributeName: boldFont_,
-                                                                 NSParagraphStyleAttributeName: _paragraphStyle }] autorelease];
+                                                                 NSParagraphStyleAttributeName: _paragraphStyle }];
         } else {
-            return [[[NSAttributedString alloc] initWithString:value
-                                                    attributes:@{ NSParagraphStyleAttributeName: _paragraphStyle }] autorelease];
+            return [[NSAttributedString alloc] initWithString:value
+                                                    attributes:@{ NSParagraphStyleAttributeName: _paragraphStyle }];
         }
     }
 }
@@ -277,6 +270,9 @@ static const CGFloat kHelpMargin = 5;
             return;
         }
     }
+    if (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask)) {
+        text = [text stringByAppendingString:@"\n"];
+    }
     [wrapper.delegate.delegate toolbeltInsertText:text];
 }
 
@@ -292,10 +288,9 @@ static const CGFloat kHelpMargin = 5;
 }
 
 - (void)computeFilteredEntries {
-    [filteredEntries_ release];
     NSArray *entries = [self.toolWrapper.delegate.delegate toolbeltCommandUsesForCurrentSession];
     if (searchField_.stringValue.length == 0) {
-        filteredEntries_ = [entries retain];
+        filteredEntries_ = entries;
     } else {
         NSMutableArray *array = [NSMutableArray array];
         for (CommandUse *entry in entries) {
@@ -303,7 +298,7 @@ static const CGFloat kHelpMargin = 5;
                 [array addObject:entry];
             }
         }
-        filteredEntries_ = [array retain];
+        filteredEntries_ = array;
     }
     [tableView_ reloadData];
 }

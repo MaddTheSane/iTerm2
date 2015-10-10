@@ -13,7 +13,7 @@
 + (instancetype)infoForPreferenceWithKey:(NSString *)key
                                     type:(PreferenceInfoType)type
                                  control:(NSControl *)control {
-    PreferenceInfo *info = [[[self alloc] init] autorelease];
+    PreferenceInfo *info = [[self alloc] init];
     info.key = key;
     info.type = type;
     info.control = control;
@@ -28,17 +28,9 @@
     return self;
 }
 
-- (void)dealloc {
-    [_key release];
-    [_control release];
-    [_shouldBeEnabled release];
-    [_onChange release];
-    [_customSettingChangedHandler release];
-    [super dealloc];
-}
 
 - (void)setObserver:(void (^)())observer {
-    [_observer autorelease];
+    //[_observer autorelease];
     _observer = [observer copy];
     // Call the observer after a delayed perform so that the current profile can be set and then the
     // control's value gets initialized.

@@ -87,14 +87,12 @@
         [[theTab realParentWindow] terminalDraggedFromAnotherWindowAtPoint:point];
 
     SessionView *oldView = [movingSession view];
-    [oldView retain];
     [theTab removeSession:movingSession];
     if ([[theTab sessions] count] == 0) {
         [[theTab realParentWindow] closeTab:theTab];
     }
 
     [term insertSession:movingSession atIndex:0];
-    [oldView autorelease];
     [theTab numberOfSessionsDidChange];
     [[term currentTab] numberOfSessionsDidChange];
  }
@@ -107,7 +105,6 @@
 - (SessionView *)removeAndClearSession
 {
     SessionView *oldView = [session_ view];
-    [oldView retain];
     PTYSession *movingSession = session_;
     PTYTab *theTab = [movingSession tab];
     [[movingSession tab] removeSession:movingSession];
@@ -115,7 +112,7 @@
         [[theTab realParentWindow] closeTab:theTab];
     }
     session_ = nil;
-    return [oldView autorelease];
+    return oldView;
 }
 
 - (BOOL)dropTab:(PTYTab *)tab
@@ -185,7 +182,6 @@
         }
 
         SessionView *oldView = [movingSession view];
-        [oldView retain];
         PTYTab *theTab = [movingSession tab];
         [[movingSession tab] removeSession:movingSession];
         if ([[theTab sessions] count] == 0) {
@@ -196,7 +192,6 @@
                                          addingSession:movingSession
                                          targetSession:dest
                                           performSetup:NO];
-        [oldView release];
         [[dest tab] fitSessionToCurrentViewSize:movingSession];
     } else {
         [[dest tab] swapSession:dest withSession:session_];
@@ -223,7 +218,6 @@
     PTYTab *theTab = [session tab];
     NSRect rect = [[[session view] superview] convertRect:[[session view] frame] toView:nil];
     SessionView *source = [session view];
-    [source retain];
     didSplit_ = NO;
     NSWindow *theWindow = [[theTab realParentWindow] window];
     for (PseudoTerminal *term in [[iTermController sharedInstance] terminals]) {
@@ -241,7 +235,6 @@
         [[term window] enableCursorRects];
     }
     [[NSCursor openHandCursor] set];
-    [source autorelease];
     session_ = nil;
 }
 

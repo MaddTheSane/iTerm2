@@ -7,7 +7,7 @@
 @synthesize extendsToEndOfLine = extendsToEndOfLine_;
 
 + (LineBufferPosition *)position {
-    return [[[self alloc] init] autorelease];
+    return [[self alloc] init];
 }
 
 - (NSString *)description {
@@ -41,11 +41,6 @@
     return [NSString stringWithFormat:@"<%@: %p start=%@ end=%@>", [self class], self, _start, _end];
 }
 
-- (void)dealloc {
-    [_start release];
-    [_end release];
-    [super dealloc];
-}
 
 @end
 

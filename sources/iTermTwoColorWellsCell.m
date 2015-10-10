@@ -91,10 +91,8 @@
           // Perform click only if the button was hit.
           if (isHitOnWell) {
               // Use dispatch async because we want this to run after tableViewSelectionDidChange:
-              [self retain];
               dispatch_async(dispatch_get_main_queue(), ^{
                                  [self openColorPickerForWell:_lastHitWell];
-                                 [self release];
                              });
           }
 
@@ -109,7 +107,7 @@
         [[NSColor whiteColor] set];
         NSRectFill(rect);
 
-        NSBezierPath *path = [[[NSBezierPath alloc] init] autorelease];
+        NSBezierPath *path = [[NSBezierPath alloc] init];
         [path moveToPoint:rect.origin];
         [path lineToPoint:NSMakePoint(NSMaxX(rect), NSMaxY(rect))];
         [[NSColor grayColor] set];
@@ -153,8 +151,8 @@
 - (NSAttributedString *)attributedStringForLabel:(NSString *)label {
   NSDictionary *attributes = @{ NSFontAttributeName: [NSFont systemFontOfSize:13],
                      NSForegroundColorAttributeName: [self cellTextColor] };
-  NSAttributedString *string = [[[NSAttributedString alloc] initWithString:label
-                                                                attributes:attributes] autorelease];
+  NSAttributedString *string = [[NSAttributedString alloc] initWithString:label
+                                                                attributes:attributes];
   return string;
 }
 
@@ -205,7 +203,7 @@
 }
 
 - (NSView *)accessoryView {
-    return [[[iTermNoColorAccessoryButton alloc] init] autorelease];
+    return [[iTermNoColorAccessoryButton alloc] init];
 }
 
 - (void)openColorPickerForWell:(int)wellNumber {

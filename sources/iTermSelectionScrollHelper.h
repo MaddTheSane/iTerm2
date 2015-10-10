@@ -20,7 +20,7 @@
 
 @interface iTermSelectionScrollHelper : NSObject
 
-@property(nonatomic, assign) NSView<iTermSelectionScrollHelperDelegate> *delegate;
+@property(nonatomic, weak) NSView<iTermSelectionScrollHelperDelegate> *delegate;
 
 - (void)mouseUp;
 - (void)mouseDraggedTo:(NSPoint)locationInTextView coord:(VT100GridCoord)coord;

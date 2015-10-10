@@ -152,7 +152,7 @@ typedef NS_ENUM(NSInteger, PTYCharType) {
   PointerControllerDelegate>
 
 // Current selection
-@property(nonatomic, readonly) iTermSelection *selection;
+@property(nonatomic, readonly, strong) iTermSelection *selection;
 
 // Draw a highlight along the entire line the cursor is on.
 @property(nonatomic, assign) BOOL highlightCursorLine;
@@ -161,10 +161,10 @@ typedef NS_ENUM(NSInteger, PTYCharType) {
 @property(nonatomic, assign) BOOL useNonAsciiFont;
 
 // Provider for screen contents, plus misc. other stuff.
-@property(nonatomic, assign) id<PTYTextViewDataSource> dataSource;
+@property(nonatomic, unsafe_unretained) id<PTYTextViewDataSource> dataSource;
 
 // The delegate. Interfaces to the rest of the app for this view.
-@property(nonatomic, assign) id<PTYTextViewDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<PTYTextViewDelegate> delegate;
 
 // Array of dictionaries.
 @property(nonatomic, copy) NSArray *smartSelectionRules;
@@ -207,20 +207,20 @@ typedef NS_ENUM(NSInteger, PTYCharType) {
 @property(nonatomic, readonly) BOOL keyIsARepeat;
 
 // Returns the currently selected text.
-@property(nonatomic, readonly) NSString *selectedText;
+@property(weak, nonatomic, readonly) NSString *selectedText;
 
 // Returns the entire content of the view as a string.
-@property(nonatomic, readonly) NSString *content;
+@property(weak, nonatomic, readonly) NSString *content;
 
 // Returns the time (since 1970) when the selection was last modified, or 0 if there is no selection
 @property(nonatomic, readonly) NSTimeInterval selectionTime;
 
 // Regular and non-ascii fonts.
-@property(nonatomic, readonly) NSFont *font;
-@property(nonatomic, readonly) NSFont *nonAsciiFont;
+@property(unsafe_unretained, nonatomic, readonly) NSFont *font;
+@property(unsafe_unretained, nonatomic, readonly) NSFont *nonAsciiFont;
 
 // Returns the non-ascii font, even if it's not being used.
-@property(nonatomic, readonly) NSFont *nonAsciiFontEvenIfNotUsed;
+@property(unsafe_unretained, nonatomic, readonly) NSFont *nonAsciiFontEvenIfNotUsed;
 
 // Size of a character.
 @property(nonatomic, readonly) double lineHeight;
@@ -236,16 +236,16 @@ typedef NS_ENUM(NSInteger, PTYCharType) {
 @property(nonatomic, readonly) long long absoluteScrollPosition;
 
 // Returns the current find context, or one initialized to empty.
-@property(nonatomic, readonly) FindContext *findContext;
+@property(weak, nonatomic, readonly) FindContext *findContext;
 
 // Indicates if the "find cursor" mode is active.
 @property(nonatomic, readonly) BOOL isFindingCursor;
 
 // Stores colors. This object is its delegate.
-@property(nonatomic, readonly) iTermColorMap *colorMap;
+@property(nonatomic, readonly, strong) iTermColorMap *colorMap;
 
 // Semantic history. TODO: Move this into PTYSession.
-@property(nonatomic, readonly) iTermSemanticHistoryController *semanticHistoryController;
+@property(nonatomic, readonly, strong) iTermSemanticHistoryController *semanticHistoryController;
 
 // Is this view in the key window?
 @property(nonatomic, readonly) BOOL isInKeyWindow;

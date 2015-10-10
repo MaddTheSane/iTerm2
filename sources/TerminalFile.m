@@ -15,9 +15,9 @@
 NSString *const kTerminalFileShouldStopNotification = @"kTerminalFileShouldStopNotification";
 
 @interface TerminalFile ()
-@property(nonatomic, retain) NSMutableString *data;
+@property(nonatomic, strong) NSMutableString *data;
 @property(nonatomic, copy) NSString *filename;  // No path, just a name.
-@property(nonatomic, retain) NSString *error;
+@property(nonatomic, strong) NSString *error;
 @end
 
 @implementation TerminalFile
@@ -40,14 +40,6 @@ NSString *const kTerminalFileShouldStopNotification = @"kTerminalFileShouldStopN
         self.fileSize = size;
     }
     return self;
-}
-
-- (void)dealloc {
-    [_localPath release];
-    [_data release];
-    [_filename release];
-    [_error release];
-    [super dealloc];
 }
 
 #pragma mark - Overridden methods from superclass

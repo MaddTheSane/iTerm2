@@ -14,7 +14,7 @@
 
 @interface CommandHistoryPopupEntry : PopupEntry
 @property(nonatomic, copy) NSString *command;
-@property(nonatomic, retain) NSDate *date;
+@property(nonatomic, strong) NSDate *date;
 @end
 
 @interface CommandHistoryPopupWindowController : Popup

@@ -46,12 +46,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [trackingArea_ release];
-    [super dealloc];
-}
-
 - (void)_createTrackingArea
 {
     NSRect frame = self.frame;
@@ -67,7 +61,6 @@
     [super setFrameSize:newSize];
     if (trackingArea_) {
         [self removeTrackingArea:trackingArea_];
-        [trackingArea_ release];
         [self _createTrackingArea];
     }
 }
@@ -75,7 +68,7 @@
 - (void)_showMessage:(NSString *)message inRect:(NSRect)frame
 {
     [[NSColor whiteColor] set];
-    NSMutableParagraphStyle *pStyle = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    NSMutableParagraphStyle *pStyle = [[NSMutableParagraphStyle alloc] init];
     [pStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
     [pStyle setAlignment:NSCenterTextAlignment];
 
@@ -90,8 +83,8 @@
                 [NSColor whiteColor], NSForegroundColorAttributeName,
                 pStyle, NSParagraphStyleAttributeName,
                 nil];
-        attributedString = [[[NSMutableAttributedString alloc] initWithString:message
-                                                                   attributes:attrs] autorelease];
+        attributedString = [[NSMutableAttributedString alloc] initWithString:message
+                                                                   attributes:attrs];
         rect = NSMakeRect(frame.origin.x,
                           frame.origin.y + frame.size.height * 2.0 / 3.0,
                           frame.size.width,
@@ -104,7 +97,7 @@
              rect.size.height + rect.origin.y > frame.origin.y + frame.size.height);
                                                                                           
     
-    NSShadow *theShadow = [[[NSShadow  alloc] init] autorelease];
+    NSShadow *theShadow = [[NSShadow  alloc] init];
     [theShadow setShadowOffset:NSMakeSize(0, 0)];
     [theShadow setShadowBlurRadius:4.0];
     [theShadow setShadowColor:[NSColor blackColor]];

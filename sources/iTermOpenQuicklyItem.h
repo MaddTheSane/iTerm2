@@ -13,7 +13,7 @@
 @property(nonatomic, copy) NSAttributedString *title;
 
 // Detail text for table view (in small text below title)
-@property(nonatomic, retain) NSAttributedString *detail;
+@property(nonatomic, strong) NSAttributedString *detail;
 
 // How well this item matches the query. Just a non-negative number. Higher
 // scores are better matches.
@@ -21,10 +21,10 @@
 
 // The view. We have to hold on to this to change the text color for
 // non-highlighted items. This is hacky :(
-@property(nonatomic, retain) iTermOpenQuicklyTableCellView *view;
+@property(nonatomic, strong) iTermOpenQuicklyTableCellView *view;
 
 // Icon to display with item. Should be overridden by subclasses.
-@property(nonatomic, readonly) NSImage *icon;
+@property(weak, nonatomic, readonly) NSImage *icon;
 
 @end
 
@@ -32,7 +32,7 @@
 @interface iTermOpenQuicklySessionItem : iTermOpenQuicklyItem
 
 // Holds the session's colors and can create a logo with them as needed.
-@property(nonatomic, retain) iTermLogoGenerator *logoGenerator;
+@property(nonatomic, strong) iTermLogoGenerator *logoGenerator;
 
 @end
 

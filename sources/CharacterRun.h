@@ -55,14 +55,14 @@
 // Describes the appearance of a character.
 typedef struct {
     BOOL antiAlias;           // Use anti-aliasing?
-    NSColor *color;           // Foreground color. Do not assign directly to this. Use CRunAttrsSetColor().
+    CFTypeRef color;           // Foreground color. Do not assign directly to this. Use CRunAttrsSetColor().
     BOOL fakeBold;            // Should bold text be rendered by drawing text twice with a 1px shift?
     BOOL fakeItalic;          // Should text be skewed?
     BOOL underline;
     unichar imageCode;        // Gives the image code, or 0 if not an image.
     int imageLine;            // Line number of the image cell. Valid if image is positive.
     int imageColumn;          // Column number of the image cell. Valid if image is positive.
-    PTYFontInfo *fontInfo;    // Font to use. WEAK.
+    __unsafe_unretained PTYFontInfo *fontInfo;    // Font to use. WEAK.
 } CAttrs;
 
 typedef struct CRun CRun;
@@ -76,10 +76,10 @@ struct CRun {
     CGFloat x;                // x pixel coordinate for the run's start.
     int length;               // Number of codes/glyphs/advances.
     int index;                // -1 if nothing allocated, else start index of codes, glyphs, advances
-    NSString *string;         // If set then there are no codes or glyphs, but may be advances.
+    CFStringRef string;       // If set then there are no codes or glyphs, but may be advances.
     int key;                  // For complex chars, this is the key that gives the sting.
     BOOL terminated;          // No more appends allowed (will go into |next|)
-    CRunStorage *storage;     // Backing store for codes, glyphs, and advances.
+    CFTypeRef storage;        // Backing store for codes, glyphs, and advances. //CRunStorage
     int numImageCells;        // Number of consecutive image cells.
     VT100GridCoord coord;     // Origin of run. Kept to know where to redraw animated GIFs.
     CRun *next;               // Next run in linked list.

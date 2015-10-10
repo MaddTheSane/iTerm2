@@ -35,7 +35,7 @@ typedef NS_ENUM(NSInteger, iTermTipCardActionButtonAnimationState) {
 @property(nonatomic, copy) NSString *shortcut;
 
 // 22x22pt icon
-@property(nonatomic, retain) NSImage *icon;
+@property(nonatomic, strong) NSImage *icon;
 
 // If many buttons share one row, this gives the button's index in the row.
 @property(nonatomic, assign) int indexInRow;

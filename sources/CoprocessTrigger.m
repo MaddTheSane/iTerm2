@@ -53,11 +53,10 @@ static NSString *const kSuppressCoprocessTriggerWarning = @"NoSyncSuppressCoproc
 
 + (void)showCoprocessAnnouncementInSession:(PTYSession *)aSession {
     if (![[NSUserDefaults standardUserDefaults] boolForKey:kSuppressCoprocessTriggerWarning]) {
-        [aSession retain];
         void (^completion)(int selection) = ^(int selection) {
             switch (selection) {
                 case -2:
-                    [aSession release];
+                    aSession;
                     break;
 
                 case 0:

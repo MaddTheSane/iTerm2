@@ -104,10 +104,10 @@ static const int kDragThreshold = 3;
 // Set the hostname this view is currently waiting for AsyncHostLookupController to finish looking
 // up.
 @property(nonatomic, copy) NSString *currentUnderlineHostname;
-@property(nonatomic, retain) iTermSelection *selection;
-@property(nonatomic, retain) iTermSemanticHistoryController *semanticHistoryController;
-@property(nonatomic, retain) iTermFindCursorView *findCursorView;
-@property(nonatomic, retain) NSWindow *findCursorWindow;  // For find-cursor animation
+@property(nonatomic, strong) iTermSelection *selection;
+@property(nonatomic, strong) iTermSemanticHistoryController *semanticHistoryController;
+@property(nonatomic, strong) iTermFindCursorView *findCursorView;
+@property(nonatomic, strong) NSWindow *findCursorWindow;  // For find-cursor animation
 
 @end
 
@@ -227,7 +227,7 @@ static const int kDragThreshold = 3;
         _drawingHelper = [[iTermTextDrawingHelper alloc] init];
         _drawingHelper.delegate = self;
 
-        _colorMap = [colorMap retain];
+        _colorMap = colorMap;
         _colorMap.delegate = self;
 
         _drawingHelper.colorMap = colorMap;
@@ -320,51 +320,27 @@ static const int kDragThreshold = 3;
 }
 
 - (void)dealloc {
-    [_selection release];
-    [_smartSelectionRules release];
 
-    [_mouseDownEvent release];
     _mouseDownEvent = nil;
 
     [self removeAllTrackingAreas];
     if ([self isFindingCursor]) {
         [self.findCursorWindow close];
     }
-    [_findCursorWindow release];
 
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     _colorMap.delegate = nil;
-    [_colorMap release];
 
-    [_primaryFont release];
-    [_secondaryFont release];
-
-    [_markedTextAttributes release];
-
-    [_semanticHistoryController release];
-
-    [pointer_ release];
-    [cursor_ release];
     [threeFingerTapGestureRecognizer_ disconnectTarget];
-    [threeFingerTapGestureRecognizer_ release];
 
     if (self.currentUnderlineHostname) {
         [[AsyncHostLookupController sharedInstance] cancelRequestForHostname:self.currentUnderlineHostname];
     }
-    [_currentUnderlineHostname release];
     _indicatorsHelper.delegate = nil;
-    [_indicatorsHelper release];
     _selectionScrollHelper.delegate = nil;
-    [_selectionScrollHelper release];
     _findOnPageHelper.delegate = nil;
-    [_findOnPageHelper release];
-    [_drawingHook release];
     _drawingHelper.delegate = nil;
-    [_drawingHelper release];
-    [_accessibilityHelper release];
-    [_badgeLabel release];
 
-    [super dealloc];
 }
 
 - (NSString *)description {
@@ -506,10 +482,10 @@ static const int kDragThreshold = 3;
                                      NSTrackingActiveAlways |
                                      NSTrackingMouseMoved);
         NSTrackingArea *trackingArea =
-            [[[NSTrackingArea alloc] initWithRect:[self visibleRect]
+            [[NSTrackingArea alloc] initWithRect:[self visibleRect]
                                           options:trackingOptions
                                             owner:self
-                                         userInfo:nil] autorelease];
+                                         userInfo:nil];
         [self addTrackingArea:trackingArea];
     }
 }
@@ -597,8 +573,7 @@ static const int kDragThreshold = 3;
 
 - (void)setMarkedTextAttributes:(NSDictionary *)attr
 {
-    [_markedTextAttributes autorelease];
-    _markedTextAttributes = [attr retain];
+    _markedTextAttributes = attr;
 }
 
 - (void)updateScrollerForBackgroundColor
@@ -1442,7 +1417,7 @@ static const int kDragThreshold = 3;
         // wrong instnace of PTYTextView. We work around the issue by using a global variable to
         // track the instance of PTYTextView that is currently handling a key event and rerouting
         // calls as needed in -insertText and -doCommandBySelector.
-        gCurrentKeyEventTextView = [[self retain] autorelease];
+        gCurrentKeyEventTextView = self;
         [self interpretKeyEvents:[NSArray arrayWithObject:event]];
         gCurrentKeyEventTextView = nil;
 
@@ -1603,8 +1578,7 @@ static const int kDragThreshold = 3;
     if (cursor == cursor_) {
         return NO;
     }
-    [cursor_ autorelease];
-    cursor_ = [cursor retain];
+    cursor_ = cursor;
     return YES;
 }
 
@@ -1979,8 +1953,7 @@ static const int kDragThreshold = 3;
         [(PTYScroller*)([[self enclosingScrollView] verticalScroller]) setUserScroll:YES];
     }
 
-    [_mouseDownEvent autorelease];
-    _mouseDownEvent = [event retain];
+    _mouseDownEvent = event;
     _mouseDragged = NO;
     _mouseDownOnSelection = NO;
     _mouseDownOnImage = NO;
@@ -2337,11 +2310,11 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
         dragPosition = [self convertPoint:[event locationInWindow] fromView:nil];
         dragPosition.x -= [dragImage size].width / 2;
 
-        NSURL *url = [[[NSURL alloc] initWithScheme:@"file" host:nil path:path] autorelease];
+        NSURL *url = [[NSURL alloc] initWithScheme:@"file" host:nil path:path];
 
-        NSPasteboardItem *pbItem = [[[NSPasteboardItem alloc] init] autorelease];
+        NSPasteboardItem *pbItem = [[NSPasteboardItem alloc] init];
         [pbItem setString:[url absoluteString] forType:(NSString *)kUTTypeFileURL];
-        NSDraggingItem *dragItem = [[[NSDraggingItem alloc] initWithPasteboardWriter:pbItem] autorelease];
+        NSDraggingItem *dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter:pbItem];
         [dragItem setDraggingFrame:NSMakeRect(dragPosition.x, dragPosition.y, dragImage.size.width, dragImage.size.height)
                           contents:dragImage];
         NSDraggingSession *draggingSession = [self beginDraggingSessionWithItems:@[ dragItem ]
@@ -2446,7 +2419,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
                                                   suffix:(NSString *)suffix
                                                     path:(NSString *)path
                                         workingDirectory:(NSString *)workingDirectory {
-    NSMutableDictionary *subs = [[[_delegate textViewVariables] mutableCopy] autorelease];
+    NSMutableDictionary *subs = [[_delegate textViewVariables] mutableCopy];
     NSDictionary *semanticHistorySubs =
         @{ kSemanticHistoryPrefixSubstitutionKey: [prefix stringWithEscapedShellCharacters] ?: @"",
            kSemanticHistorySuffixSubstitutionKey: [suffix stringWithEscapedShellCharacters] ?: @"",
@@ -2529,7 +2502,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
         ![_selection containsCoord:VT100GridCoordMake(x, y)]) {
         // Didn't click on selection.
         // Save the selection and do a smart selection. If we don't like the result, restore it.
-        iTermSelection *savedSelection = [[_selection copy] autorelease];
+        iTermSelection *savedSelection = [_selection copy];
         [self smartSelectWithEvent:event];
         NSCharacterSet *nonWhiteSpaceSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
         NSString *text = [self selectedText];
@@ -2537,16 +2510,15 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
             !text.length ||
             [text rangeOfCharacterFromSet:nonWhiteSpaceSet].location == NSNotFound) {
             // If all we selected was white space, undo it.
-            [_selection release];
-            _selection = [savedSelection retain];
+            _selection = savedSelection;
         }
     }
     [self setNeedsDisplay:YES];
     NSMenu *contextMenu = [self menuAtCoord:coord];
     if (markMenu) {
-        NSMenuItem *markItem = [[[NSMenuItem alloc] initWithTitle:@"Command Info"
+        NSMenuItem *markItem = [[NSMenuItem alloc] initWithTitle:@"Command Info"
                                                            action:nil
-                                                    keyEquivalent:@""] autorelease];
+                                                    keyEquivalent:@""];
         markItem.submenu = markMenu;
         [contextMenu insertItem:markItem atIndex:0];
         [contextMenu insertItem:[NSMenuItem separatorItem] atIndex:1];
@@ -2858,12 +2830,12 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     id theSelectedText;
     NSDictionary *(^attributeProvider)(screen_char_t);
     if (attributed) {
-        theSelectedText = [[[NSMutableAttributedString alloc] init] autorelease];
+        theSelectedText = [[NSMutableAttributedString alloc] init];
         attributeProvider = ^NSDictionary *(screen_char_t theChar) {
             return [self charAttributes:theChar];
         };
     } else {
-        theSelectedText = [[[NSMutableString alloc] init] autorelease];
+        theSelectedText = [[NSMutableString alloc] init];
         attributeProvider = nil;
     }
 
@@ -2974,7 +2946,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 - (void)addNote:(id)sender
 {
     if ([_selection hasSelection]) {
-        PTYNoteViewController *note = [[[PTYNoteViewController alloc] init] autorelease];
+        PTYNoteViewController *note = [[PTYNoteViewController alloc] init];
         [_dataSource addNote:note inRange:_selection.lastRange.coordRange];
 
         // Make sure scrollback overflow is reset.
@@ -3007,7 +2979,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
            NSFontAttributeName: _primaryFont.font };
     NSSize size = [selectedText sizeWithAttributes:attributes];
     size.height = _lineHeight;
-    NSImage* image = [[[NSImage alloc] initWithSize:size] autorelease];
+    NSImage* image = [[NSImage alloc] initWithSize:size];
     [image lockFocus];
     [selectedText drawAtPoint:NSMakePoint(0, 0) withAttributes:attributes];
     [image unlockFocus];
@@ -3175,7 +3147,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
                                        isComplex:c.complexChar
                                       renderBold:&isBold
                                     renderItalic:&isItalic];
-    NSMutableParagraphStyle *paragraphStyle = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
 
     NSFont *font = fontInfo.font;
@@ -3381,9 +3353,9 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
                                                             workingDirectory:[_dataSource workingDirectoryOnLine:line]
                                                                   remoteHost:[_dataSource remoteHostOnLine:line]];
 
-                    NSMenuItem *theItem = [[[NSMenuItem alloc] initWithTitle:theTitle
+                    NSMenuItem *theItem = [[NSMenuItem alloc] initWithTitle:theTitle
                                                                       action:mySelector
-                                                               keyEquivalent:@""] autorelease];
+                                                               keyEquivalent:@""];
                     NSString *parameter =
                         [ContextMenuActionPrefsController parameterForActionDict:action
                                                            withCaptureComponents:components
@@ -3430,9 +3402,9 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 + (void)runCommand:(NSString *)command
 {
 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    system([command UTF8String]);
-    [pool drain];
+    @autoreleasepool {
+        system([command UTF8String]);
+    }
 }
 
 - (void)contextMenuActionRunCoprocess:(id)sender
@@ -3613,24 +3585,24 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     NSMenu *theMenu;
 
     // Allocate a menu
-    theMenu = [[[NSMenu alloc] initWithTitle:@"Contextual Menu"] autorelease];
+    theMenu = [[NSMenu alloc] initWithTitle:@"Contextual Menu"];
 
-    NSMenuItem *theItem = [[[NSMenuItem alloc] init] autorelease];
+    NSMenuItem *theItem = [[NSMenuItem alloc] init];
     theItem.title = [NSString stringWithFormat:@"Command: %@", mark.command];
     [theMenu addItem:theItem];
 
     if (directory) {
-        theItem = [[[NSMenuItem alloc] init] autorelease];
+        theItem = [[NSMenuItem alloc] init];
         theItem.title = [NSString stringWithFormat:@"Directory: %@", directory];
         [theMenu addItem:theItem];
     }
 
-    theItem = [[[NSMenuItem alloc] init] autorelease];
+    theItem = [[NSMenuItem alloc] init];
     theItem.title = [NSString stringWithFormat:@"Return code: %d", mark.code];
     [theMenu addItem:theItem];
 
     if (mark.startDate) {
-        theItem = [[[NSMenuItem alloc] init] autorelease];
+        theItem = [[NSMenuItem alloc] init];
         NSTimeInterval runningTime;
         if (mark.endDate) {
             runningTime = [mark.endDate timeIntervalSinceDate:mark.startDate];
@@ -3653,15 +3625,15 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 
     [theMenu addItem:[NSMenuItem separatorItem]];
 
-    theItem = [[[NSMenuItem alloc] initWithTitle:@"Re-run Command"
+    theItem = [[NSMenuItem alloc] initWithTitle:@"Re-run Command"
                                           action:@selector(reRunCommand:)
-                                   keyEquivalent:@""] autorelease];
+                                   keyEquivalent:@""];
     [theItem setRepresentedObject:mark.command];
     [theMenu addItem:theItem];
 
-    theItem = [[[NSMenuItem alloc] initWithTitle:@"Select Command Output"
+    theItem = [[NSMenuItem alloc] initWithTitle:@"Select Command Output"
                                           action:@selector(selectCommandOutput:)
-                                   keyEquivalent:@""] autorelease];
+                                   keyEquivalent:@""];
     [theItem setRepresentedObject:mark];
     [theMenu addItem:theItem];
 
@@ -3673,7 +3645,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     NSMenu *theMenu;
 
     // Allocate a menu
-    theMenu = [[[NSMenu alloc] initWithTitle:@"Contextual Menu"] autorelease];
+    theMenu = [[NSMenu alloc] initWithTitle:@"Contextual Menu"];
     iTermImageInfo *imageInfo = [self imageInfoAtCoord:coord];
     if (imageInfo) {
         // Show context menu for an image.
@@ -3689,9 +3661,9 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
         for (NSDictionary *entryDict in entryDicts) {
             NSMenuItem *item;
 
-            item = [[[NSMenuItem alloc] initWithTitle:entryDict[@"title"]
+            item = [[NSMenuItem alloc] initWithTitle:entryDict[@"title"]
                                                action:NSSelectorFromString(entryDict[@"selector"])
-                                        keyEquivalent:@""] autorelease];
+                                        keyEquivalent:@""];
             [item setRepresentedObject:imageInfo];
             [theMenu addItem:item];
         }
@@ -3702,7 +3674,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
         NSString *text = [self selectedText];
         NSString *conversion = [text hexOrDecimalConversionHelp];
         if (conversion) {
-            NSMenuItem *theItem = [[[NSMenuItem alloc] init] autorelease];
+            NSMenuItem *theItem = [[NSMenuItem alloc] init];
             theItem.title = conversion;
             [theMenu addItem:theItem];
             [theMenu addItem:[NSMenuItem separatorItem]];
@@ -3849,14 +3821,13 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
         mailto = [NSString stringWithFormat:@"mailto:%@", [self selectedText]];
     }
 
-    NSString* escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
+    NSString* escapedString = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,
                                                                                   (CFStringRef)mailto,
                                                                                   (CFStringRef)@"!*'();:@&=+$,/?%#[]",
                                                                                   NULL,
-                                                                                  kCFStringEncodingUTF8 );
+                                                                                  kCFStringEncodingUTF8 ));
 
     NSURL* url = [NSURL URLWithString:escapedString];
-    [escapedString release];
 
     [[NSWorkspace sharedWorkspace] openURL:url];
 }
@@ -4128,12 +4099,10 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
         [NSFont userFixedPitchFontOfSize: 0], NSFontAttributeName, NULL]
                          range: NSMakeRange(0, [theContents length])];
     [[tempView textStorage] setAttributedString: theContents];
-    [theContents release];
 
     // Now print the temporary view.
     [[NSPrintOperation printOperationWithView:tempView
                                     printInfo:aPrintInfo] runOperation];
-    [tempView release];
 }
 
 #pragma mark - NSTextInputClient
@@ -4209,11 +4178,11 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     DLog(@"setMarkedText%@ selectedRange%@ replacementRange:%@",
          aString, NSStringFromRange(selRange), NSStringFromRange(replacementRange));
     if ([aString isKindOfClass:[NSAttributedString class]]) {
-        _drawingHelper.markedText = [[[NSAttributedString alloc] initWithString:[aString string]
-                                                                     attributes:[self markedTextAttributes]] autorelease];
+        _drawingHelper.markedText = [[NSAttributedString alloc] initWithString:[aString string]
+                                                                     attributes:[self markedTextAttributes]];
     } else {
-        _drawingHelper.markedText = [[[NSAttributedString alloc] initWithString:aString
-                                                                     attributes:[self markedTextAttributes]] autorelease];
+        _drawingHelper.markedText = [[NSAttributedString alloc] initWithString:aString
+                                                                     attributes:[self markedTextAttributes]];
     }
     _drawingHelper.inputMethodMarkedRange = NSMakeRange(0, [_drawingHelper.markedText length]);
     _drawingHelper.inputMethodSelectedRange = selRange;
@@ -4595,7 +4564,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 
 - (void)highlightMarkOnLine:(int)line {
     CGFloat y = line * _lineHeight;
-    NSView *blue = [[[NSView alloc] initWithFrame:NSMakeRect(0, y, self.frame.size.width, _lineHeight)] autorelease];
+    NSView *blue = [[NSView alloc] initWithFrame:NSMakeRect(0, y, self.frame.size.width, _lineHeight)];
     [blue setWantsLayer:YES];
     [self addSubview:blue];
 
@@ -4606,10 +4575,8 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 
     // Animate it out, removing from superview when complete.
     [CATransaction begin];
-    [blue retain];
     [CATransaction setCompletionBlock:^{
         [blue removeFromSuperview];
-        [blue release];
     }];
     const NSTimeInterval duration = 0.75;
 
@@ -4678,10 +4645,10 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 
 - (void)createFindCursorWindow {
     [self scrollRectToVisible:[self cursorFrame]];
-    self.findCursorWindow = [[[NSWindow alloc] initWithContentRect:NSZeroRect
+    self.findCursorWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
                                                          styleMask:NSBorderlessWindowMask
                                                            backing:NSBackingStoreBuffered
-                                                             defer:YES] autorelease];
+                                                             defer:YES];
     [_findCursorWindow setLevel:NSFloatingWindowLevel];
     [_findCursorWindow setFrame:[self cursorScreenFrame] display:YES];
     _findCursorWindow.backgroundColor = [NSColor clearColor];
@@ -4726,7 +4693,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 
 - (void)endFindCursor {
     [NSAnimationContext beginGrouping];
-    NSWindow *theWindow = [_findCursorWindow retain];
+    NSWindow *theWindow = _findCursorWindow;
     [[NSAnimationContext currentContext] setCompletionHandler:^{
         [theWindow close];  // This sends release to the window
     }];
@@ -4740,8 +4707,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 }
 
 - (void)setFindCursorView:(iTermFindCursorView *)view {
-    [_findCursorView autorelease];
-    _findCursorView = [view retain];
+    _findCursorView = view;
 }
 
 - (BOOL)getAndResetChangedSinceLastExpose
@@ -5015,9 +4981,8 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     static NSMutableCharacterSet* urlChars;
     if (!urlChars) {
         NSString *chars = [iTermAdvancedSettingsModel URLCharacterSet];
-        urlChars = [[NSMutableCharacterSet characterSetWithCharactersInString:chars] retain];
+        urlChars = [NSMutableCharacterSet characterSetWithCharactersInString:chars];
         [urlChars formUnionWithCharacterSet:[NSCharacterSet alphanumericCharacterSet]];
-        [urlChars retain];
     }
 
     return urlChars;
@@ -5508,7 +5473,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 
     // start the drag
     NSPasteboardItem *pbItem = [imageInfo pasteboardItem];
-    NSDraggingItem *dragItem = [[[NSDraggingItem alloc] initWithPasteboardWriter:pbItem] autorelease];
+    NSDraggingItem *dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter:pbItem];
     [dragItem setDraggingFrame:NSMakeRect(dragPoint.x, dragPoint.y, icon.size.width, icon.size.height)
                       contents:icon];
     NSDraggingSession *draggingSession = [self beginDraggingSessionWithItems:@[ dragItem ]
@@ -5532,7 +5497,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     }
 
     imageSize = NSMakeSize(_charWidth * length, _lineHeight);
-    anImage = [[[NSImage alloc] initWithSize:imageSize] autorelease];
+    anImage = [[NSImage alloc] initWithSize:imageSize];
     [anImage lockFocus];
     if ([aString length] > 15) {
         tmpString = [NSString stringWithFormat:@"%@…",
@@ -5552,10 +5517,10 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     dragPoint.x -= imageSize.width / 2;
 
     // start the drag
-    NSPasteboardItem *pbItem = [[[NSPasteboardItem alloc] init] autorelease];
+    NSPasteboardItem *pbItem = [[NSPasteboardItem alloc] init];
     [pbItem setString:aString forType:(NSString *)kUTTypeUTF8PlainText];
     NSDraggingItem *dragItem =
-        [[[NSDraggingItem alloc] initWithPasteboardWriter:pbItem] autorelease];
+        [[NSDraggingItem alloc] initWithPasteboardWriter:pbItem];
     [dragItem setDraggingFrame:NSMakeRect(dragPoint.x,
                                           dragPoint.y,
                                           anImage.size.width,
@@ -5578,7 +5543,6 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     BOOL track = [pointer_ viewShouldTrackTouches];
     [self setAcceptsTouchEvents:track];
     [self setWantsRestingTouches:track];
-    [threeFingerTapGestureRecognizer_ release];
     threeFingerTapGestureRecognizer_ = nil;
     if (track) {
         if ([self useThreeFingerTapGestureRecognizer]) {
@@ -5654,7 +5618,6 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
     anythingIsBlinking = [self _markChangedSelectionAndBlinkDirty:redrawBlink width:WIDTH];
 
     // Copy selection position to detect change in selected chars next call.
-    [_oldSelection release];
     _oldSelection = [_selection copy];
 
     // Redraw lines with dirty characters
@@ -6190,7 +6153,7 @@ static double EuclideanDistance(NSPoint p1, NSPoint p2) {
 }
 
 - (iTermTextExtractor *)drawingHelperTextExtractor {
-    return [[[iTermTextExtractor alloc] initWithDataSource:_dataSource] autorelease];
+    return [[iTermTextExtractor alloc] initWithDataSource:_dataSource];
 }
 
 - (NSArray *)drawingHelperCharactersWithNotesOnLine:(int)line {

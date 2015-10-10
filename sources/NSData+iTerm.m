@@ -45,9 +45,9 @@
     char *bytes = (char *)buffer.mutableBytes;
     while (remaining > 0) {
         @autoreleasepool {
-            NSString *chunk = [[[NSString alloc] initWithBytes:bytes + offset
+            NSString *chunk = [[NSString alloc] initWithBytes:bytes + offset
                                                         length:MIN(77, remaining)
-                                                      encoding:NSUTF8StringEncoding] autorelease];
+                                                      encoding:NSUTF8StringEncoding];
             [string appendString:chunk];
             [string appendString:lineBreak];
             remaining -= chunk.length;
@@ -99,7 +99,7 @@
     for (int i = 0; i < sizeof(identifiers) / sizeof(*identifiers); i++) {
         if (self.length >= identifiers[i].length &&
             !memcmp(self.bytes, identifiers[i].fingerprint, identifiers[i].length)) {
-            return (NSString *)identifiers[i].uti;
+            return (__bridge NSString *)identifiers[i].uti;
         }
     }
     return nil;

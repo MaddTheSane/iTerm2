@@ -41,7 +41,7 @@
 - (void) addKeyToArray:(NSMutableArray *)anArray {
 	
 	[left addKeyToArray:anArray];
-	[anArray addObject:[[key copy] autorelease]];
+	[anArray addObject:[key copy]];
 	[right addKeyToArray:anArray];
 }
 
@@ -49,8 +49,8 @@
 - (id) copyWithZone:(NSZone *)zone {
 	
 	AATreeNode *copy = [[AATreeNode alloc] initWithData:data boundToKey:key];
-	copy.left = [[left copy] autorelease];
-	copy.right = [[right copy] autorelease];
+	copy.left = [left copy];
+	copy.right = [right copy];
 	copy.level = level;
 	return copy;
 }
@@ -63,21 +63,8 @@
 	NSMutableString *pre = [[NSMutableString alloc] init];
 	for (int i=0; i<indent; i++) [pre appendString:@"   "];
 	NSLog(@"%@%@-%@(%i)", pre, key, data, level);
-	[pre release];
 	
 	if (left) [left printWithIndent:(indent+1)];
-}
-
-
-- (void) dealloc
-{
-	[left release];
-	[right release];
-	[data release];
-	[key release];
-    data = nil;
-    key = nil;
-	[super dealloc];
 }
 
 

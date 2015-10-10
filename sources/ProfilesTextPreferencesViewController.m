@@ -18,8 +18,8 @@
 static NSInteger kNonAsciiFontButtonTag = 1;
 
 @interface ProfilesTextPreferencesViewController ()
-@property(nonatomic, retain) NSFont *normalFont;
-@property(nonatomic, retain) NSFont *nonAsciiFont;
+@property(nonatomic, strong) NSFont *normalFont;
+@property(nonatomic, strong) NSFont *nonAsciiFont;
 @end
 
 @implementation ProfilesTextPreferencesViewController {
@@ -61,9 +61,6 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_normalFont release];
-    [_nonAsciiFont release];
-    [super dealloc];
 }
 
 - (void)awakeFromNib {

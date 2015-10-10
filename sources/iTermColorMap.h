@@ -71,7 +71,7 @@ extern const int kColorMap24bitBase;
 @property(nonatomic, assign) BOOL dimOnlyText;
 @property(nonatomic, assign) double dimmingAmount;
 @property(nonatomic, assign) double mutingAmount;
-@property(nonatomic, assign) id<iTermColorMapDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermColorMapDelegate> delegate;
 @property(nonatomic, assign) double minimumContrast;
 
 + (iTermColorMapKey)keyFor8bitRed:(int)red

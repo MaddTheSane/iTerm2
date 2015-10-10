@@ -16,7 +16,7 @@
 #import "RegexKitLite.h"
 
 @interface iTermFileReference : NSObject
-@property(nonatomic, readonly) NSData *data;
+@property(weak, nonatomic, readonly) NSData *data;
 - (instancetype)initWithName:(NSString *)url;
 - (NSString *)stringWithBase64EncodingWithLineBreak:(NSString *)lineBreak;
 @end
@@ -33,10 +33,6 @@
     return self;
 }
 
-- (void)dealloc {
-    [_name release];
-    [super dealloc];
-}
 
 - (NSData *)data {
     return [NSData dataWithContentsOfFile:_name];
@@ -106,8 +102,8 @@
         NSMutableArray *values = [NSMutableArray array];
         NSMutableArray *labels = [NSMutableArray array];
         [self getLabels:labels andValues:values];
-        _labels = [labels retain];
-        _originalValues = [values retain];
+        _labels = labels;
+        _originalValues = values;
         _encoding = encoding;
         self.chunkSize = chunkSize;
         self.delayBetweenChunks = delayBetweenChunks;
@@ -117,13 +113,6 @@
     return self;
 }
 
-- (void)dealloc {
-    [_originalValues release];
-    [_labels release];
-    [_rawString release];
-    [_pasteSpecialViewController release];
-    [super dealloc];
-}
 
 - (void)awakeFromNib {
     for (NSString *label in _labels) {
@@ -143,41 +132,35 @@
         if (string && ![item stringForType:(NSString *)kUTTypeFileURL]) {
             // Is a non-file URL string. File URLs get special handling.
             [values addObject:string];
-            CFStringRef description = NULL;
+            NSString *description = nil;
             for (NSString *theType in item.types) {
-                description = UTTypeCopyDescription((CFStringRef)theType);
+                description = CFBridgingRelease(UTTypeCopyDescription((__bridge CFStringRef)theType));
                 if (description) {
                     break;
                 }
             }
             NSString *label = [NSString stringWithFormat:@"%@: “%@”",
-                               [((NSString *)description ?: @"Unknown Type") stringByCapitalizingFirstLetter],
+                               [(description ?: @"Unknown Type") stringByCapitalizingFirstLetter],
                                [string ellipsizedDescriptionNoLongerThan:100]];
-            if (description) {
-                CFRelease(description);
-            }
             [labels addObject:label];
         }
         if (!string) {
             NSString *theType = (NSString *)kUTTypeData;
-            CFStringRef description = NULL;
+            NSString *description = nil;
             NSData *data = [item dataForType:theType];
             if (!data) {
                 for (NSString *typeName in item.types) {
                     if ([typeName hasPrefix:@"public."] &&
                         ![typeName isEqualTo:(NSString *)kUTTypeFileURL]) {
                         data = [item dataForType:typeName];
-                        description = UTTypeCopyDescription((CFStringRef)typeName);
+                        description = CFBridgingRelease(UTTypeCopyDescription((__bridge CFStringRef)typeName));
                         break;
                     }
                 }
             }
             if (data && description) {
                 [values addObject:data];
-                [labels addObject:(NSString *)description];
-            }
-            if (description) {
-                CFRelease(description);
+                [labels addObject:description];
             }
         }
     }
@@ -208,7 +191,7 @@
         BOOL isDirectory;
         if ([fileManager fileExistsAtPath:filename isDirectory:&isDirectory] &&
             !isDirectory) {
-            [values addObject:[[[iTermFileReference alloc] initWithName:filename] autorelease]];
+            [values addObject:[[iTermFileReference alloc] initWithName:filename]];
             [labels addObject:[NSString stringWithFormat:@"Contents of %@", filename]];
         }
     }
@@ -231,7 +214,7 @@
         }
 
         // If the data happens to be valid UTF-8 data then don't insist on base64 encoding it.
-        string = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+        string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         if (!string) {
             _base64only = YES;
             string = [data stringWithBase64EncodingWithLineBreak:@"\r"];
@@ -240,7 +223,6 @@
         string = (NSString *)value;
     }
     _index = index;
-    [_rawString autorelease];
     _rawString = [string copy];
     _preview.string = _rawString;
     BOOL containsTabs = [string containsString:@"\t"];
@@ -292,7 +274,7 @@
     PasteEvent *pasteEvent = [self pasteEventWithString:_rawString forPreview:YES];
     [iTermPasteHelper sanitizePasteEvent:pasteEvent encoding:_encoding];
     _preview.string = pasteEvent.string;
-    NSNumberFormatter *bytesFormatter = [[[NSNumberFormatter alloc] init] autorelease];
+    NSNumberFormatter *bytesFormatter = [[NSNumberFormatter alloc] init];
     int numBytes = _preview.string.length;
     if (numBytes < 10) {
         bytesFormatter.numberStyle = NSNumberFormatterSpellOutStyle;
@@ -300,7 +282,7 @@
         bytesFormatter.numberStyle = NSNumberFormatterDecimalStyle;
     }
 
-    NSNumberFormatter *linesFormatter = [[[NSNumberFormatter alloc] init] autorelease];
+    NSNumberFormatter *linesFormatter = [[NSNumberFormatter alloc] init];
     NSUInteger numberOfLines = _preview.string.numberOfLines;
     if (numberOfLines < 10) {
         linesFormatter.numberStyle = NSNumberFormatterSpellOutStyle;
@@ -342,12 +324,12 @@
             isAtShellPrompt:(BOOL)isAtShellPrompt
                  completion:(iTermPasteSpecialCompletionBlock)completion {
     iTermPasteSpecialWindowController *controller =
-        [[[iTermPasteSpecialWindowController alloc] initWithChunkSize:chunkSize
+        [[iTermPasteSpecialWindowController alloc] initWithChunkSize:chunkSize
                                                    delayBetweenChunks:delayBetweenChunks
                                                     bracketingEnabled:bracketingEnabled
                                                      canWaitForPrompt:canWaitForPrompt
                                                       isAtShellPrompt:isAtShellPrompt
-                                                             encoding:encoding] autorelease];
+                                                             encoding:encoding];
     NSWindow *window = [controller window];
     [NSApp beginSheet:window
        modalForWindow:presentingWindow

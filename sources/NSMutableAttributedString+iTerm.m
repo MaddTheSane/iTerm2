@@ -23,8 +23,8 @@
 }
 
 - (void)iterm_appendString:(NSString *)string withAttributes:(NSDictionary *)attributes {
-    [self appendAttributedString:[[[NSAttributedString alloc] initWithString:string
-                                                                  attributes:attributes] autorelease]];
+    [self appendAttributedString:[[NSAttributedString alloc] initWithString:string
+                                                                  attributes:attributes]];
 }
 
 - (void)trimTrailingWhitespace {
@@ -50,10 +50,10 @@
 
     NSSize size = NSMakeSize(maxWidth, FLT_MAX);
     NSTextContainer *textContainer =
-        [[[NSTextContainer alloc] initWithContainerSize:size] autorelease];
+        [[NSTextContainer alloc] initWithContainerSize:size];
     NSTextStorage *textStorage =
-        [[[NSTextStorage alloc] initWithAttributedString:self] autorelease];
-    NSLayoutManager *layoutManager = [[[NSLayoutManager alloc] init] autorelease];
+        [[NSTextStorage alloc] initWithAttributedString:self];
+    NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
 
     [layoutManager addTextContainer:textContainer];
     [textStorage addLayoutManager:layoutManager];

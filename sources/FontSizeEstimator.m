@@ -45,7 +45,7 @@
 
 + (id)fontSizeEstimatorForFont:(NSFont *)aFont
 {
-    FontSizeEstimator* fse = [[[FontSizeEstimator alloc] init] autorelease];
+    FontSizeEstimator* fse = [[FontSizeEstimator alloc] init];
     if (fse) {
         NSMutableDictionary *dic = [NSMutableDictionary dictionary];
         [dic setObject:aFont forKey:NSFontAttributeName];
@@ -55,7 +55,7 @@
         int advances[1];
         UniChar characters[1];
         characters[0] = 'W';
-        CTFontRef ctfont = (CTFontRef)aFont;  // Toll-free bridged
+        CTFontRef ctfont = (__bridge CTFontRef)aFont;  // Toll-free bridged
         CGFontRef cgfont = CTFontCopyGraphicsFont(ctfont, NULL);
         CTFontGetGlyphsForCharacters(ctfont, characters, glyphs, 1);
         if (CGFontGetGlyphAdvances(cgfont,

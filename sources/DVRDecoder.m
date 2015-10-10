@@ -61,7 +61,6 @@
     if (frame_) {
         free(frame_);
     }
-    [super dealloc];
 }
 
 - (BOOL)seek:(long long)timestamp

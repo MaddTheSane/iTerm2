@@ -227,7 +227,7 @@ typedef NS_ENUM(int, iTermWindowType) {
     WINDOW_TYPE_NO_TITLE_BAR = 12,
 };
 
-typedef NS_ENUM(int, iTermObjectType) {
+typedef NS_ENUM(NSInteger, iTermObjectType) {
   iTermWindowObject,
   iTermTabObject,
   iTermPaneObject,
@@ -254,8 +254,7 @@ typedef NS_ENUM(int, iTermObjectType) {
 // Login command that leaves you in your home directory.
 + (NSString *)standardLoginCommand;
 
-- (id)init;
-- (void)dealloc;
+- (instancetype)init;
 - (void) locateBonjourServices;
 - (void)stopLocatingBonjourServices;
 - (void)copyProfileToBookmark:(NSMutableDictionary *)dict;

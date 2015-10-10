@@ -17,7 +17,7 @@ NS_INLINE BOOL iscontrol(int c) {
 @interface VT100ControlParser : NSObject
 
 // If a DCS hook is present, returns a description of it for debug logging.
-@property(nonatomic, readonly) NSString *hookDescription;
+@property(weak, nonatomic, readonly) NSString *hookDescription;
 
 // Force the DCS parser to remove its hook (presently, that means terminating tmux integration).
 - (void)unhookDCS;

@@ -174,7 +174,7 @@
     [_boundHostsTableView reloadData];
     [self removeNamelessHosts];
 
-    NSMutableArray *temp = [[[self boundHosts] mutableCopy] autorelease];
+    NSMutableArray *temp = [[self boundHosts] mutableCopy];
     [temp addObject:@""];
     [self setObject:temp forKey:KEY_BOUND_HOSTS];
     [_boundHostsTableView reloadData];
@@ -206,7 +206,7 @@
     // API that explicitly ends editing.
     [_boundHostsTableView reloadData];
     
-    NSMutableArray *temp = [[[self boundHosts] mutableCopy] autorelease];
+    NSMutableArray *temp = [[self boundHosts] mutableCopy];
     [temp removeObjectAtIndex:rowIndex];
     [self setObject:temp forKey:KEY_BOUND_HOSTS];
     [_boundHostsTableView reloadData];
@@ -248,7 +248,7 @@
     if (!hosts) {
         hosts = @[];
     }
-    NSMutableArray *temp = [[hosts mutableCopy] autorelease];
+    NSMutableArray *temp = [hosts mutableCopy];
     temp[rowIndex] = anObject;
     [self setObject:temp forKey:KEY_BOUND_HOSTS];
     
@@ -275,7 +275,7 @@
                                         identifier:nil
                                        silenceable:kiTermWarningTypePersistent]) {
             case kiTermWarningSelection0:
-                temp = [[boundHosts mutableCopy] autorelease];
+                temp = [boundHosts mutableCopy];
                 [temp removeObject:anObject];
                 [iTermProfilePreferences setObject:temp
                                             forKey:KEY_BOUND_HOSTS
@@ -304,7 +304,7 @@
 - (NSCell *)tableView:(NSTableView *)tableView
     dataCellForTableColumn:(NSTableColumn *)tableColumn
                        row:(NSInteger)row {
-    NSTextFieldCell *cell = [[[NSTextFieldCell alloc] initTextCell:@"hostname"] autorelease];
+    NSTextFieldCell *cell = [[NSTextFieldCell alloc] initTextCell:@"hostname"];
     [cell setPlaceholderString:@"Hostname, username@hostname, or username@"];
     [cell setEditable:YES];
     return cell;

@@ -50,11 +50,9 @@
 - (void)dealloc
 {
     assert(index_ == sanityCheck);
-    [index_ release];
     index_ = nil;
     sanityCheck = nil;
     free(store_);
-    [super dealloc];
 }
 
 - (BOOL)reserve:(long long)length
@@ -91,7 +89,6 @@
 
     long long key = nextKey_++;
     [index_ setObject:entry forKey:[NSNumber numberWithLongLong:key]];
-    [entry release];
     assert(index_ == sanityCheck);
 
     return key;

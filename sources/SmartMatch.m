@@ -10,12 +10,6 @@
 
 @implementation SmartMatch
 
-- (void)dealloc {
-    [_rule release];
-    [_components release];
-    [super dealloc];
-}
-
 - (NSComparisonResult)compare:(SmartMatch *)other
 {
     return [[NSNumber numberWithDouble:_score] compare:[NSNumber numberWithDouble:other.score]];

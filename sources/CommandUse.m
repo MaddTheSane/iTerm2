@@ -18,11 +18,6 @@
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_directory release];
-    [_markGuid release];
-    [_command release];
-    [_code release];
-    [super dealloc];
 }
 
 - (NSArray *)serializedValue {
@@ -34,7 +29,7 @@
 }
 
 - (id)copyWithZone:(NSZone *)zone {
-    return [[[self class] commandUseFromSerializedValue:[self serializedValue]] retain];
+    return [[self class] commandUseFromSerializedValue:[self serializedValue]];
 }
 
 - (void)setMark:(VT100ScreenMark *)mark {
@@ -49,7 +44,7 @@
 }
 
 + (instancetype)commandUseFromSerializedValue:(id)serializedValue {
-    CommandUse *commandUse = [[[CommandUse alloc] init] autorelease];
+    CommandUse *commandUse = [[CommandUse alloc] init];
     if ([serializedValue isKindOfClass:[NSArray class]]) {
         commandUse.time = [serializedValue[0] doubleValue];
         if ([serializedValue count] > 1) {

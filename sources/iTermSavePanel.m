@@ -43,7 +43,7 @@ static NSString *const kInitialDirectoryKey = @"Initial Directory";
         savePanel.directoryURL = [NSURL fileURLWithPath:initialDirectory];
     }
     savePanel.nameFieldStringValue = defaultFilename;
-    iTermSavePanel *delegate = [[[iTermSavePanel alloc] initWithOptions:options] autorelease];
+    iTermSavePanel *delegate = [[iTermSavePanel alloc] initWithOptions:options];
 
     savePanel.delegate = delegate;
     BOOL retrying;
@@ -91,11 +91,6 @@ static NSString *const kInitialDirectoryKey = @"Initial Directory";
     return self;
 }
 
-- (void)dealloc {
-    [_filename release];
-    [_path release];
-    [super dealloc];
-}
 
 #pragma mark - Private
 

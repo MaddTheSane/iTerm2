@@ -64,7 +64,7 @@ static BOOL AdvanceAndEatControlChars(iTermParserContext *context,
             case VT100CC_DC1:
             case VT100CC_DC3:
             case VT100CC_DEL:
-                CVectorAppend(incidentals, [VT100Token tokenForControlCharacter:c]);
+                CVectorAppend(incidentals, (__bridge void *)([VT100Token tokenForControlCharacter:c]));
                 break;
 
             case VT100CC_CAN:

@@ -166,11 +166,9 @@ const CGFloat kEdgeWidth = 3;
         [insetPath transformUsingAffineTransform:transform];
         NSGradient *insetGradient = [[NSGradient alloc] initWithStartingColor:insetTopColor endingColor:insetBottomColor];
         [insetGradient drawInBezierPath:insetPath angle:90.0];
-        [insetGradient release];
 
         NSGradient *strokeGradient = [[NSGradient alloc] initWithStartingColor:strokeTopColor endingColor:strokeBottomColor];
         [strokeGradient drawInBezierPath:strokePath angle:90.0];
-        [strokeGradient release];
 
         NSRect fieldRect = NSInsetRect(cellFrame, 1.0, 1.0);
         fieldRect.size.height -= 1.0;
@@ -186,37 +184,37 @@ const CGFloat kEdgeWidth = 3;
     NSRect blueRect = NSMakeRect(0, 0, w * [self fraction] + kEdgeWidth, cellFrame.size.height);
     const CGFloat alpha = 0.3 * _alphaMultiplier;
     NSGradient *horizontalGradient =
-        [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedRed:204.0/255.0
+        [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedRed:204.0/255.0
                                                                              green:219.0/255.0
                                                                               blue:233.0/255.0
                                                                              alpha:alpha]
                                        endingColor:[NSColor colorWithCalibratedRed:131.0/255.0
                                                                              green:187.0/255.0
                                                                               blue:239.0/255.0
-                                                                             alpha:alpha]] autorelease];
+                                                                             alpha:alpha]];
     [horizontalGradient drawInRect:blueRect angle:0];
 
     NSGradient *verticalGradient =
-        [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedRed:0/255.0
+        [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedRed:0/255.0
                                                                              green:0/255.0
                                                                               blue:0/255.0
                                                                              alpha:alpha]
                                        endingColor:[NSColor colorWithCalibratedRed:10.0/255.0
                                                                              green:13.0/255.0
                                                                               blue:0/255.0
-                                                                             alpha:alpha]] autorelease];
+                                                                             alpha:alpha]];
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositePlusLighter];
     [verticalGradient drawInRect:blueRect angle:90];
 
     NSGradient *edgeGradient =
-        [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedRed:255/255.0
+        [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedRed:255/255.0
                                                                              green:255/255.0
                                                                               blue:255/255.0
                                                                              alpha:0.0]
                                        endingColor:[NSColor colorWithCalibratedRed:255.0/255.0
                                                                              green:255.0/255.0
                                                                               blue:255.0/255.0
-                                                                             alpha:1.0]] autorelease];
+                                                                             alpha:1.0]];
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
     NSRect edgeRect = NSMakeRect(blueRect.size.width - kEdgeWidth, 0, kEdgeWidth, blueRect.size.height);
     [edgeGradient drawInRect:edgeRect angle:0];
@@ -244,7 +242,6 @@ const CGFloat kEdgeWidth = 3;
         [outlinePath fill];
 
         [[NSGraphicsContext currentContext] restoreGraphicsState];
-        [innerShadow release];
 
         [self drawInteriorWithFrame:cellFrame inView:controlView];
         if ([controlView respondsToSelector:@selector(currentEditor)] && [(NSControl *)controlView currentEditor]) {
@@ -271,14 +268,9 @@ const CGFloat kEdgeWidth = 3;
 - (id)init {
     self = [super init];
     if (self) {
-        _string = [@"" retain];
+        _string = @"";
     }
     return self;
-}
-
-- (void)dealloc {
-    [_string release];
-    [super dealloc];
 }
 
 @end
@@ -357,10 +349,6 @@ const CGFloat kEdgeWidth = 3;
         [timer_ invalidate];
         timer_ = nil;
     }
-    [previousFindString_ release];
-    [state_ release];
-    [savedState_ release];
-    [super dealloc];
 }
 
 - (NSRect)superframe
@@ -440,13 +428,11 @@ const CGFloat kEdgeWidth = 3;
 }
 
 - (void)restoreState {
-    [state_ release];
     state_ = savedState_;
     savedState_ = nil;
 }
 
 - (void)saveState {
-    [savedState_ release];
     savedState_ = state_;
     state_ = [[FindState alloc] init];
     state_.ignoreCase = savedState_.ignoreCase;
@@ -535,8 +521,7 @@ const CGFloat kEdgeWidth = 3;
 - (void)_setSearchString:(NSString *)s
 {
     if (!savedState_) {
-        [gSearchString autorelease];
-        gSearchString = [s retain];
+        gSearchString = s;
         state_.string = s;
     }
 }
@@ -798,7 +783,6 @@ const CGFloat kEdgeWidth = 3;
 
 - (void)startDelay {
     delayState_ = kFindViewDelayStateDelaying;
-    [self retain];
     NSTimeInterval delay = [iTermAdvancedSettingsModel findDelaySeconds];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{
@@ -806,7 +790,6 @@ const CGFloat kEdgeWidth = 3;
                            delayState_ == kFindViewDelayStateDelaying) {
                            [self becomeActive];
                        }
-                       [self release];
                    });
 }
 

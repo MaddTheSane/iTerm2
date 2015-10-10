@@ -36,7 +36,7 @@
 @class SessionTitleView;
 
 @interface SessionView : NSView <SessionTitleViewDelegate>
-@property(nonatomic, retain) PTYSession *session;
+@property(nonatomic, strong) PTYSession *session;
 // Unique per-process id of view, used for ordering them in PTYTab.
 @property(nonatomic, assign) int viewId;
 

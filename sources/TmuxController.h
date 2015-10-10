@@ -34,11 +34,11 @@ extern NSString *kTmuxControllerSessionWasRenamed;
 @interface TmuxController : NSObject
 
 @property(nonatomic, readonly) TmuxGateway *gateway;
-@property(nonatomic, retain) NSMutableDictionary *windowPositions;
+@property(nonatomic, strong) NSMutableDictionary *windowPositions;
 @property(nonatomic, copy) NSString *sessionName;
-@property(nonatomic, retain) NSArray *sessions;
+@property(nonatomic, strong) NSArray *sessions;
 @property(nonatomic, assign) BOOL ambiguousIsDoubleWidth;
-@property(nonatomic, readonly) NSString *clientName;
+@property(nonatomic, readonly, copy) NSString *clientName;
 @property(nonatomic, readonly) int sessionId;
 
 - (id)initWithGateway:(TmuxGateway *)gateway clientName:(NSString *)clientName;

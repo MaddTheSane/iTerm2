@@ -116,11 +116,6 @@ static NSString *const kTitleRestrictionOperator = @"name:";
   return NO;
 }
 
-- (void)dealloc {
-  [_strings release];
-  [_operator release];
-  [super dealloc];
-}
 
 @end
 

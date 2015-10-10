@@ -265,7 +265,7 @@ typedef enum {
 
 - (NSMenu*)profileTable:(id)profileTable menuForEvent:(NSEvent*)theEvent
 {
-    NSMenu* menu =[[[NSMenu alloc] initWithTitle:@"Contextual Menu"] autorelease];
+    NSMenu* menu =[[NSMenu alloc] initWithTitle:@"Contextual Menu"];
 
     int count = [[profileTable selectedGuids] count];
     if (count == 1) {

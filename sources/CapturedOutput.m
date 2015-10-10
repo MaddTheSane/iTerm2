@@ -19,32 +19,21 @@ NSString *const kCapturedOutputStateKey = @"State";
 NSString *const kCapturedOutputMarkGuidKey = @"Mark Guid";
 
 @interface CapturedOutput()
-@property(nonatomic, retain) NSData *triggerDigest;
+@property(nonatomic, strong) NSData *triggerDigest;
 @end
 
 @implementation CapturedOutput
 
 + (instancetype)capturedOutputWithDictionary:(NSDictionary *)dict {
-    CapturedOutput *capturedOutput = [[[CapturedOutput alloc] init] autorelease];
+    CapturedOutput *capturedOutput = [[CapturedOutput alloc] init];
     if (capturedOutput) {
         capturedOutput.line = dict[kCapturedOutputLineKey];
         capturedOutput.values = dict[kCapturedOutputValuesKey];
         capturedOutput.triggerDigest = dict[kCapturedOutputTriggerHashKey];
         capturedOutput.state = [dict[kCapturedOutputStateKey] boolValue];
-        capturedOutput.markGuid = [[dict[kCapturedOutputMarkGuidKey] copy] autorelease];
+        capturedOutput.markGuid = [dict[kCapturedOutputMarkGuidKey] copy];
     }
     return capturedOutput;
-}
-
-- (void)dealloc {
-    [_values release];
-    [_trigger release];
-    [_mark release];
-    [_markGuid release];
-    [_line release];
-    [_triggerDigest release];
-
-    [super dealloc];
 }
 
 - (void)setKnownTriggers:(NSArray *)knownTriggers {

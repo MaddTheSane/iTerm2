@@ -23,15 +23,15 @@
 // Return YES if the delegate handles it, NO if Popup should handle it.
 - (BOOL)popupHandleSelector:(SEL)selector string:(NSString *)string currentValue:(NSString *)currentValue;
 - (void)popupWillClose:(Popup *)popup;
+- (BOOL)popupWindowIsInHotkeyWindow;
 
 @end
 
 @interface Popup : NSWindowController
 
-@property(nonatomic, assign) id<PopupDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<PopupDelegate> delegate;
 
-- (id)initWithWindowNibName:(NSString*)nibName tablePtr:(NSTableView**)table model:(PopupModel*)model;
-- (void)dealloc;
+- (instancetype)initWithWindowNibName:(NSString*)nibName tablePtr:(NSTableView**)table model:(PopupModel*)model;
 
 // Call this after initWithWindowNibName:tablePtr:model: if table was nil.
 - (void)setTableView:(NSTableView *)table;

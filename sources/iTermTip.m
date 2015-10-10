@@ -36,13 +36,6 @@ NSString *const kTipUrlKey = @"url";
   return self;
 }
 
-- (void)dealloc {
-  [_identifier release];
-  [_title release];
-  [_body release];
-  [_url release];
-  [super dealloc];
-}
 
 @end
 

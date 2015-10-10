@@ -14,7 +14,7 @@
     NSMutableDictionary *map_;
 }
 
-@property (nonatomic, retain) NSMutableArray *columns;
+@property (nonatomic, strong) NSMutableArray *columns;
 @property (nonatomic, readonly) NSMutableArray *records;
 
 - (NSString *)valueInRecord:(NSArray *)record forField:(NSString *)fieldName;

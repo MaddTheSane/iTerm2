@@ -12,16 +12,16 @@
 
 @interface SplitPanel : NSWindowController {
     NSWindowController *parent_;
-    IBOutlet NSTextField *label_;
+    IBOutlet NSTextField *__weak label_;
     IBOutlet NSButton *splitButton_;
     BOOL isVertical_;
     IBOutlet ProfileListView *bookmarks_;
     NSString *guid_;
 }
 
-@property (nonatomic, retain) NSWindowController *parent;
+@property (nonatomic, strong) NSWindowController *parent;
 @property (nonatomic, assign) BOOL isVertical;
-@property (nonatomic, readonly) NSTextField *label;
+@property (weak, nonatomic, readonly) NSTextField *label;
 @property (nonatomic, copy) NSString *guid;
 
 + (NSString *)showPanelWithParent:(NSWindowController *)parent isVertical:(BOOL)vertical;

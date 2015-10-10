@@ -213,7 +213,6 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
                   KEY_PLACE_PROMPT_AT_FIRST_COLUMN: @YES,
                   KEY_SHOW_MARK_INDICATORS: @YES,
                 };
-        [dict retain];
     }
     return dict;
 }
@@ -255,7 +254,6 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
     static NSDictionary *dict;
     if (!dict) {
         dict = @{ };
-        [dict retain];
     }
     return dict;
 }

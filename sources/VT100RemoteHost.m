@@ -25,12 +25,6 @@ static NSString *const kRemoteHostUserNameKey = @"User name";
     return self;
 }
 
-- (void)dealloc {   
-    [_hostname release];
-    [_username release];
-    [super dealloc];
-}
-
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: %p hostname=%@ username=%@>",
             self.class, self, self.hostname, self.username];

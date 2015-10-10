@@ -28,11 +28,6 @@ static const NSInteger kRecycleDirectoryTag = 2;
     return [super initWithWindowNibName:@"AdvancedWorkingDirectoryWindow"];
 }
 
-- (void)dealloc {
-    [_profile release];
-    [super dealloc];
-}
-
 - (NSArray *)allKeys {
     return @[ KEY_AWDS_WIN_OPTION,
               KEY_AWDS_WIN_DIRECTORY,
@@ -45,7 +40,7 @@ static const NSInteger kRecycleDirectoryTag = 2;
 #pragma mark - Actions
 
 - (IBAction)ok:(id)sender {
-    NSMutableDictionary *dict = [[_profile mutableCopy] autorelease];
+    NSMutableDictionary *dict = [_profile mutableCopy];
     
     dict[KEY_AWDS_WIN_OPTION] = [self valueForTag:_windowDirectoryType.selectedTag];
     dict[KEY_AWDS_TAB_OPTION] = [self valueForTag:_tabDirectoryType.selectedTag];
@@ -91,7 +86,6 @@ static const NSInteger kRecycleDirectoryTag = 2;
 }
 
 - (void)setProfile:(NSDictionary *)profile {
-    [_profile autorelease];
     _profile = [profile copy];
     [self setAdvancedBookmarkMatrix:_windowDirectoryType
                           withValue:[_profile objectForKey:KEY_AWDS_WIN_OPTION]];

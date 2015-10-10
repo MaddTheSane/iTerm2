@@ -64,11 +64,6 @@
     return self;
 }
 
-- (void)dealloc {
-    [_highlightMap release];
-    [_copiedContext release];
-    [super dealloc];
-}
 
 - (BOOL)findInProgress {
     return _findInProgress || _searchingForNextResult;
@@ -137,10 +132,8 @@
 }
 
 - (void)clearHighlights {
-    [_lastStringSearchedFor release];
     _lastStringSearchedFor = nil;
 
-    [_searchResults release];
     _searchResults = nil;
 
     _numberOfProcessedSearchResults = 0;

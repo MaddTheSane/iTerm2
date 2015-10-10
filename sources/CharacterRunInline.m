@@ -1,64 +1,17 @@
-// Prevent inlining by changing to
-// #define CRUN_INLINE
-#define CRUN_INLINE extern
+//
+//  CharacterRunInline.m
+//  iTerm2
+//
+//  Created by C.W. Betts on 10/9/15.
+//
+//
 
-// Initialize the state of a new run, whether it is on the stack or malloc'ed.
-CRUN_INLINE void CRunInitialize(CRun *run,
-                                CAttrs *attrs,
-                                CRunStorage *storage,
-                                VT100GridCoord coord,
-                                CGFloat x);
+#import <Foundation/Foundation.h>
+#import "CharacterRun.h"
+#import "CharacterRunInline.h"
 
-// Append a single unicode character (no combining marks allowed) to a run.
-// Returns the new tail of the run list.
-CRUN_INLINE CRun *CRunAppend(CRun *run,
-                             CAttrs *attrs,
-                             unichar code,
-                             CGFloat advance,
-                             CGFloat x);
-
-// Append a string, possibly with combining marks, to a run.
-// Returns the new tail of the run list.
-CRUN_INLINE CRun *CRunAppendString(CRun *run,
-                                   CAttrs *attrs,
-                                   NSString *string,
-                                   int key,
-                                   CGFloat advance,
-                                   CGFloat x);
-
-// Release the storage from a run and its successors in the run list.
-CRUN_INLINE void CRunDestroy(CRun *run);
-
-// Destroy and free() the run.
-CRUN_INLINE void CRunFree(CRun *run);
-
-// Move the start of the run past |offset| codes. Only valid if run->codes is
-// non-null.
-CRUN_INLINE void CRunAdvance(CRun *run, int offset);
-
-// Advance past the first |newStart| characters. Split the next character into
-// a CRun with a string and return that, which the caller must free. The
-// remainder of the run remains in |run|. This is used when the |newStart|th
-// character has a missing glyph.
-CRUN_INLINE CRun *CRunSplit(CRun *run, int newStart);
-
-// Gets an array of glyphs for the current run (not including its linked
-// successors). The return value's memory is owned by the run's storage.
-// *firstMissingGlyph will be filled in with the index of the first glyph that
-// could not be found.
-CRUN_INLINE CGGlyph *CRunGetGlyphs(CRun *run, int *firstMissingGlyph);
-
-// Prevent further appends from going to |run|. They will go into a linked
-// successor.
-CRUN_INLINE void CRunTerminate(CRun *run);
-
-CRUN_INLINE NSSize *CRunGetAdvances(CRun *run);
-
-CRUN_INLINE void CRunAttrsSetColor(CAttrs *attrs, CRunStorage *storage, NSColor *color);
-
-#pragma mark - Implementations
-
-#if 0
+#undef CRUN_INLINE
+#define CRUN_INLINE extern inline
 
 CRUN_INLINE void CRunInitialize(CRun *run,
                                 CAttrs *attrs,
@@ -96,11 +49,11 @@ CRUN_INLINE void CRunAppendSelfString(CRun *run,
                                       int key,
                                       CGFloat advance) {
     assert(run->length == 0);
-    int theIndex = [run->storage appendCode:0 andAdvance:NSMakeSize(advance, 0)];
+    int theIndex = [(CRunStorage*)run->storage appendCode:0 andAdvance:NSMakeSize(advance, 0)];
     if (run->index < 0) {
         run->index = theIndex;
     }
-    run->string = [string retain];
+    run->string = CFStringCreateCopy(kCFAllocatorDefault, (CFStringRef)string);
     run->key = key;
 }
 
@@ -191,7 +144,7 @@ CRUN_INLINE CRun *CRunAppendString(CRun *run,
 
 CRUN_INLINE void CRunDestroy(CRun *run) {
     CFRelease(run->string);
-    [run->storage release];
+    [(CRunStorage*)run->storage release];
     if (run->next) {
         CRunDestroy(run->next);
         free(run->next);
@@ -207,7 +160,7 @@ CRUN_INLINE void CRunFree(CRun *run) {
 CRUN_INLINE void CRunAdvance(CRun *run, int offset) {
     assert(!run->string);
     assert(run->length >= offset);
-    NSSize *advances = [run->storage advancesFromIndex:run->index];
+    NSSize *advances = [(CRunStorage*)run->storage advancesFromIndex:run->index];
     for (int i = 0; i < offset; i++) {
         run->x += advances[i].width;
     }
@@ -222,23 +175,23 @@ CRUN_INLINE CRun *CRunSplit(CRun *run, int newStart) {
     }
     assert(newStart < run->length);
     CRun *newRun = malloc(sizeof(CRun));
-
+    
     // Skip past |newStart| chars
     CRunAdvance(run, newStart);
-
+    
     // Create a new string run from the first char
     CRunInitialize(newRun, &run->attrs, run->storage, run->coord, run->x);
     CRunAppendString(newRun,
                      &run->attrs,
-                     [NSString stringWithCharacters:[run->storage codesFromIndex:run->index]
+                     [NSString stringWithCharacters:[(CRunStorage*)run->storage codesFromIndex:run->index]
                                              length:1],
                      -1,
-                     [run->storage advancesFromIndex:run->index][0].width,
+                     [(CRunStorage*)run->storage advancesFromIndex:run->index][0].width,
                      run->x);
-
+    
     // Skip past that one char.
     CRunAdvance(run, 1);
-
+    
     return newRun;
 }
 
@@ -249,9 +202,9 @@ CRUN_INLINE CGGlyph *CRunGetGlyphs(CRun *run, int *firstMissingGlyph) {
     if (run->length == 0) {
         return nil;
     }
-    CGGlyph *glyphs = [run->storage glyphsFromIndex:run->index];
+    CGGlyph *glyphs = [(CRunStorage*)run->storage glyphsFromIndex:run->index];
     BOOL foundAllGlyphs = CTFontGetGlyphsForCharacters((CTFontRef)run->attrs.fontInfo.font,
-                                                       [run->storage codesFromIndex:run->index],
+                                                       [(CRunStorage*)run->storage codesFromIndex:run->index],
                                                        glyphs,
                                                        run->length);
     if (!foundAllGlyphs) {
@@ -271,7 +224,7 @@ CRUN_INLINE void CRunTerminate(CRun *run) {
 
 CRUN_INLINE NSSize *CRunGetAdvances(CRun *run) {
     assert(run->index >= 0);
-    return [run->storage advancesFromIndex:run->index];
+    return [(CRunStorage*)run->storage advancesFromIndex:run->index];
 }
 
 CRUN_INLINE void CRunAttrsSetColor(CAttrs *attrs, CRunStorage *storage, NSColor *color) {
@@ -279,4 +232,3 @@ CRUN_INLINE void CRunAttrsSetColor(CAttrs *attrs, CRunStorage *storage, NSColor 
     [storage addColor:color];
 }
 
-#endif

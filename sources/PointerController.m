@@ -12,7 +12,7 @@
 #import "PreferencePanel.h"
 
 @implementation PointerController {
-    NSObject<PointerControllerDelegate> *delegate_;
+    id<PointerControllerDelegate> __unsafe_unretained delegate_;
     int mouseDownButton_;
     int clicks_;
 

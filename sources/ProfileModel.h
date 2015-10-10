@@ -36,7 +36,7 @@ typedef struct {
     SEL alternateSelector;         // opt+click
     SEL openAllSelector;           // open all bookmarks
     SEL alternateOpenAllSelector;  // opt+open all bookmarks
-    id target;                     // receiver of selector
+    CFTypeRef target;                     // receiver of selector
 } JournalParams;
 
 @interface ProfileModel : NSObject {
@@ -139,7 +139,7 @@ typedef NS_ENUM(int, JournalAction) {
     int index;  // Index of bookmark
 }
 
-+ (BookmarkJournalEntry*)journalWithAction:(JournalAction)action
++ (instancetype)journalWithAction:(JournalAction)action
                                   bookmark:(Profile*)bookmark
                                      model:(ProfileModel*)model;
 

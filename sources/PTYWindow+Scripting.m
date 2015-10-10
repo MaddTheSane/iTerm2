@@ -20,11 +20,11 @@
         containerRef = [NSApp objectSpecifier];
         classDescription = [NSClassDescription classDescriptionForClass:[NSApp class]];
         // Create and return the specifier
-        return [[[NSIndexSpecifier alloc]
+        return [[NSIndexSpecifier alloc]
                    initWithContainerClassDescription:classDescription
                                   containerSpecifier:containerRef
                                                  key:@"orderedWindows"
-                                               index:anIndex] autorelease];
+                                               index:anIndex];
     } else {
         return nil;
     }

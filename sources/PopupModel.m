@@ -37,11 +37,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [values_ release];
-    [super dealloc];
-}
 
 - (NSUInteger)count
 {
@@ -102,7 +97,7 @@
     return [values_ objectAtIndex:i];
 }
 
-- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)stackbuf count:(NSUInteger)len
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id __unsafe_unretained [])stackbuf count:(NSUInteger)len
 {
     return [values_ countByEnumeratingWithState:state objects:stackbuf count:len];
 }
@@ -115,13 +110,12 @@
 - (void)sortByScore
 {
     NSSortDescriptor *sortDescriptor;
-    sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"score"
-                                                  ascending:NO] autorelease];
+    sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"score"
+                                                  ascending:NO];
     NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
     NSArray *sortedArray;
     sortedArray = [values_ sortedArrayUsingDescriptors:sortDescriptors];
-    [values_ release];
-    values_ = [[NSMutableArray arrayWithArray:sortedArray] retain];
+    values_ = [NSMutableArray arrayWithArray:sortedArray];
 }
 
 - (int)indexOfObjectWithMainValue:(NSString*)value

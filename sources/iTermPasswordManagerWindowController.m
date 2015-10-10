@@ -49,7 +49,7 @@ static NSString *const kPasswordManagersShouldReloadData = @"kPasswordManagersSh
                 [array addObject:accountName];
             }
     }
-    return [[array sortedArrayUsingSelector:@selector(compare:)] retain];
+    return [array sortedArrayUsingSelector:@selector(compare:)];
 }
 
 - (id)init {
@@ -64,9 +64,7 @@ static NSString *const kPasswordManagersShouldReloadData = @"kPasswordManagersSh
 }
 
 - (void)dealloc {
-    [_accounts release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (void)awakeFromNib {
@@ -167,13 +165,11 @@ static NSString *const kPasswordManagersShouldReloadData = @"kPasswordManagersSh
 #pragma mark - Private
 
 - (void)setPasswordBeingShown:(NSString *)password onRow:(NSInteger)row {
-    [_passwordBeingShown release];
-    _passwordBeingShown = [password retain];
+    _passwordBeingShown = password;
     _rowForPasswordBeingShown = row;
 }
 
 - (void)clearPasswordBeingShown {
-    [_passwordBeingShown release];
     _passwordBeingShown = nil;
     _rowForPasswordBeingShown = -1;
 }
@@ -215,7 +211,6 @@ static NSString *const kPasswordManagersShouldReloadData = @"kPasswordManagersSh
 
 - (void)reloadAccounts {
     [self clearPasswordBeingShown];
-    [_accounts release];
     NSString *filter = [_searchField stringValue];
     _accounts = [[self class] accountNamesWithFilter:filter];
     [_tableView reloadData];
@@ -304,17 +299,17 @@ shouldEditTableColumn:(NSTableColumn *)aTableColumn
 dataCellForTableColumn:(NSTableColumn *)tableColumn
                   row:(NSInteger)row {
     if (tableColumn == _accountNameColumn) {
-        NSTextFieldCell *cell = [[[NSTextFieldCell alloc] initTextCell:@"name"] autorelease];
+        NSTextFieldCell *cell = [[NSTextFieldCell alloc] initTextCell:@"name"];
         [cell setEditable:YES];
         return cell;
     } else if (tableColumn == _passwordColumn) {
         if ([_tableView editedRow] == row) {
-            NSSecureTextFieldCell *cell = [[[NSSecureTextFieldCell alloc] initTextCell:@"editPassword"] autorelease];
+            NSSecureTextFieldCell *cell = [[NSSecureTextFieldCell alloc] initTextCell:@"editPassword"];
             [cell setEditable:YES];
             [cell setEchosBullets:YES];
             return cell;
         } else {
-            NSTextFieldCell *cell = [[[NSTextFieldCell alloc] initTextCell:@"password"] autorelease];
+            NSTextFieldCell *cell = [[NSTextFieldCell alloc] initTextCell:@"password"];
             [cell setEditable:YES];
             return cell;
         }

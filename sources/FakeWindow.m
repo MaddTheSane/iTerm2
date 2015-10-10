@@ -45,15 +45,10 @@
     isMiniaturized = [[aTerm window] isMiniaturized];
     frame = [[aTerm window] frame];
     screen = [[aTerm window] screen];
-    session = [aSession retain];
+    session = aSession;
     realWindow = aTerm;
     scrollbarShouldBeVisible = [aTerm scrollbarShouldBeVisible];
     return self;
-}
-
-- (void)dealloc {
-    [session release];
-    [super dealloc];
 }
 
 - (void)rejoin:(NSWindowController<iTermWindowController> *)aTerm

@@ -17,7 +17,7 @@
 
 @interface iTermPasswordManagerWindowController : NSWindowController
 
-@property(nonatomic, assign) id<iTermPasswordManagerDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermPasswordManagerDelegate> delegate;
 
 + (NSArray *)accountNamesWithFilter:(NSString *)filter;
 

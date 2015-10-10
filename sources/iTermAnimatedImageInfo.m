@@ -22,7 +22,7 @@
         NSMutableArray *delays = [NSMutableArray array];
         CGImageSourceRef source = CGImageSourceCreateWithData((CFDataRef)data,
                                                               (CFDictionaryRef)@{});
-        [(id)source autorelease];
+        CFAutorelease(source);
         size_t const count = CGImageSourceGetCount(source);
         if (count <= 1) {
             return nil;
@@ -39,9 +39,9 @@
         _maxDelay = 0;
         for (size_t i = 0; i < count; ++i) {
             CGImageRef imageRef = CGImageSourceCreateImageAtIndex(source, i, NULL);
-            NSImage *image = [[[NSImage alloc] initWithCGImage:imageRef
+            NSImage *image = [[NSImage alloc] initWithCGImage:imageRef
                                                           size:NSMakeSize(CGImageGetWidth(imageRef),
-                                                                          CGImageGetHeight(imageRef))] autorelease];
+                                                                          CGImageGetHeight(imageRef))];
             [images addObject:image];
             CFRelease(imageRef);
             NSTimeInterval delay = [self delayInGifProperties:frameProperties[i]];
@@ -49,17 +49,12 @@
             [delays addObject:@(_maxDelay)];
         }
         _creationTime = [NSDate timeIntervalSinceReferenceDate];
-        _images = [images retain];
-        _delays = [delays retain];
+        _images = images;
+        _delays = delays;
     }
     return self;
 }
 
-- (void)dealloc {
-    [_images release];
-    [_delays release];
-    [super dealloc];
-}
 
 - (int)currentFrame {
     NSTimeInterval offset = [NSDate timeIntervalSinceReferenceDate] - _creationTime;
@@ -81,12 +76,10 @@
 }
 
 - (NSDictionary *)gifPropertiesForSource:(CGImageSourceRef)source frame:(int)i {
-    CFDictionaryRef const properties = CGImageSourceCopyPropertiesAtIndex(source, i, NULL);
-    [(id)properties autorelease];
+    NSDictionary *properties = CFBridgingRelease(CGImageSourceCopyPropertiesAtIndex(source, i, NULL));
     if (properties) {
-        CFDictionaryRef const gifProperties = CFDictionaryGetValue(properties,
-                                                                   kCGImagePropertyGIFDictionary);
-        return (NSDictionary *)gifProperties;
+        NSDictionary *gifProperties = properties[(NSString*)kCGImagePropertyGIFDictionary];
+        return gifProperties;
     } else {
         return nil;
     }

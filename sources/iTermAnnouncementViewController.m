@@ -26,7 +26,7 @@
                                 style:(iTermAnnouncementViewStyle)style
                           withActions:(NSArray *)actions
                            completion:(void (^)(int))completion {
-    iTermAnnouncementViewController *announcement = [[[self alloc] init] autorelease];
+    iTermAnnouncementViewController *announcement = [[self alloc] init];
     announcement.title = title;
     announcement.actions = actions;
     announcement.completion = completion;
@@ -34,14 +34,8 @@
     return announcement;
 }
 
-- (void)dealloc {
-    [_actions release];
-    [_completion release];
-    [super dealloc];
-}
 
 - (void)loadView {
-    [self retain];
     self.view = [iTermAnnouncementView announcementViewWithTitle:self.title
                                                            style:_style
                                                          actions:self.actions
@@ -50,7 +44,6 @@
                                                                    self.completion(index);
                                                                    [self dismiss];
                                                                }
-                                                               [self release];
                                                            }];
 }
 

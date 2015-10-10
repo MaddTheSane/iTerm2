@@ -3,7 +3,7 @@
 @implementation SearchResult
 
 + (SearchResult *)searchResultFromX:(int)x y:(long long)y toX:(int)endX y:(long long)endY {
-    SearchResult *result = [[[SearchResult alloc] init] autorelease];
+    SearchResult *result = [[SearchResult alloc] init];
     result->startX = x;
     result->endX = endX;
     result->absStartY = y;

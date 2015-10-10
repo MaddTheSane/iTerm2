@@ -121,11 +121,6 @@ typedef enum {
 
 @synthesize hasSelection = hasSelection_;
 
-- (void)dealloc
-{
-    [origKey_ release];
-    [super dealloc];
-}
 
 + (NSDictionary *)dictForAction:(NSString *)action
 {
@@ -516,7 +511,7 @@ typedef enum {
         }
         if ([iTermPreferences boolForKey:kPreferenceKeyThreeFingerEmulatesMiddle]) {
             // Find all actions that use middle button and add corresponding three-finger gesture.
-            NSMutableDictionary *tempCopy = [[temp mutableCopy] autorelease];
+            NSMutableDictionary *tempCopy = [temp mutableCopy];
             for (NSString *key in temp) {
                 if ([PointerPrefsController keyIsButton:key] &&
                     [PointerPrefsController buttonForKey:key] == kMiddleButton) {
@@ -550,7 +545,7 @@ typedef enum {
                 }
             }
         }
-        defaultDict = [temp retain];
+        defaultDict = temp;
     }
     return defaultDict;
 }
@@ -862,8 +857,7 @@ typedef enum {
         [editButton_ selectItemWithTag:[PointerPrefsController tagForGestureIdentifier:gestureIdent]];
         [editClickType_ selectItem:nil];
     }
-    [origKey_ autorelease];
-    origKey_ = [key retain];
+    origKey_ = key;
     [self buttonOrGestureChanged:nil];
     [ok_ setEnabled:[self okShouldBeEnabled]];
 }
@@ -929,7 +923,7 @@ typedef enum {
        modalForWindow:[[PreferencePanel sharedInstance] window]
         modalDelegate:self
        didEndSelector:@selector(genericCloseSheet:returnCode:contextInfo:)
-          contextInfo:key];
+          contextInfo:(__bridge void * _Null_unspecified)(key)];
 }
 
 - (void)genericCloseSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo

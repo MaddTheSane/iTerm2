@@ -105,7 +105,7 @@
   CGImageRef image = CGBitmapContextCreateImage(context);
 
   // Convert to NSImage
-  NSImage *coloredImage = [[[NSImage alloc] initWithCGImage:image size:size] autorelease];
+  NSImage *coloredImage = [[NSImage alloc] initWithCGImage:image size:size];
 
   // Release memory.
   CGContextRelease(context);
@@ -119,7 +119,7 @@
     CGImageRef cgImage = [self CGImageForProposedRect:NULL
                                               context:nil
                                                 hints:nil];
-    NSBitmapImageRep *imageRep = [[[NSBitmapImageRep alloc] initWithCGImage:cgImage] autorelease];
+    NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
     [imageRep setSize:self.size];
     return [imageRep representationUsingType:fileType properties:@{}];
 }
@@ -162,7 +162,7 @@
     [ctx flushGraphics];
     [NSGraphicsContext restoreGraphicsState];
     
-    return [rep autorelease];
+    return rep;
 }
 
 @end

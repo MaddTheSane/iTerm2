@@ -2,6 +2,7 @@
 #import "NSColor+iTerm.h"
 #import "PTYTab.h"
 #import "WindowControllerInterface.h"
+#import "PTYTabView.h"
 
 @implementation PTYSession (Scripting)
 
@@ -13,10 +14,10 @@
     }
     id classDescription = [NSClassDescription classDescriptionForClass:[PTYTab class]];
 
-  return [[[NSUniqueIDSpecifier alloc] initWithContainerClassDescription:classDescription
+  return [[NSUniqueIDSpecifier alloc] initWithContainerClassDescription:classDescription
                                                       containerSpecifier:[self.tab objectSpecifier]
                                                                      key:@"sessions"
-                                                                uniqueID:self.guid] autorelease];
+                                                                uniqueID:self.guid];
 }
 
 // Handlers for supported commands:

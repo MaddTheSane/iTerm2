@@ -124,9 +124,7 @@ const float kItermExposeThumbMargin = 25;
 - (void)dealloc
 {
     [window_ close];
-    [view_ release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification
@@ -134,7 +132,6 @@ const float kItermExposeThumbMargin = 25;
     [window_ close];
     [self showWindows:YES];
     window_ = nil;
-    [view_ release];
     view_ = nil;
     SetSystemUIMode(kUIModeNormal, 0);
 }
@@ -468,7 +465,7 @@ static BOOL AdvanceCell(float* x, float* y, NSRect screenFrame, NSSize size) {
 
 
     // Finish setting up the view. The frames array is now owned by view_.
-    [view_ setGrid:[[[iTermExposeGridView alloc] initWithFrame:NSMakeRect(0,
+    [view_ setGrid:[[iTermExposeGridView alloc] initWithFrame:NSMakeRect(0,
                                                                           0,
                                                                           screenFrame.size.width,
                                                                           screenFrame.size.height)
@@ -477,7 +474,7 @@ static BOOL AdvanceCell(float* x, float* y, NSRect screenFrame, NSSize size) {
                                                           tabs:tabs
                                                         frames:frames
                                                   wasMaximized:wasMaximized
-                                                      putOnTop:selectedIndex] autorelease]];
+                                                      putOnTop:selectedIndex]];
     [window_ setContentView:view_];
     [window_ setBackgroundColor:[[NSColor blackColor] colorWithAlphaComponent:0]];
     [window_ setOpaque:NO];

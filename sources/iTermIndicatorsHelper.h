@@ -30,11 +30,11 @@ extern CGFloat kiTermIndicatorStandardHeight;
 
 @interface iTermIndicatorsHelper : NSObject
 
-@property(nonatomic, assign) id<iTermIndicatorsHelperDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermIndicatorsHelperDelegate> delegate;
 
 - (void)setIndicator:(NSString *)identifier visible:(BOOL)visible;
 - (void)beginFlashingIndicator:(NSString *)identifier;
-- (NSInteger)numberOfVisibleIndicators;
+@property (readonly) NSInteger numberOfVisibleIndicators;
 - (void)beginFlashingFullScreen;
 - (void)drawInFrame:(NSRect)frame;
 

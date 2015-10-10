@@ -23,7 +23,7 @@ static const NSTimeInterval kMaxTimeToRememberCommands = 60 * 60 * 24 * 90;
 static const int kMaxCommandsToSavePerHost = 200;
 
 @interface CommandHistory ()
-@property(nonatomic, retain) NSMutableDictionary *hosts;
+@property(nonatomic, strong) NSMutableDictionary *hosts;
 @end
 
 @implementation CommandHistory {
@@ -59,14 +59,6 @@ static const int kMaxCommandsToSavePerHost = 200;
         [self loadCommandHistory];
     }
     return self;
-}
-
-- (void)dealloc {
-    [_hosts release];
-    [_path release];
-    [_expandedCache release];
-
-    [super dealloc];
 }
 
 #pragma mark - APIs
@@ -124,7 +116,7 @@ static const int kMaxCommandsToSavePerHost = 200;
     }
     theEntry.uses = theEntry.uses + 1;
     theEntry.lastUsed = [NSDate timeIntervalSinceReferenceDate];
-    CommandUse *commandUse = [[[CommandUse alloc] init] autorelease];
+    CommandUse *commandUse = [[CommandUse alloc] init];
     commandUse.time = theEntry.lastUsed;
     commandUse.mark = mark;
     commandUse.directory = directory;
@@ -295,7 +287,6 @@ static const int kMaxCommandsToSavePerHost = 200;
 }
 
 - (void)eraseHistory {
-    [_hosts release];
     _hosts = [[NSMutableDictionary alloc] init];
     [[NSFileManager defaultManager] removeItemAtPath:_path error:NULL];
 

@@ -9,8 +9,10 @@
 #import "iTermExposeView.h"
 #import "iTermExposeGridView.h"
 #import "iTermExpose.h"
+#import "PTYSession.h"
 
 @implementation iTermExposeView
+@synthesize grid = grid_;
 
 - (id)initWithFrame:(NSRect)frameRect
 {
@@ -32,24 +34,15 @@
 - (void)dealloc
 {
     [search_ abort];
-    [search_ release];
-    [super dealloc];
 }
 
 - (void)setGrid:(iTermExposeGridView*)newGrid
 {
     iTermExposeGridView* oldGrid = grid_;
     // retain, change, release in case newGrid==grid_.
-    [oldGrid retain];
     [oldGrid removeFromSuperview];
     [self addSubview:newGrid positioned:NSWindowBelow relativeTo:[search_ view]];
-    [oldGrid release];
     grid_ = newGrid;
-}
-
-- (iTermExposeGridView*)grid
-{
-    return grid_;
 }
 
 - (NSRect)searchFrame

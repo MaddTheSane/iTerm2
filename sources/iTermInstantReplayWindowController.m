@@ -27,7 +27,6 @@ static const float kAlphaValue = 0.9;
     if ([self window]) {
         if (_trackingArea) {
             [self removeTrackingArea:_trackingArea];
-            [_trackingArea release];
         }
         _trackingArea = [[NSTrackingArea alloc] initWithRect:[self visibleRect]
                                                      options:NSTrackingMouseMoved |NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways
@@ -72,15 +71,13 @@ static const float kAlphaValue = 0.9;
 }
 
 - (IBAction)sliderMoved:(id)sender {
-    [self retain];
     [_delegate instantReplaySeekTo:[sender floatValue]];
     [self updateInstantReplayView];
-    [self release];
 }
 
 - (void)keyDown:(NSEvent *)theEvent {
     NSString *characters = [theEvent characters];
-    [self retain];  // In case delegate releases us
+      // In case delegate releases us
     if ([characters length]) {
         unichar code = [characters characterAtIndex:0];
         switch (code) {
@@ -97,7 +94,6 @@ static const float kAlphaValue = 0.9;
                 break;
         }
     }
-    [self release];
 }
 
 #pragma mark - NSWindowController
@@ -125,7 +121,7 @@ static const float kAlphaValue = 0.9;
     struct tm nowParts;
     localtime_r(&startTime, &startTimeParts);
     localtime_r(&now, &nowParts);
-    NSDateFormatter* fmt = [[[NSDateFormatter alloc] init] autorelease];
+    NSDateFormatter* fmt = [[NSDateFormatter alloc] init];
     [fmt setDateStyle:NSDateFormatterShortStyle];
     if (startTimeParts.tm_year != nowParts.tm_year ||
         startTimeParts.tm_yday != nowParts.tm_yday) {

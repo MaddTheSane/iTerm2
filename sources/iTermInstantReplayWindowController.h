@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@protocol iTermInstantReplayDelegate
+@protocol iTermInstantReplayDelegate <NSObject>
 - (void)replaceSyntheticActiveSessionWithLiveSessionIfNeeded;
 - (void)instantReplaySeekTo:(float)position;
 - (void)instantReplayStep:(int)direction;
@@ -29,7 +29,7 @@
 
 @interface iTermInstantReplayWindowController : NSWindowController <NSWindowDelegate>
 
-@property(nonatomic, assign) id<iTermInstantReplayDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermInstantReplayDelegate> delegate;
 
 - (void)updateInstantReplayView;
 

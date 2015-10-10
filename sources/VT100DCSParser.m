@@ -96,16 +96,6 @@ static NSRange MakeCharacterRange(unsigned char first, unsigned char lastInclusi
     return self;
 }
 
-- (void)dealloc {
-    [_stateMachine release];
-    [_data release];
-    [_parameterString release];
-    [_intermediateString release];
-    [_privateMarkers release];
-    [_hook release];
-    [super dealloc];
-}
-
 // Defines the state machine.
 - (VT100StateMachine *)stateMachine {
     if (_stateMachine) {
@@ -403,14 +393,13 @@ static NSRange MakeCharacterRange(unsigned char first, unsigned char lastInclusi
             token->type = DCS_TMUX_HOOK;
         }
 
-        [_hook release];
         _hook = [[VT100TmuxParser alloc] init];
         _hookFinished = NO;
     }
 }
 
 - (void)unhook {
-    [_hook autorelease];
+    //[_hook autorelease];
     _hook = nil;
 }
 
@@ -514,7 +503,6 @@ static NSRange MakeCharacterRange(unsigned char first, unsigned char lastInclusi
     }
 
     // Replace the hook with one in recovery mode.
-    [_hook release];
     _hook = [[VT100TmuxParser alloc] initInRecoveryMode];
 }
 

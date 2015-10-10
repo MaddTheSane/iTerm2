@@ -16,10 +16,10 @@ extern NSString *const kTipUrlKey;
 // A tip of the day.
 @interface iTermTip : NSObject
 
-@property(nonatomic, readonly) NSString *identifier;
-@property(nonatomic, readonly) NSString *title;
-@property(nonatomic, readonly) NSString *body;
-@property(nonatomic, readonly) NSString *url;
+@property(nonatomic, readonly, copy) NSString *identifier;
+@property(nonatomic, readonly, copy) NSString *title;
+@property(nonatomic, readonly, copy) NSString *body;
+@property(nonatomic, readonly, copy) NSString *url;
 
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary identifier:(NSString *)identifier;
 

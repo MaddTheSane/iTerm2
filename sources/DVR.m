@@ -47,14 +47,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [decoders_ release];
-    [encoder_ release];
-    [buffer_ release];
-    [super dealloc];
-}
-
 - (void)appendFrame:(NSArray*)frameLines length:(int)length info:(DVRFrameInfo*)info
 {
     if (length > [buffer_ capacity] / 2) {
@@ -78,7 +70,6 @@
 {
     DVRDecoder* decoder = [[DVRDecoder alloc] initWithBuffer:buffer_];
     [decoders_ addObject:decoder];
-    [decoder release];
     return decoder;
 }
 

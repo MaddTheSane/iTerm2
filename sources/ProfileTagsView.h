@@ -18,8 +18,8 @@
 
 @interface ProfileTagsView : NSView <NSTableViewDataSource, NSTableViewDelegate>
 
-@property(nonatomic, assign) id<ProfileTagsViewDelegate> delegate;
-@property(nonatomic, readonly) NSArray *selectedTags;
+@property(nonatomic, unsafe_unretained) id<ProfileTagsViewDelegate> delegate;
+@property(weak, nonatomic, readonly) NSArray *selectedTags;
 
 - (void)setFont:(NSFont *)font;
 

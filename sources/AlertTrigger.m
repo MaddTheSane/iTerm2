@@ -54,12 +54,12 @@
             [[term window] makeKeyAndOrderFront:nil];
             [[term tabView] selectTabViewItemWithIdentifier:[aSession tab]];
             [[aSession tab] setActiveSession:aSession];
+        }
             break;
             
         case NSAlertOtherReturn:
             disabled_ = YES;
             break;
-        }
             
         default:
             break;

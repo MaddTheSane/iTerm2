@@ -21,7 +21,7 @@ extern const int kTmuxGatewayCommandWantsData;
 
 extern NSString * const kTmuxGatewayErrorDomain;
 
-@protocol TmuxGatewayDelegate
+@protocol TmuxGatewayDelegate <NSObject>
 
 - (TmuxController *)tmuxController;
 - (void)tmuxUpdateLayoutForWindow:(int)windowId
@@ -45,15 +45,15 @@ extern NSString * const kTmuxGatewayErrorDomain;
 
 @end
 
-typedef enum {
+typedef NS_ENUM(NSInteger, ControlCommand) {
     CONTROL_COMMAND_OUTPUT,
     CONTROL_COMMAND_LAYOUT_CHANGE,
     CONTROL_COMMAND_WINDOWS_CHANGE,
     CONTROL_COMMAND_NOOP
-} ControlCommand;
+};
 
 @interface TmuxGateway : NSObject {
-    NSObject<TmuxGatewayDelegate> *delegate_;  // weak
+    id<TmuxGatewayDelegate> delegate_;  // weak
 
     // Data from parsing an incoming command
     ControlCommand command_;
@@ -70,9 +70,9 @@ typedef enum {
 
 // Should all protocol-level input be logged to the gateway's session?
 @property(nonatomic, assign) BOOL tmuxLogging;
-@property(nonatomic, readonly) NSWindowController<iTermWindowController> *window;
+@property(weak, nonatomic, readonly) NSWindowController<iTermWindowController> *window;
 
-- (id)initWithDelegate:(NSObject<TmuxGatewayDelegate> *)delegate;
+- (id)initWithDelegate:(id<TmuxGatewayDelegate>)delegate;
 
 // Returns any unconsumed data if tmux mode is exited.
 // The token must be TMUX_xxx.
@@ -106,6 +106,6 @@ typedef enum {
 
 - (void)sendKeys:(NSData *)data toWindowPane:(int)windowPane;
 - (void)detach;
-- (NSObject<TmuxGatewayDelegate> *)delegate;
+- (id<TmuxGatewayDelegate>)delegate;
 
 @end

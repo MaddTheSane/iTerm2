@@ -81,7 +81,7 @@
     }
     NSArray *lines = [response componentsSeparatedByString:@"\n"];
     NSMutableArray *screenLines = [NSMutableArray array];
-    VT100Terminal *terminal = [[[VT100Terminal alloc] init] autorelease];
+    VT100Terminal *terminal = [[VT100Terminal alloc] init];
     [terminal setEncoding:NSUTF8StringEncoding];
     for (NSString *line in lines) {
         NSData *data = [self dataForHistoryLine:line

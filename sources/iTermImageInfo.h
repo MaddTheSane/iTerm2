@@ -17,7 +17,7 @@
 @property(nonatomic, assign) NSSize size;
 
 // Full-size image.
-@property(nonatomic, retain) NSImage *image;
+@property(nonatomic, strong) NSImage *image;
 
 // If set, the image won't be squished.
 @property(nonatomic, assign) BOOL preserveAspectRatio;
@@ -35,13 +35,13 @@
 @property(nonatomic, readonly) NSData *data;
 
 // UTI string for image type.
-@property(nonatomic, readonly) NSString *imageType;
+@property(weak, nonatomic, readonly) NSString *imageType;
 
 // Creates a new randomly named temp file containing the image and returns its name.
-@property(nonatomic, readonly) NSString *nameForNewSavedTempFile;
+@property(weak, nonatomic, readonly) NSString *nameForNewSavedTempFile;
 
 // Creates a pasteboard item that responds with image or file.
-@property(nonatomic, readonly) NSPasteboardItem *pasteboardItem;
+@property(weak, nonatomic, readonly) NSPasteboardItem *pasteboardItem;
 
 // Used to create a new instance for a new image. This may remain an empty container until
 // -setImageFromImage: is called.

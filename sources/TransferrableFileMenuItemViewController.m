@@ -21,27 +21,17 @@ static const CGFloat kCollapsedHeight = 51;
 - (id)initWithTransferrableFile:(TransferrableFile *)transferrableFile {
     self = [super init];
     if (self) {
-        _transferrableFile = [transferrableFile retain];
+        _transferrableFile = transferrableFile;
         [self view];
     }
     return self;
 }
 
 - (void)loadView {
-    self.view = [[[TransferrableFileMenuItemView alloc] initWithFrame:NSMakeRect(0,
+    self.view = [[TransferrableFileMenuItemView alloc] initWithFrame:NSMakeRect(0,
                                                                                  0,
                                                                                  kWidth,
-                                                                                 kHeight)] autorelease];
-}
-
-- (void)dealloc {
-    [_transferrableFile release];
-    [_stopSubItem release];
-    [_showInFinderSubItem release];
-    [_removeFromListSubItem release];
-    [_openSubItem release];
-    
-    [super dealloc];
+                                                                                 kHeight)];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {

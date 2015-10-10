@@ -40,7 +40,6 @@ static void WriteDebugLogHeader() {
                       (long long)[[NSDate date] timeIntervalSince1970],
                       [[NSApplication sharedApplication] keyWindow],
                       windows];
-  [gDebugLogHeader release];
   gDebugLogHeader = [header copy];
 }
 
@@ -71,7 +70,6 @@ static void FlushDebugLog() {
     [log writeToFile:kDebugLogFilename atomically:NO encoding:NSUTF8StringEncoding error:nil];
 
     [gDebugLogStr setString:@""];
-    [gDebugLogHeader release];
     gDebugLogHeader = nil;
     [gDebugLogLock unlock];
 }
@@ -137,7 +135,6 @@ void ToggleDebugLogging(void) {
         NSRunAlertPanel(@"Debug Logging Stopped",
                         @"Please send /tmp/debuglog.txt to the developers.",
                         @"OK", nil, nil);
-        [gDebugLogStr release];
         [gDebugLogLock unlock];
     }
 }

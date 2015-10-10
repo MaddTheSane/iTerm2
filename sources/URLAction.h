@@ -25,10 +25,10 @@ typedef NS_ENUM(NSInteger, URLActionType) {
 
 // Always set. Generally, the text that was used to select the action (e.g., the selection).
 // For images, this is the filename. See |identifier| for the ImageInfo.
-@property(nonatomic, readonly) NSString *string;
+@property(nonatomic, readonly, copy) NSString *string;
 
 // Extra info. Currently only used for images (holds the ImageInfo).
-@property(nonatomic, readonly) id identifier;
+@property(nonatomic, readonly, strong) id identifier;
 
 // Always set. The range of |string| on screen.
 @property(nonatomic, assign) VT100GridWindowedRange range;
@@ -40,11 +40,11 @@ typedef NS_ENUM(NSInteger, URLActionType) {
 @property(nonatomic, copy) NSString *workingDirectory;
 
 // For kURLActionSmartSelectionAction, the rule used.
-@property(nonatomic, readonly) NSDictionary *rule;
+@property(nonatomic, readonly, copy) NSDictionary *rule;
 
 // For kURLActionSmartSelectionAction. Generally, a string parameter to a smart
 // selection action.
-@property(nonatomic, retain) id representedObject;
+@property(nonatomic, strong) id representedObject;
 
 // For kURLActionSmartSelectionAction, the selector to invoke. This URLAction
 // will be passed as the argument.

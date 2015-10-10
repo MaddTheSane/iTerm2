@@ -7,7 +7,7 @@
 
 #import <AppKit/AppKit.h>
 
-@protocol ProfileTableMenuHandler
+@protocol ProfileTableMenuHandler <NSObject>
 
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent;
 
@@ -15,9 +15,9 @@
 
 @interface ProfileTableView : NSTableView
 {
-    NSObject<ProfileTableMenuHandler> *handler_;
+    id<ProfileTableMenuHandler> handler_;
 }
 
-- (void)setMenuHandler:(NSObject<ProfileTableMenuHandler> *)handler;
+- (void)setMenuHandler:(id<ProfileTableMenuHandler>)handler;
 
 @end

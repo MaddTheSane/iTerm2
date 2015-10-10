@@ -14,9 +14,9 @@
 @interface CapturedOutput : NSObject
 @property(nonatomic, copy) NSString *line;
 @property(nonatomic, copy) NSArray *values;
-@property(nonatomic, retain) CaptureTrigger *trigger;
+@property(nonatomic, strong) CaptureTrigger *trigger;
 @property(nonatomic, assign) BOOL state;  // user-defined state
-@property(nonatomic, retain) iTermCapturedOutputMark *mark;
+@property(nonatomic, strong) iTermCapturedOutputMark *mark;
 
 // Used for finding the |mark| later on while deserializing.
 @property(nonatomic, copy) NSString *markGuid;

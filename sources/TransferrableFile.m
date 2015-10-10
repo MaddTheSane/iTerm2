@@ -108,8 +108,7 @@
 
 - (void)setSuccessor:(TransferrableFile *)successor {
     @synchronized(self) {
-        [_successor autorelease];
-        _successor = [successor retain];
+        _successor = successor;
         successor.hasPredecessor = YES;
     }
 }

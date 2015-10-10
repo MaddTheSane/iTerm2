@@ -15,7 +15,7 @@
 static const NSTimeInterval kMaximumTimeToKeepFinishedDownload = 24 * 60 * 60;
 
 @interface FileTransferManager ()
-@property(nonatomic, retain) NSMutableArray *files;
+@property(nonatomic, strong) NSMutableArray *files;
 @end
 
 @implementation FileTransferManager {
@@ -48,9 +48,6 @@ static const NSTimeInterval kMaximumTimeToKeepFinishedDownload = 24 * 60 * 60;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_files release];
-    [_viewControllers release];
-    [super dealloc];
 }
 
 - (void)cleanUpMenus {
@@ -101,10 +98,10 @@ static const NSTimeInterval kMaximumTimeToKeepFinishedDownload = 24 * 60 * 60;
                                                          backing:NSBackingStoreBuffered
                                                            defer:NO];
         NSImageView  *imageView =
-            [[[NSImageView alloc] initWithFrame:NSMakeRect(0,
+            [[NSImageView alloc] initWithFrame:NSMakeRect(0,
                                                            0,
                                                            image.size.width,
-                                                           image.size.height)] autorelease];
+                                                           image.size.height)];
         imageView.image = image;
         window.contentView = imageView;
         [window makeKeyAndOrderFront:nil];
@@ -133,7 +130,7 @@ static const NSTimeInterval kMaximumTimeToKeepFinishedDownload = 24 * 60 * 60;
 
 - (void)fadeWindowOut:(NSWindow *)window {
     [window.animator setAlphaValue:0];
-    [window performSelector:@selector(release)
+    [window performSelector:@selector(close:)
                withObject:nil
                afterDelay:[[NSAnimationContext currentContext] duration]];
 }
@@ -163,30 +160,32 @@ static const NSTimeInterval kMaximumTimeToKeepFinishedDownload = 24 * 60 * 60;
         return NULL;
     }
     
-	NSArray *children = nil;
+	CFArrayRef cfChildren = nil;
     // Despite what the name would suggest, the children array and its contents don't seen to need
     // too be released by us.
 	error = AXUIElementCopyAttributeValues(menuBar,
                                            kAXChildrenAttribute,
                                            0,
                                            count,
-                                           (CFArrayRef *)&children);
+                                           (CFArrayRef *)&cfChildren);
     if (error) {
         CFRelease(menuBar);
         return NULL;
     }
     
+    NSArray *children = (__bridge NSArray*)cfChildren;
+    
     for (id child in children) {
-        AXUIElementRef element = (AXUIElementRef)child;
-        id title;
+        AXUIElementRef element = (__bridge AXUIElementRef)child;
+        CFTypeRef title;
         error = AXUIElementCopyAttributeValue(element,
                                               kAXTitleAttribute,
                                               (CFTypeRef *)&title);
         if (error) {
             continue;
         }
-        BOOL found = [title isEqualToString:menuName];
-        CFRelease(title);
+        NSString *bTitle = (NSString*)CFBridgingRelease(title);
+        BOOL found = [bTitle isEqualToString:menuName];
         if (found) {
             return element;
         }
@@ -223,49 +222,49 @@ static const NSTimeInterval kMaximumTimeToKeepFinishedDownload = 24 * 60 * 60;
 - (NSMenuItem *)menuItemForTransferrableFile:(TransferrableFile *)transferrableFile {
     NSMenuItem *item = [[NSMenuItem alloc] init];
     TransferrableFileMenuItemViewController *controller =
-        [[[TransferrableFileMenuItemViewController alloc] initWithTransferrableFile:transferrableFile] autorelease];
+        [[TransferrableFileMenuItemViewController alloc] initWithTransferrableFile:transferrableFile];
     [_viewControllers addObject:controller];
     item.view = [controller view];
     [item setEnabled:YES];
     [item setTarget:controller];
     [item setAction:@selector(itemSelected:)];
     
-    NSMenu *submenu = [[[NSMenu alloc] init] autorelease];
-    NSMenuItem *subItem = [[[NSMenuItem alloc] initWithTitle:@"Stop"
+    NSMenu *submenu = [[NSMenu alloc] init];
+    NSMenuItem *subItem = [[NSMenuItem alloc] initWithTitle:@"Stop"
                                                       action:@selector(stop:)
-                                               keyEquivalent:@""] autorelease];
+                                               keyEquivalent:@""];
     [subItem setTarget:controller];
     [submenu addItem:subItem];
     controller.stopSubItem = subItem;
     
     if (transferrableFile.isDownloading) {
-        subItem = [[[NSMenuItem alloc] initWithTitle:@"Show in Finder"
+        subItem = [[NSMenuItem alloc] initWithTitle:@"Show in Finder"
                                               action:@selector(showInFinder:)
-                                       keyEquivalent:@""] autorelease];
+                                       keyEquivalent:@""];
         [subItem setTarget:controller];
         [submenu addItem:subItem];
         controller.showInFinderSubItem = subItem;
     }
     
-    subItem = [[[NSMenuItem alloc] initWithTitle:@"Remove from List"
+    subItem = [[NSMenuItem alloc] initWithTitle:@"Remove from List"
                                           action:@selector(removeFromList:)
-                                   keyEquivalent:@""] autorelease];
+                                   keyEquivalent:@""];
     [subItem setTarget:controller];
     [submenu addItem:subItem];
     controller.removeFromListSubItem = subItem;
 
     if (transferrableFile.isDownloading) {
-        subItem = [[[NSMenuItem alloc] initWithTitle:@"Open"
+        subItem = [[NSMenuItem alloc] initWithTitle:@"Open"
                                               action:@selector(open:)
-                                       keyEquivalent:@""] autorelease];
+                                       keyEquivalent:@""];
         [subItem setTarget:controller];
         [submenu addItem:subItem];
         controller.openSubItem = subItem;
     }
 
-    subItem = [[[NSMenuItem alloc] initWithTitle:@"Get Info"
+    subItem = [[NSMenuItem alloc] initWithTitle:@"Get Info"
                                           action:@selector(getInfo:)
-                                   keyEquivalent:@""] autorelease];
+                                   keyEquivalent:@""];
     [subItem setTarget:controller];
     [submenu addItem:subItem];
     controller.openSubItem = subItem;
@@ -336,7 +335,7 @@ static const NSTimeInterval kMaximumTimeToKeepFinishedDownload = 24 * 60 * 60;
                                                        transferrableFile.protocolName];
     
     NSSecureTextField *input =
-        [[[NSSecureTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)] autorelease];
+        [[NSSecureTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
     [input setStringValue:@""];
     [alert setAccessoryView:input];
     [alert layout];

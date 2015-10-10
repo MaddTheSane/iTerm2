@@ -56,11 +56,6 @@ const NSUInteger kAllModifiers = (NSControlKeyMask |
     return self;
 }
 
-- (void)dealloc {
-    [_tabViewItemsInMRUOrder release];
-    [super dealloc];
-}
-
 #pragma mark - NSView
 
 - (BOOL)acceptsFirstResponder {
