@@ -61,7 +61,7 @@
 @property (nonatomic, unsafe_unretained) id<ToolWrapperDelegate> delegate;
 
 - (void)relayout;
-- (id<ToolbeltTool>)tool;
+@property (readonly, retain) id<ToolbeltTool> tool;
 - (void)removeToolSubviews;
 - (CGFloat)minimumHeight;
 

@@ -10,7 +10,7 @@
 @implementation SolidColorView
 @synthesize color = color_;
 
-- (id)initWithFrame:(NSRect)frame color:(NSColor*)color
+- (instancetype)initWithFrame:(NSRect)frame color:(NSColor*)color
 {
     self = [super initWithFrame:frame];
     if (self) {

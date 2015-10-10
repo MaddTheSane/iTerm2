@@ -44,7 +44,7 @@ typedef NS_ENUM(NSInteger, SplitSessionHalf) {
 // frame is the frame fo the parent view.
 // session is the session we overlay.
 // the delegate gets called when a selection is made.
-- (id)initAsCancelOnly:(BOOL)cancelOnly
+- (instancetype)initAsCancelOnly:(BOOL)cancelOnly
              withFrame:(NSRect)frame
            withSession:(PTYSession *)session
               delegate:(id<SplitSelectionViewDelegate>)delegate

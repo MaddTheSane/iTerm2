@@ -64,7 +64,7 @@ static NSDate* lastResizeDate_;
     _announcements = [[NSMutableArray alloc] init];
 }
 
-- (id)initWithFrame:(NSRect)frame {
+- (instancetype)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         [self _initCommon];
@@ -79,7 +79,7 @@ static NSDate* lastResizeDate_;
     return self;
 }
 
-- (id)initWithFrame:(NSRect)frame session:(PTYSession*)session {
+- (instancetype)initWithFrame:(NSRect)frame session:(PTYSession*)session {
     self = [self initWithFrame:frame];
     if (self) {
         [self _initCommon];

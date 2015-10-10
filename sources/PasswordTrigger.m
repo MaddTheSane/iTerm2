@@ -20,7 +20,7 @@
     return @"Open Password Manager…";
 }
 
-- (id)init {
+- (instancetype)init {
     self = [super init];
     if (self) {
         [self reloadData];
@@ -52,7 +52,7 @@
     return [_accountNames sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
 }
 
-- (int)indexForObject:(id)object {
+- (NSInteger)indexForObject:(id)object {
 
     NSUInteger index = [[self sortedAccountNames] indexOfObject:object];
     if (index == NSNotFound) {
@@ -62,7 +62,7 @@
     }
 }
 
-- (id)objectAtIndex:(int)index {
+- (id)objectAtIndex:(NSInteger)index {
     if (index < 0 || index >= _accountNames.count) {
         return nil;
     }

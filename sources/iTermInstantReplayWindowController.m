@@ -54,7 +54,7 @@ static const float kAlphaValue = 0.9;
     IBOutlet NSTextField *_latestTimeLabel;
 }
 
-- (id)init {
+- (instancetype)init {
     return [super initWithWindowNibName:@"InstantReplay"];
 }
 

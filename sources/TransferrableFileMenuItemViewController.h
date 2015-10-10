@@ -17,7 +17,7 @@
 @property(nonatomic, strong) NSMenuItem *removeFromListSubItem;
 @property(nonatomic, strong) NSMenuItem *openSubItem;
 
-- (id)initWithTransferrableFile:(TransferrableFile *)transferrableFile;
+- (instancetype)initWithTransferrableFile:(TransferrableFile *)transferrableFile;
 - (void)update;
 - (void)itemSelected:(id)sender;
 - (NSTimeInterval)timeSinceLastStatusChange;

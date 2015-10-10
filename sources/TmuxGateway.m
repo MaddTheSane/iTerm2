@@ -43,7 +43,7 @@ static NSString *kCommandIsLastInList = @"lastInList";
     BOOL disconnected_;
 }
 
-- (id)initWithDelegate:(id<TmuxGatewayDelegate>)delegate
+- (instancetype)initWithDelegate:(id<TmuxGatewayDelegate>)delegate
 {
     self = [super init];
     if (self) {

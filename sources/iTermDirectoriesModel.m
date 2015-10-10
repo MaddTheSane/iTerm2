@@ -44,7 +44,7 @@ static const int kMaxDirectoriesToSavePerHost = 200;
     return [[self alloc] initWithComponent:component];
 }
 
-- (id)initWithComponent:(NSString *)component {
+- (instancetype)initWithComponent:(NSString *)component {
     self = [super init];
     if (self) {
         _component = [component copy];
@@ -96,7 +96,7 @@ static const int kMaxDirectoriesToSavePerHost = 200;
 
 @implementation iTermDirectoryTree
 
-- (id)init {
+- (instancetype)init {
     self = [super init];
     if (self) {
         _root = [[iTermDirectoryTreeNode alloc] initWithComponent:nil];
@@ -287,7 +287,7 @@ static const int kMaxDirectoriesToSavePerHost = 200;
     return instance;
 }
 
-- (id)init {
+- (instancetype)init {
     self = [super init];
     if (self) {
         _hostToPathArrayDictionary = [[NSMutableDictionary alloc] init];
