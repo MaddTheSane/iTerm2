@@ -589,6 +589,17 @@
 		1DFA9D7018F3A30F008ADC98 /* PointerPreferencesViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DFA9D6E18F3A30F008ADC98 /* PointerPreferencesViewController.h */; };
 		49A6E4091211CC6000D9AD6F /* Compatability.h in Headers */ = {isa = PBXBuildFile; fileRef = 49A6E4081211CC6000D9AD6F /* Compatability.h */; };
 		550BB9CE1BC8C8EA00CF5EE1 /* CharacterRunInline.m in Sources */ = {isa = PBXBuildFile; fileRef = 550BB9CD1BC8C8EA00CF5EE1 /* CharacterRunInline.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		557FC0121BC98AB50067891C /* iTermTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557FC0111BC98AB50067891C /* iTermTip.swift */; settings = {ASSET_TAGS = (); }; };
+		557FC0131BC98AB50067891C /* iTermTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557FC0111BC98AB50067891C /* iTermTip.swift */; settings = {ASSET_TAGS = (); }; };
+		557FC0151BC98C880067891C /* iTermTipWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DA76A041B30892900CB272A /* iTermTipWindowController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		557FC0161BC98C890067891C /* iTermTipWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DA76A041B30892900CB272A /* iTermTipWindowController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		557FC0171BC98C930067891C /* iTermTipController.m in Sources */ = {isa = PBXBuildFile; fileRef = A65B72A11B3134FB00F947A7 /* iTermTipController.m */; settings = {ASSET_TAGS = (); }; };
+		557FC0191BC98CF50067891C /* iTermTip.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D8BBA901B33529E0005A852 /* iTermTip.m */; settings = {ASSET_TAGS = (); }; };
+		557FC01A1BC98D170067891C /* iTermTipController.m in Sources */ = {isa = PBXBuildFile; fileRef = A65B72A11B3134FB00F947A7 /* iTermTipController.m */; settings = {ASSET_TAGS = (); }; };
+		557FC01B1BC98EB80067891C /* iTermTipCardActionButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D8BBA591B30E9AF0005A852 /* iTermTipCardActionButton.m */; settings = {ASSET_TAGS = (); }; };
+		557FC01C1BC98EBA0067891C /* iTermTipCardActionButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D8BBA591B30E9AF0005A852 /* iTermTipCardActionButton.m */; settings = {ASSET_TAGS = (); }; };
+		557FC01D1BC98EC20067891C /* iTermTipCardViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DA76A1D1B308AD000CB272A /* iTermTipCardViewController.m */; settings = {ASSET_TAGS = (); }; };
+		557FC01E1BC98EC40067891C /* iTermTipCardViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DA76A1D1B308AD000CB272A /* iTermTipCardViewController.m */; settings = {ASSET_TAGS = (); }; };
 		5ECE005F1454E59B004861E9 /* PseudoTerminalRestorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5ECE005D1454E59B004861E9 /* PseudoTerminalRestorer.h */; };
 		5ECE4AE814513F05002A9CC2 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5ECE4AC41451343E002A9CC2 /* Growl.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5ECE4AEA14514058002A9CC2 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 5ECE4AE914514058002A9CC2 /* Growl Registration Ticket.growlRegDict */; };
@@ -1247,13 +1258,8 @@
 		A6C763B51B45C52B00E3C992 /* SendTextTrigger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D24C283142EF334006B246F /* SendTextTrigger.m */; };
 		A6C763B61B45C52B00E3C992 /* StopTrigger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D468F031B06A79000226083 /* StopTrigger.m */; };
 		A6C763B71B45C52B00E3C992 /* Trigger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D9DCBFD142D7BA60016228A /* Trigger.m */; };
-		A6C763B81B45C52B00E3C992 /* iTermTip.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D8BBA901B33529E0005A852 /* iTermTip.m */; };
-		A6C763B91B45C52B00E3C992 /* iTermTipCardActionButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D8BBA591B30E9AF0005A852 /* iTermTipCardActionButton.m */; };
-		A6C763BA1B45C52B00E3C992 /* iTermTipCardViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DA76A1D1B308AD000CB272A /* iTermTipCardViewController.m */; };
-		A6C763BB1B45C52B00E3C992 /* iTermTipController.m in Sources */ = {isa = PBXBuildFile; fileRef = A65B72A11B3134FB00F947A7 /* iTermTipController.m */; };
 		A6C763BC1B45C52B00E3C992 /* iTermTipData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D374DEA1B349FC8007BE76A /* iTermTipData.m */; };
 		A6C763BD1B45C52B00E3C992 /* iTermTipRootView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DA76A0F1B30895600CB272A /* iTermTipRootView.m */; };
-		A6C763BE1B45C52B00E3C992 /* iTermTipWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DA76A041B30892900CB272A /* iTermTipWindowController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A6C763BF1B45C52B00E3C992 /* VT100AnsiParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A647E39918C3515900450FA1 /* VT100AnsiParser.m */; };
 		A6C763C01B45C52B00E3C992 /* VT100ControlParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A647E3AD18C3588800450FA1 /* VT100ControlParser.m */; };
 		A6C763C11B45C52B00E3C992 /* VT100CSIParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A6A13AB018C33ED300B241ED /* VT100CSIParser.m */; };
@@ -1815,6 +1821,8 @@
 		20E74F4904E9089700000106 /* ITAddressBookMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = ITAddressBookMgr.m; sourceTree = "<group>"; tabWidth = 4; };
 		49A6E4081211CC6000D9AD6F /* Compatability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Compatability.h; sourceTree = "<group>"; };
 		550BB9CD1BC8C8EA00CF5EE1 /* CharacterRunInline.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CharacterRunInline.m; sourceTree = "<group>"; };
+		557FC00F1BC98AB50067891C /* iTerm2-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "iTerm2-Bridging-Header.h"; sourceTree = "<group>"; };
+		557FC0111BC98AB50067891C /* iTermTip.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = iTermTip.swift; sourceTree = "<group>"; };
 		5ECE005D1454E59B004861E9 /* PseudoTerminalRestorer.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = PseudoTerminalRestorer.h; sourceTree = "<group>"; tabWidth = 4; };
 		5ECE005E1454E59B004861E9 /* PseudoTerminalRestorer.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = PseudoTerminalRestorer.m; sourceTree = "<group>"; tabWidth = 4; };
 		5ECE4AC41451343E002A9CC2 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Growl.framework; sourceTree = "<group>"; };
@@ -2490,6 +2498,7 @@
 		0464AB15006CD2EC7F000001 /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				557FC00F1BC98AB50067891C /* iTerm2-Bridging-Header.h */,
 				A6358642184BEA57009ED690 /* AATree.h */,
 				A6358644184BEA57009ED690 /* AATreeNode.h */,
 				A6E713B018FCB559008D94DD /* AdvancedWorkingDirectoryWindowController.h */,
@@ -3227,6 +3236,7 @@
 		1DA76A021B3088F100CB272A /* Tips */ = {
 			isa = PBXGroup;
 			children = (
+				557FC0111BC98AB50067891C /* iTermTip.swift */,
 				1D8BBA901B33529E0005A852 /* iTermTip.m */,
 				1D8BBA591B30E9AF0005A852 /* iTermTipCardActionButton.m */,
 				1DA76A1D1B308AD000CB272A /* iTermTipCardViewController.m */,
@@ -4601,6 +4611,7 @@
 		0464AB0C006CD2EC7F000001 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0700;
 				TargetAttributes = {
 					A6C7641B1B45CB2800E3C992 = {
@@ -4989,6 +5000,11 @@
 			files = (
 				A6C763CF1B45C53B00E3C992 /* main.m in Sources */,
 				1D1F8C1E1A32616A00167161 /* AMIndeterminateProgressIndicator.m in Sources */,
+				557FC0171BC98C930067891C /* iTermTipController.m in Sources */,
+				557FC01D1BC98EC20067891C /* iTermTipCardViewController.m in Sources */,
+				557FC0131BC98AB50067891C /* iTermTip.swift in Sources */,
+				557FC0151BC98C880067891C /* iTermTipWindowController.m in Sources */,
+				557FC01B1BC98EB80067891C /* iTermTipCardActionButton.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5017,7 +5033,12 @@
 			files = (
 				A667F38C1B48AEF200705186 /* NSApplication+iTerm.m in Sources */,
 				A6C763CE1B45C53A00E3C992 /* main.m in Sources */,
+				557FC0161BC98C890067891C /* iTermTipWindowController.m in Sources */,
 				1D1F8C1C1A32616A00167161 /* AMIndeterminateProgressIndicator.m in Sources */,
+				557FC0121BC98AB50067891C /* iTermTip.swift in Sources */,
+				557FC01C1BC98EBA0067891C /* iTermTipCardActionButton.m in Sources */,
+				557FC01E1BC98EC40067891C /* iTermTipCardViewController.m in Sources */,
+				557FC01A1BC98D170067891C /* iTermTipController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5047,7 +5068,6 @@
 				A6C763AC1B45C52B00E3C992 /* BellTrigger.m in Sources */,
 				A6C763E01B45C6DD00E3C992 /* PSMTabBarControl.m in Sources */,
 				A6C7638B1B45C52B00E3C992 /* ProfileTableRow.m in Sources */,
-				A6C763B91B45C52B00E3C992 /* iTermTipCardActionButton.m in Sources */,
 				A6C763DF1B45C6DD00E3C992 /* PSMTabBarCell.m in Sources */,
 				A6C763171B45C52B00E3C992 /* iTermMouseCursor.m in Sources */,
 				A6C7639B1B45C52B00E3C992 /* TmuxHistoryParser.m in Sources */,
@@ -5108,7 +5128,6 @@
 				A6C762AA1B45C52B00E3C992 /* PTYWindow+Scripting.m in Sources */,
 				A6C763341B45C52B00E3C992 /* iTermPasswordManagerWindowController.m in Sources */,
 				A6C763571B45C52B00E3C992 /* iTermOpenQuicklyTextField.m in Sources */,
-				A6C763B81B45C52B00E3C992 /* iTermTip.m in Sources */,
 				A6C7631D1B45C52B00E3C992 /* iTermSelectionScrollHelper.m in Sources */,
 				A6C7636B1B45C52B00E3C992 /* iTermAdvancedSettingsViewController.m in Sources */,
 				A6C762B61B45C52B00E3C992 /* NSFileManager+iTerm.m in Sources */,
@@ -5256,6 +5275,7 @@
 				A6C763401B45C52B00E3C992 /* iTermDragHandleView.m in Sources */,
 				A6C7632F1B45C52B00E3C992 /* FindViewController.m in Sources */,
 				A6C763951B45C52B00E3C992 /* shell_launcher.c in Sources */,
+				557FC0191BC98CF50067891C /* iTermTip.m in Sources */,
 				A6C763551B45C52B00E3C992 /* iTermOpenQuicklyTableRowView.m in Sources */,
 				A6C763E31B45C6DD00E3C992 /* PSMYosemiteTabStyle.m in Sources */,
 				A6C763091B45C52B00E3C992 /* CommandUse.m in Sources */,
@@ -5283,7 +5303,6 @@
 				A6C763161B45C52B00E3C992 /* iTermMinimumSubsequenceMatcher.m in Sources */,
 				A6C763131B45C52B00E3C992 /* iTermIndicatorsHelper.m in Sources */,
 				A6C763BD1B45C52B00E3C992 /* iTermTipRootView.m in Sources */,
-				A6C763BE1B45C52B00E3C992 /* iTermTipWindowController.m in Sources */,
 				A6C762F81B45C52B00E3C992 /* iTermExposeTabView.m in Sources */,
 				A6C762CD1B45C52B00E3C992 /* iTermGrowlDelegate.m in Sources */,
 				A6C763DD1B45C6DD00E3C992 /* PSMProgressIndicator.m in Sources */,
@@ -5293,7 +5312,6 @@
 				A6C763301B45C52B00E3C992 /* iTermAboutWindowController.m in Sources */,
 				A6C762E91B45C52B00E3C992 /* VT100Screen.m in Sources */,
 				A6C7638A1B45C52B00E3C992 /* ProfileModelWrapper.m in Sources */,
-				A6C763BB1B45C52B00E3C992 /* iTermTipController.m in Sources */,
 				A6C763BF1B45C52B00E3C992 /* VT100AnsiParser.m in Sources */,
 				A6C763831B45C52B00E3C992 /* SmartSelectionController.m in Sources */,
 				A6C762E31B45C52B00E3C992 /* SessionView.m in Sources */,
@@ -5322,7 +5340,6 @@
 				A6C762D81B45C52B00E3C992 /* PseudoTerminal.m in Sources */,
 				A6C762C81B45C52B00E3C992 /* ITAddressBookMgr.m in Sources */,
 				A6C763431B45C52B00E3C992 /* iTermImageWell.m in Sources */,
-				A6C763BA1B45C52B00E3C992 /* iTermTipCardViewController.m in Sources */,
 				A6C762BF1B45C52B00E3C992 /* NSScreen+iTerm.m in Sources */,
 				A6C763621B45C52B00E3C992 /* PopupWindow.m in Sources */,
 				A6C7639F1B45C52B00E3C992 /* TmuxWindowOpener.m in Sources */,
@@ -5472,6 +5489,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = iTerm2;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "Don't Code Sign";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -5502,6 +5520,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.googlecode.iterm2;
 				PRODUCT_NAME = iTerm2;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "sources/iTerm2-Bridging-Header.h";
 				WARNING_CFLAGS = (
 					"-Wextra",
 					"-Wall",
@@ -5519,6 +5538,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = iTerm2;
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5547,8 +5567,10 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.googlecode.iterm2.applescript;
+				PRODUCT_MODULE_NAME = iTerm2;
 				PRODUCT_NAME = iTerm2ForApplescriptTesting;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "sources/iTerm2-Bridging-Header.h";
 				WARNING_CFLAGS = (
 					"-Wextra",
 					"-Wall",
@@ -5565,6 +5587,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = iTerm2;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Don't Code Sign";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
@@ -5593,8 +5616,10 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.googlecode.iterm2.applescript;
+				PRODUCT_MODULE_NAME = iTerm2;
 				PRODUCT_NAME = iTerm2ForApplescriptTesting;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "sources/iTerm2-Bridging-Header.h";
 				WARNING_CFLAGS = (
 					"-Wextra",
 					"-Wall",
@@ -5611,6 +5636,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = iTerm2;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Don't Code Sign";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
@@ -5638,8 +5664,10 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.googlecode.iterm2.applescript;
+				PRODUCT_MODULE_NAME = iTerm2;
 				PRODUCT_NAME = iTerm2ForApplescriptTesting;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "sources/iTerm2-Bridging-Header.h";
 				WARNING_CFLAGS = (
 					"-Wextra",
 					"-Wall",
@@ -6019,6 +6047,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = iTerm2;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -6050,6 +6079,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.googlecode.iterm2;
 				PRODUCT_NAME = iTerm2;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "sources/iTerm2-Bridging-Header.h";
 				WARNING_CFLAGS = (
 					"-Wextra",
 					"-Wall",
@@ -6067,6 +6097,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = iTerm2;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "Don't Code Sign";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -6098,6 +6129,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.googlecode.iterm2;
 				PRODUCT_NAME = iTerm2;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "sources/iTerm2-Bridging-Header.h";
 				WARNING_CFLAGS = (
 					"-Wextra",
 					"-Wall",
@@ -6153,6 +6185,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Debug;

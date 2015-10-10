@@ -16,6 +16,7 @@
 #import "iTermFlippedView.h"
 #import "NSView+iTerm.h"
 #import "SolidColorView.h"
+#import "iTerm2-Swift.h"
 
 #import <QuartzCore/QuartzCore.h>
 

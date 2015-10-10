@@ -8,20 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 // Dictionary keys
 extern NSString *const kTipTitleKey;
 extern NSString *const kTipBodyKey;
 extern NSString *const kTipUrlKey;
 
-// A tip of the day.
-@interface iTermTip : NSObject
-
-@property(nonatomic, readonly, copy) NSString *identifier;
-@property(nonatomic, readonly, copy) NSString *title;
-@property(nonatomic, readonly, copy) NSString *body;
-@property(nonatomic, readonly, copy) NSString *url;
-
-- (instancetype)initWithDictionary:(NSDictionary *)dictionary identifier:(NSString *)identifier;
-
-@end
+NS_ASSUME_NONNULL_END
 

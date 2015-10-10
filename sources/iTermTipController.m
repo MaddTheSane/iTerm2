@@ -13,6 +13,7 @@
 #import "iTermTipData.h"
 #import "iTermTipWindowController.h"
 #import "NSApplication+iTerm.h"
+#import "iTerm2-Swift.h"
 
 static NSString *const kUnshowableTipsKey = @"NoSyncTipsToNotShow";
 static NSString *const kLastTipTimeKey = @"NoSyncLastTipTime";

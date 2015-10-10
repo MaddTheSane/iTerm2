@@ -13,29 +13,3 @@ NSString *const kTipIdentifierKey = @"key";
 NSString *const kTipBodyKey = @"body";
 NSString *const kTipUrlKey = @"url";
 
-@interface iTermTip()
-
-@property(nonatomic, copy) NSString *identifier;
-@property(nonatomic, copy) NSString *title;
-@property(nonatomic, copy) NSString *body;
-@property(nonatomic, copy) NSString *url;
-
-@end
-
-@implementation iTermTip
-
-- (instancetype)initWithDictionary:(NSDictionary *)dictionary
-                        identifier:(NSString *)identifier {
-  self = [super init];
-  if (self) {
-    self.identifier = identifier;
-    self.title = dictionary[kTipTitleKey];
-    self.body = dictionary[kTipBodyKey];
-    self.url = dictionary[kTipUrlKey];
-  }
-  return self;
-}
-
-
-@end
-
