@@ -47,9 +47,6 @@ static NSString *const kKey = @"key";
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_keyMap release];
-    [_keys release];
-    [super dealloc];
 }
 
 - (PreferenceInfo *)infoForKey:(NSString *)key {

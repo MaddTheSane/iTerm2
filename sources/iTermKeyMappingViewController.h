@@ -37,7 +37,7 @@
     NSTableViewDelegate,
     NSTableViewDataSource>
 
-@property(nonatomic, assign) IBOutlet id<iTermKeyMappingViewControllerDelegate> delegate;
-@property(nonatomic, retain) IBOutlet NSView *placeholderView;
+@property(nonatomic, unsafe_unretained) IBOutlet id<iTermKeyMappingViewControllerDelegate> delegate;
+@property(nonatomic, strong) IBOutlet NSView *placeholderView;
 
 @end

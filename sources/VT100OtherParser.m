@@ -172,8 +172,8 @@
                         // Found terminator. Grab text from datap to char before it
                         // save in result.string.
                         NSData *data = [NSData dataWithBytes:datap + 2 length:length];
-                        result.string = [[[NSString alloc] initWithData:data
-                                                                  encoding:encoding] autorelease];
+                        result.string = [[NSString alloc] initWithData:data
+                                                                  encoding:encoding];
                         // Consume everything up to the terminator
                         *rmlen = i + 1;
                         found = YES;

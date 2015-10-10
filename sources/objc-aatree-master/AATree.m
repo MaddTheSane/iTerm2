@@ -6,7 +6,7 @@
 
 @interface AATree() // private methods.
 
-@property(retain) AATreeNode *root;
+@property(strong) AATreeNode *root;
 @property(assign) NSUInteger count;
 @property(copy) NSComparator keyComparator;
 
@@ -144,7 +144,7 @@
 	AATree *copy = [[AATree alloc] initWithKeyComparator:keyComparator];
 	
 	[self __lockForReading];
-	copy.root = [[root copy] autorelease];
+	copy.root = [root copy];
 	copy.count = count;
 	[self __unlock];
 	
@@ -221,7 +221,6 @@
     if (changedNodes.count > 0) {
         [_delegate aaTree:self didChangeSubtreesAtNodes:changedNodes];
     }
-    [changedNodes release];
     changedNodes = nil;
 	[self __unlock];
 }
@@ -235,7 +234,7 @@
 	
 	[self __lockForWriting];
     changedNodes = [[NSMutableSet alloc] init];
-	AATreeNode *newNode = [[[AATreeNode alloc] initWithData:anObject boundToKey:[[aKey copy] autorelease]] autorelease];
+	AATreeNode *newNode = [[AATreeNode alloc] initWithData:anObject boundToKey:[aKey copy]];
     AATreeNode *prevRoot = self.root;
 	self.root = [self __insertNode:newNode atRoot:root];
     if (prevRoot != self.root) {
@@ -249,7 +248,6 @@
     if (changedNodes.count > 0) {
         [_delegate aaTree:self didChangeSubtreesAtNodes:changedNodes];
     }
-    [changedNodes release];
     changedNodes = nil;
 	[self __unlock];
 }
@@ -276,13 +274,6 @@
     
     // Nothing found, return nil.
     return nil;
-}
-
-- (void) dealloc
-{
-	[root release];
-	[keyComparator release];
-	[super dealloc];
 }
 
 

@@ -41,7 +41,7 @@ static const int kMaxDirectoriesToSavePerHost = 200;
 @implementation iTermDirectoryTreeNode
 
 + (instancetype)nodeWithComponent:(NSString *)component {
-    return [[[self alloc] initWithComponent:component] autorelease];
+    return [[self alloc] initWithComponent:component];
 }
 
 - (id)initWithComponent:(NSString *)component {
@@ -68,11 +68,6 @@ static const int kMaxDirectoriesToSavePerHost = 200;
     return number;
 }
 
-- (void)dealloc {
-    [_component release];
-    [_children release];
-    [super dealloc];
-}
 
 - (void)removePathWithParts:(NSArray *)parts {
     --_count;
@@ -109,13 +104,9 @@ static const int kMaxDirectoriesToSavePerHost = 200;
     return self;
 }
 
-- (void)dealloc {
-    [_root release];
-    [super dealloc];
-}
 
 + (NSMutableArray *)attributedComponentsInPath:(NSAttributedString *)path {
-    NSMutableArray *components = [[[path attributedComponentsSeparatedByString:@"/"] mutableCopy] autorelease];
+    NSMutableArray *components = [[path attributedComponentsSeparatedByString:@"/"] mutableCopy];
     for (int i = components.count - 1; i >= 0; i--) {
         if ([components[i] string].length == 0) {
             [components removeObjectAtIndex:i];
@@ -128,7 +119,7 @@ static const int kMaxDirectoriesToSavePerHost = 200;
     if (!path) {
         return nil;
     }
-    NSMutableArray *components = [[[path componentsSeparatedByString:@"/"] mutableCopy] autorelease];
+    NSMutableArray *components = [[path componentsSeparatedByString:@"/"] mutableCopy];
     NSUInteger index = [components indexOfObject:@""];
     while (index != NSNotFound && components.count > 0) {
         [components removeObjectAtIndex:index];
@@ -184,7 +175,7 @@ static const int kMaxDirectoriesToSavePerHost = 200;
 @implementation iTermDirectoryEntry
 
 + (instancetype)entryWithDictionary:(NSDictionary *)dictionary {
-    iTermDirectoryEntry *entry = [[[iTermDirectoryEntry alloc] init] autorelease];
+    iTermDirectoryEntry *entry = [[iTermDirectoryEntry alloc] init];
     entry.path = dictionary[kDirectoryEntryPath];
     entry.useCount = [dictionary[kDirectoryEntryUseCount] intValue];
     entry.lastUse =
@@ -223,11 +214,6 @@ static const int kMaxDirectoriesToSavePerHost = 200;
     return [other.lastUse compare:_lastUse];
 }
 
-- (void)dealloc {
-    [_path release];
-    [_lastUse release];
-    [super dealloc];
-}
 
 - (NSAttributedString *)attributedStringForTableColumn:(NSTableColumn *)aTableColumn
                                basedOnAttributedString:(NSAttributedString *)attributedString
@@ -242,21 +228,21 @@ static const int kMaxDirectoriesToSavePerHost = 200;
         [[iTermDirectoriesModel sharedInstance] abbreviationSafeIndexesInEntry:self];
 
     // Initialize attributes.
-    NSMutableParagraphStyle *style = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
     style.lineBreakMode = NSLineBreakByTruncatingMiddle;
     NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithDictionary:baseAttributes];
     attributes[NSFontAttributeName] = font;
     attributes[NSParagraphStyleAttributeName] = style;
 
     // Compute the prefix of the result.
-    NSMutableAttributedString *result = [[[NSMutableAttributedString alloc] init] autorelease];
+    NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
     NSString *prefix = _starred ? @"★ /" : @"/";
     [result iterm_appendString:prefix withAttributes:attributes];
     NSAttributedString *attributedSlash =
-        [[[NSAttributedString alloc] initWithString:@"/" attributes:attributes] autorelease];
+        [[NSAttributedString alloc] initWithString:@"/" attributes:attributes];
 
     // Initialize the abbreviated name in case no further changes are made.
-    NSMutableAttributedString *abbreviatedName = [[[NSMutableAttributedString alloc] init] autorelease];
+    NSMutableAttributedString *abbreviatedName = [[NSMutableAttributedString alloc] init];
     [abbreviatedName iterm_appendString:prefix withAttributes:attributes];
     NSAttributedString *attributedPath =
         [components attributedComponentsJoinedByAttributedString:attributedSlash];
@@ -278,7 +264,7 @@ static const int kMaxDirectoriesToSavePerHost = 200;
 }
 
 - (NSAttributedString *)attributedStringForTableColumn:(NSTableColumn *)aTableColumn {
-    NSAttributedString *theString = [[[NSAttributedString alloc] initWithString:_path] autorelease];
+    NSAttributedString *theString = [[NSAttributedString alloc] initWithString:_path];
     return [self attributedStringForTableColumn:aTableColumn
                         basedOnAttributedString:theString
                                  baseAttributes:@{}];
@@ -321,12 +307,6 @@ static const int kMaxDirectoriesToSavePerHost = 200;
     return self;
 }
 
-- (void)dealloc {
-    [_hostToPathArrayDictionary release];
-    [_path release];
-    [_tree release];
-    [super dealloc];
-}
 
 - (void)recordUseOfPath:(NSString *)path
                  onHost:(VT100RemoteHost *)host
@@ -344,7 +324,7 @@ static const int kMaxDirectoriesToSavePerHost = 200;
     }
 
     if (!entry) {
-        entry = [[[iTermDirectoryEntry alloc] init] autorelease];
+        entry = [[iTermDirectoryEntry alloc] init];
         entry.path = path;
         [array addObject:entry];
         [_tree addPath:path];
@@ -439,7 +419,6 @@ static const int kMaxDirectoriesToSavePerHost = 200;
 }
 
 - (void)eraseHistory {
-    [_tree release];
     _tree = [[iTermDirectoryTree alloc] init];
     [_hostToPathArrayDictionary removeAllObjects];
     [[NSFileManager defaultManager] removeItemAtPath:_path error:NULL];

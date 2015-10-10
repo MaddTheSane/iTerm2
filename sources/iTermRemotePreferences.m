@@ -25,10 +25,6 @@
     return instance;
 }
 
-- (void)dealloc {
-    [_savedRemotePrefs release];
-    [super dealloc];
-}
 
 - (BOOL)shouldLoadRemotePrefs {
     return [iTermPreferences boolForKey:kPreferenceKeyLoadPrefsFromCustomFolder];

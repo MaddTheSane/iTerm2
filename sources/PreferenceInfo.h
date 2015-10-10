@@ -22,9 +22,9 @@ typedef NS_ENUM(NSInteger, PreferenceInfoType) {
 
 @interface PreferenceInfo : NSObject
 
-@property(nonatomic, retain) NSString *key;
+@property(nonatomic, strong) NSString *key;
 @property(nonatomic, assign) PreferenceInfoType type;
-@property(nonatomic, retain) NSControl *control;
+@property(nonatomic, strong) NSControl *control;
 @property(nonatomic, assign) NSRange range;  // For integer fields, the range of legal values.
 
 // A function that indicates if the control should be enabled. If nil, then the control is always

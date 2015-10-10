@@ -42,17 +42,17 @@ NSString *const kMarkGuidKey = @"Guid";  // Not all kinds of marks have a guid
         _sessionGuid = [dict[kMarkSessionGuidKey] copy];
         NSTimeInterval start = [dict[kMarkStartDateKey] doubleValue];
         if (start > 0) {
-            _startDate = [[NSDate dateWithTimeIntervalSinceReferenceDate:start] retain];
+            _startDate = [NSDate dateWithTimeIntervalSinceReferenceDate:start];
         }
         NSTimeInterval end = [dict[kMarkEndDateKey] doubleValue];
         if (end > 0) {
-            _endDate = [[NSDate dateWithTimeIntervalSinceReferenceDate:end] retain];
+            _endDate = [NSDate dateWithTimeIntervalSinceReferenceDate:end];
         }
         NSMutableArray *array = [NSMutableArray array];
         for (NSDictionary *capturedOutputDict in dict[kMarkCapturedOutputKey]) {
             [array addObject:[CapturedOutput capturedOutputWithDictionary:capturedOutputDict]];
         }
-        _capturedOutput = [array retain];
+        _capturedOutput = array;
         if (dict[kMarkCommandKey]) {
             _command = [dict[kMarkCommandKey] copy];
         }
@@ -60,14 +60,6 @@ NSString *const kMarkGuidKey = @"Guid";  // Not all kinds of marks have a guid
     return self;
 }
 
-- (void)dealloc {
-    [_command release];
-    [_startDate release];
-    [_endDate release];
-    [_capturedOutput release];
-    [_sessionGuid release];
-    [super dealloc];
-}
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: %p interval=%@ sessionGuid=%@>",
@@ -78,7 +70,6 @@ NSString *const kMarkGuidKey = @"Guid";  // Not all kinds of marks have a guid
     if (!_command) {
         [self.delegate markDidBecomeCommandMark:self];
     }
-    [_command autorelease];
     _command = [command copy];
     self.startDate = [NSDate date];
 }
@@ -155,8 +146,6 @@ NSString *const kMarkGuidKey = @"Guid";  // Not all kinds of marks have a guid
 
 - (void)dealloc {
     [[self.class registry] removeObjectForKey:_guid];
-    [_guid release];
-    [super dealloc];
 }
 
 - (NSString *)guid {
@@ -167,7 +156,7 @@ NSString *const kMarkGuidKey = @"Guid";  // Not all kinds of marks have a guid
 }
 
 - (NSDictionary *)dictionaryValue {
-    NSMutableDictionary *dict = [[[super dictionaryValue] mutableCopy] autorelease];
+    NSMutableDictionary *dict = [[super dictionaryValue] mutableCopy];
     dict[kScreenMarkIsPrompt] = @(_isPrompt);
     dict[kMarkGuidKey] = self.guid;
     return dict;
@@ -177,10 +166,6 @@ NSString *const kMarkGuidKey = @"Guid";  // Not all kinds of marks have a guid
 
 @implementation iTermCapturedOutputMark
 
-- (void)dealloc {
-    [_guid release];
-    [super dealloc];
-}
 
 - (NSString *)guid {
     if (!_guid) {
@@ -202,7 +187,7 @@ NSString *const kMarkGuidKey = @"Guid";  // Not all kinds of marks have a guid
 }
 
 - (NSDictionary *)dictionaryValue {
-    NSMutableDictionary *dict = [[[super dictionaryValue] mutableCopy] autorelease];
+    NSMutableDictionary *dict = [[super dictionaryValue] mutableCopy];
     dict[kMarkGuidKey] = self.guid;
     return dict;
 }

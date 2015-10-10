@@ -17,14 +17,14 @@ static NSString *const kCommandUses = @"use times";  // The name is a historical
 
 @interface CommandHistoryEntry () <NSCopying>
 
-@property(nonatomic, retain) NSMutableArray *commandUses;
+@property(nonatomic, strong) NSMutableArray *commandUses;
 
 @end
 
 @implementation CommandHistoryEntry
 
 + (instancetype)commandHistoryEntry {
-    return [[[self alloc] init] autorelease];
+    return [[self alloc] init];
 }
 
 + (instancetype)entryWithDictionary:(NSDictionary *)dict {
@@ -45,12 +45,6 @@ static NSString *const kCommandUses = @"use times";  // The name is a historical
         _commandUses = [[NSMutableArray alloc] init];
     }
     return self;
-}
-
-- (void)dealloc {
-    [_command release];
-    [_commandUses release];
-    [super dealloc];
 }
 
 - (NSArray *)serializedCommandUses {
@@ -140,7 +134,7 @@ static NSString *const kCommandUses = @"use times";  // The name is a historical
 - (id)copyWithZone:(NSZone *)zone {
     CommandHistoryEntry *theCopy = [self copyWithoutUses];
     for (CommandUse *use in self.commandUses) {
-        [theCopy.commandUses addObject:[[use copy] autorelease]];
+        [theCopy.commandUses addObject:[use copy]];
     }
     return theCopy;
 }

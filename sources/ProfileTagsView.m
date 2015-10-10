@@ -12,11 +12,11 @@
 static const CGFloat kRowHeight = 21;
 
 @interface ProfileTagsView ()
-@property(nonatomic, retain) NSScrollView *scrollView;
-@property(nonatomic, retain) NSTableView *tableView;
-@property(nonatomic, retain) NSTableColumn *tagsColumn;
-@property(nonatomic, retain) NSTableHeaderView *headerView;
-@property(nonatomic, retain) NSArray *cache;
+@property(nonatomic, strong) NSScrollView *scrollView;
+@property(nonatomic, strong) NSTableView *tableView;
+@property(nonatomic, strong) NSTableColumn *tagsColumn;
+@property(nonatomic, strong) NSTableHeaderView *headerView;
+@property(nonatomic, strong) NSArray *cache;
 @end
 
 @implementation ProfileTagsView
@@ -78,12 +78,6 @@ static const CGFloat kRowHeight = 21;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_scrollView release];
-    [_tableView release];
-    [_tagsColumn release];
-    [_headerView release];
-    [_cache release];
-    [super dealloc];
 }
 
 #pragma mark - NSTableViewDelegate
@@ -180,7 +174,7 @@ static const CGFloat kRowHeight = 21;
     for (NSTableColumn *col in [_tableView tableColumns]) {
         [[col dataCell] setFont:theFont];
     }
-    NSLayoutManager* layoutManager = [[[NSLayoutManager alloc] init] autorelease];
+    NSLayoutManager* layoutManager = [[NSLayoutManager alloc] init];
     [_tableView setRowHeight:[layoutManager defaultLineHeightForFont:theFont]];
 }
 

@@ -13,11 +13,6 @@
 
 @implementation DirectoriesPopupEntry
 
-- (void)dealloc {
-    [_entry release];
-    [super dealloc];
-}
-
 @end
 
 @implementation DirectoriesPopupWindowController {
@@ -28,7 +23,7 @@
 - (id)init {
     self = [super initWithWindowNibName:@"DirectoriesPopup"
                                tablePtr:nil
-                                  model:[[[PopupModel alloc] init] autorelease]];
+                                  model:[[PopupModel alloc] init]];
     if (self) {
         [self setTableView:_tableView];
     }
@@ -39,13 +34,12 @@
 - (void)dealloc {
     [_tableView setDelegate:nil];
     [_tableView setDataSource:nil];
-    [super dealloc];
 }
 
 - (void)loadDirectoriesForHost:(VT100RemoteHost *)host {
     [[self unfilteredModel] removeAllObjects];
     for (iTermDirectoryEntry *entry in [[iTermDirectoriesModel sharedInstance] entriesSortedByScoreOnHost:host]) {
-        DirectoriesPopupEntry *popupEntry = [[[DirectoriesPopupEntry alloc] init] autorelease];
+        DirectoriesPopupEntry *popupEntry = [[DirectoriesPopupEntry alloc] init];
         popupEntry.entry = entry;
         [popupEntry setMainValue:popupEntry.entry.path];
         [[self unfilteredModel] addObject:popupEntry];

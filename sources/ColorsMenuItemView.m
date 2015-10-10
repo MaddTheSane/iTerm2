@@ -27,6 +27,7 @@
 #import "ColorsMenuItemView.h"
 
 @implementation ColorsMenuItemView
+@synthesize color = color_;
 
 const int kNumberOfColors = 8;
 const int kColorAreaOffsetX = 20;
@@ -51,11 +52,6 @@ enum {
     kMenuItemPurple = 6,
     kMenuItemGray = 7
 };
-
-- (NSColor*)color
-{
-    return color_;
-}
 
 // Returns the color gradient corresponding to the color index.
 // These colours were chosen to appear similar to those in Aperture 3.
@@ -113,7 +109,7 @@ enum {
             break;
     }
 
-    return [gradient autorelease];
+    return gradient;
 }
 
 // Draw the menu item (label and colors)
@@ -149,14 +145,12 @@ enum {
         NSGradient *gradient = [self gradientForColorIndex:i];
         [gradient drawInRect:colorArea angle:-90.0];
     }
-    [outlineGradient release];
 
     // draw the menu label
     NSMutableDictionary *fontAtts = [[NSMutableDictionary alloc] init];
     [fontAtts setObject: [NSFont menuFontOfSize: kMenuFontOfSize] forKey: NSFontAttributeName];
     NSString *labelTitle = @"Tab Color:";
     [labelTitle drawAtPoint:NSMakePoint(kMenuLabelOffsetX, kMenuLabelOffsetY) withAttributes:fontAtts];
-    [fontAtts release];
     [NSBezierPath setDefaultLineWidth:savedWidth];
 }
 

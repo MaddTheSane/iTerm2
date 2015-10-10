@@ -9,13 +9,6 @@ static NSMutableDictionary *gLogoCache;
 
 @implementation iTermLogoGenerator
 
-- (void)dealloc {
-  [_textColor release];
-  [_backgroundColor release];
-  [_tabColor release];
-  [_cursorColor release];
-  [super dealloc];
-}
 
 - (NSString *)keyForColor:(NSColor *)color {
     // Quantizing at 4 bits per component should be enough to produce good logos, while hopefully
@@ -43,7 +36,7 @@ static NSMutableDictionary *gLogoCache;
 
     const CGFloat width = 48;
     const CGFloat height = 48;
-    NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(width, height)] autorelease];
+    NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(width, height)];
     [image lockFocus];
 
     NSImage *frame = [NSImage imageNamed:@"LogoFrame.png"];

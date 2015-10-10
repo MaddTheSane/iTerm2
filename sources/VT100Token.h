@@ -210,14 +210,14 @@ typedef struct {
 }
 
 // For VT100_STRING
-@property(nonatomic, retain) NSString *string;
+@property(nonatomic, strong) NSString *string;
 
 // For saved data (when copying to clipboard)
-@property(nonatomic, retain) NSData *savedData;
+@property(nonatomic, strong) NSData *savedData;
 
 // For XTERMCC_SET_KVP.
-@property(nonatomic, retain) NSString *kvpKey;
-@property(nonatomic, retain) NSString *kvpValue;
+@property(nonatomic, strong) NSString *kvpKey;
+@property(nonatomic, strong) NSString *kvpValue;
 
 // For VT100CSI_ codes that take paramters.
 @property(nonatomic, readonly) CSIParam *csi;

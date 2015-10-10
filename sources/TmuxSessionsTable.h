@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "FutureMethods.h"
 
-@protocol TmuxSessionsTableProtocol
+@protocol TmuxSessionsTableProtocol <NSObject>
 
 - (NSArray *)sessions;
 - (void)renameSessionWithName:(NSString *)oldName toName:(NSString *)newName;
@@ -28,7 +28,7 @@
 @interface TmuxSessionsTable : NSObject <NSTableViewDelegate, NSTableViewDataSource> {
     NSMutableArray *model_;
     BOOL canAttachToSelectedSession_;
-    NSObject<TmuxSessionsTableProtocol> *delegate_;  // weak
+    id<TmuxSessionsTableProtocol> __unsafe_unretained delegate_;  // weak
 
     IBOutlet NSTableColumn *checkColumn_;
     IBOutlet NSTableColumn *nameColumn_;
@@ -38,7 +38,7 @@
     IBOutlet NSButton *removeButton_;
 }
 
-@property (nonatomic, assign) NSObject<TmuxSessionsTableProtocol> *delegate;
+@property (nonatomic, unsafe_unretained) id<TmuxSessionsTableProtocol> delegate;
 
 - (void)setSessions:(NSArray *)names;
 - (NSString *)selectedSessionName;

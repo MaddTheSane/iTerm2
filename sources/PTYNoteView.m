@@ -38,7 +38,7 @@ const CGFloat kDragAreaSize = 5;
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        backgroundColor_ = [[self defaultBackgroundColor] retain];
+        backgroundColor_ = [self defaultBackgroundColor];
         NSImage *closeImage = [NSImage imageNamed:@"closebutton"];
         killButton_ = [[NSButton alloc] initWithFrame:NSMakeRect(0, 0, kButtonSize, kButtonSize)];
         [killButton_ setButtonType:NSMomentaryPushInButton];
@@ -49,15 +49,8 @@ const CGFloat kDragAreaSize = 5;
         [[killButton_ cell] setHighlightsBy:NSContentsCellMask];
         [killButton_ setTitle:@""];
         [self addSubview:killButton_];
-        [killButton_ release];
     }
     return self;
-}
-
-- (void)dealloc {
-    [contentView_ release];
-    [backgroundColor_ release];
-    [super dealloc];
 }
 
 - (NSColor *)defaultBackgroundColor {
@@ -208,7 +201,7 @@ static NSRect FlipRect(NSRect rect, CGFloat height) {
                                            inset:inset
                                    pointerLength:pointerLength
                                        tipOnEdge:tipEdge];
-    NSBezierPath *path = [[[NSBezierPath alloc] init] autorelease];
+    NSBezierPath *path = [[NSBezierPath alloc] init];
 
     // start on the left edge
     NSPoint p = [self trailingCornerOfRoundedRect:bubbleFrame radius:radius dx:-1 dy:0];
@@ -415,8 +408,7 @@ static NSRect FlipRect(NSRect rect, CGFloat height) {
 
 - (void)setContentView:(NSView *)contentView {
     [contentView_ removeFromSuperview];
-    [contentView_ autorelease];
-    contentView_ = [contentView retain];
+    contentView_ = contentView;
     [self addSubview:contentView_];
     [self layoutSubviews];
 }

@@ -86,8 +86,6 @@ int gMigrated;
 
 - (void)dealloc
 {
-    [super dealloc];
-    [journal_ release];
     NSLog(@"Deallocating bookmark model!");
 }
 
@@ -104,8 +102,8 @@ int gMigrated;
     NSArray* tokens = [self parseFilter:filter];
     [self doesProfileWithName:name tags:@[] matchFilter:tokens nameIndexSet:indexes tagIndexSets:nil];
     NSMutableAttributedString *result =
-        [[[NSMutableAttributedString alloc] initWithString:name
-                                                attributes:defaultAttributes] autorelease];
+        [[NSMutableAttributedString alloc] initWithString:name
+                                                attributes:defaultAttributes];
     [indexes enumerateRangesUsingBlock:^(NSRange range, BOOL *stop) {
         [result setAttributes:highlightedAttributes range:range];
     }];
@@ -129,8 +127,8 @@ int gMigrated;
     NSMutableArray *result = [NSMutableArray array];
     for (int i = 0; i < tags.count; i++) {
         NSMutableAttributedString *attributedString =
-            [[[NSMutableAttributedString alloc] initWithString:tags[i]
-                                                    attributes:defaultAttributes] autorelease];
+            [[NSMutableAttributedString alloc] initWithString:tags[i]
+                                                    attributes:defaultAttributes];
         NSIndexSet *indexSet = indexSets[i];
         [indexSet enumerateRangesUsingBlock:^(NSRange range, BOOL *stop) {
             [attributedString setAttributes:highlightedAttributes range:range];
@@ -186,7 +184,7 @@ int gMigrated;
     NSArray *phrases = [filter componentsBySplittingProfileListQuery];
     NSMutableArray *tokens = [NSMutableArray array];
     for (NSString *phrase in phrases) {
-        iTermProfileSearchToken *token = [[[iTermProfileSearchToken alloc] initWithPhrase:phrase] autorelease];
+        iTermProfileSearchToken *token = [[iTermProfileSearchToken alloc] initWithPhrase:phrase];
         [tokens addObject:token];
     }
     return tokens;
@@ -305,7 +303,7 @@ int gMigrated;
 - (void)addBookmark:(Profile*)bookmark inSortedOrder:(BOOL)sort
 {
 
-    NSMutableDictionary *newBookmark = [[bookmark mutableCopy] autorelease];
+    NSMutableDictionary *newBookmark = [bookmark mutableCopy];
 
     // Ensure required fields are present
     if (![newBookmark objectForKey:KEY_NAME]) {
@@ -328,7 +326,7 @@ int gMigrated;
     }
     [ProfileModel migratePromptOnCloseInMutableBookmark:newBookmark];
     [ProfileModel migrateDeprecatedKeysInMutableBookmark:newBookmark];
-    bookmark = [[newBookmark copy] autorelease];
+    bookmark = [newBookmark copy];
 
     int theIndex;
     if (sort) {
@@ -608,8 +606,6 @@ int gMigrated;
 
 - (void)setDefaultByGuid:(NSString*)guid
 {
-    [guid retain];
-    [defaultBookmarkGuid_ release];
     defaultBookmarkGuid_ = guid;
     if (prefs_) {
         [prefs_ setObject:defaultBookmarkGuid_ forKey:KEY_DEFAULT_GUID];
@@ -642,15 +638,15 @@ int gMigrated;
         preserveName = YES;
     }
 
-    NSMutableDictionary *dict = [[bookmark mutableCopy] autorelease];
+    NSMutableDictionary *dict = [bookmark mutableCopy];
     if (preserveName) {
-        dict[KEY_NAME] = [[origProfile[KEY_NAME] copy] autorelease];
+        dict[KEY_NAME] = [origProfile[KEY_NAME] copy];
     }
-    dict[KEY_GUID] = [[origGuid copy] autorelease];
+    dict[KEY_GUID] = [origGuid copy];
     
     // Change the dict in the sessions bookmarks so that if you copy it back, it gets copied to
     // the new profile.
-    dict[KEY_ORIGINAL_GUID] = [[bookmark[KEY_GUID] copy] autorelease];
+    dict[KEY_ORIGINAL_GUID] = [bookmark[KEY_GUID] copy];
     [[ProfileModel sessionsInstance] setBookmark:dict withGuid:origGuid];
     [[NSNotificationCenter defaultCenter] postNotificationName:kReloadAllProfiles
                                                         object:nil
@@ -664,13 +660,11 @@ int gMigrated;
         return;
     }
     Profile* bookmark = [bookmarks_ objectAtIndex:sourceRow];
-    [bookmark retain];
     [bookmarks_ removeObjectAtIndex:sourceRow];
     if (sourceRow < destinationRow) {
         destinationRow--;
     }
     [bookmarks_ insertObject:bookmark atIndex:destinationRow];
-    [bookmark release];
 }
 
 - (void)rebuildMenus
@@ -692,7 +686,6 @@ int gMigrated;
                                                             object:nil
                                                           userInfo:[NSDictionary dictionaryWithObject:journal_ forKey:@"array"]];
     }
-    [journal_ release];
     journal_ = [[NSMutableArray alloc] init];
 }
 
@@ -774,10 +767,10 @@ int gMigrated;
 
     if (!submenu) {
         // Add menu item with submenu
-        NSMenuItem* newItem = [[[NSMenuItem alloc] initWithTitle:name
+        NSMenuItem* newItem = [[NSMenuItem alloc] initWithTitle:name
                                                           action:nil
-                                                   keyEquivalent:@""] autorelease];
-        [newItem setSubmenu:[[[NSMenu alloc] init] autorelease]];
+                                                   keyEquivalent:@""];
+        [newItem setSubmenu:[[NSMenu alloc] init]];
         [menu insertItem:newItem atIndex:pos];
         submenu = [newItem submenu];
     }
@@ -804,18 +797,17 @@ int gMigrated;
     // Add separator + open all menu items
     [menu addItem:[NSMenuItem separatorItem]];
     NSMenuItem* openAll = [menu addItemWithTitle:@"Open All" action:params->openAllSelector keyEquivalent:@""];
-    [openAll setTarget:params->target];
+    [openAll setTarget:(__bridge id _Nullable)(params->target)];
 
     // Add alternate open all menu
     NSMenuItem* altOpenAll = [[NSMenuItem alloc] initWithTitle:@"Open All in New Window"
                                                         action:params->alternateOpenAllSelector
                                                  keyEquivalent:@""];
-    [altOpenAll setTarget:params->target];
+    [altOpenAll setTarget:(__bridge id _Nullable)(params->target)];
     [altOpenAll setKeyEquivalentModifierMask:NSAlternateKeyMask];
     [altOpenAll setAlternate:YES];
     [altOpenAll setRepresentedObject:gAltOpenAllRepresentedObject];
     [menu addItem:altOpenAll];
-    [altOpenAll release];
 }
 
 + (BOOL)menuHasOpenAll:(NSMenu*)menu
@@ -899,11 +891,10 @@ int gMigrated;
         [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
     }
     [item setAlternate:isAlternate];
-    [item setTarget:params->target];
-    [item setRepresentedObject:[[[b objectForKey:KEY_GUID] copy] autorelease]];
+    [item setTarget:(__bridge id _Nullable)(params->target)];
+    [item setRepresentedObject:[[b objectForKey:KEY_GUID] copy]];
     [item setTag:tag];
     [menu insertItem:item atIndex:pos];
-    [item release];
 }
 
 - (void)addBookmark:(Profile*)b
@@ -1064,7 +1055,7 @@ int gMigrated;
                                   bookmark:(Profile*)bookmark
                                      model:(ProfileModel*)model
 {
-    BookmarkJournalEntry* entry = [[[BookmarkJournalEntry alloc] init] autorelease];
+    BookmarkJournalEntry* entry = [[BookmarkJournalEntry alloc] init];
     entry->action = action;
     entry->guid = [[bookmark objectForKey:KEY_GUID] copy];
     entry->model = model;
@@ -1072,11 +1063,5 @@ int gMigrated;
     return entry;
 }
 
-- (void)dealloc
-{
-    [guid release];
-    [tags release];
-    [super dealloc];
-}
 
 @end

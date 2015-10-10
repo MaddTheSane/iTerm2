@@ -27,7 +27,7 @@ extern NSString *const kTmuxWindowOpenerWindowFlagStyleValueFullScreen;
     TmuxGateway *gateway_;
     NSMutableDictionary *parseTree_;
     int pendingRequests_;
-    TmuxController *controller_;  // weak
+    TmuxController *__weak controller_;  // weak
     NSMutableDictionary *histories_;
     NSMutableDictionary *altHistories_;
     NSMutableDictionary *states_;
@@ -42,16 +42,16 @@ extern NSString *const kTmuxWindowOpenerWindowFlagStyleValueFullScreen;
 @property (nonatomic, assign) NSSize size;
 @property (nonatomic, copy) NSString *layout;
 @property (nonatomic, assign) int maxHistory;
-@property (nonatomic, retain) TmuxGateway *gateway;
-@property (nonatomic, retain) NSMutableDictionary *parseTree;
-@property (nonatomic, assign) TmuxController *controller;  // weak
-@property (nonatomic, retain) id target;
+@property (nonatomic, strong) TmuxGateway *gateway;
+@property (nonatomic, strong) NSMutableDictionary *parseTree;
+@property (nonatomic, weak) TmuxController *controller;  // weak
+@property (nonatomic, strong) id target;
 // Selector is called even if the window is already open and nothing is done.
 @property (nonatomic, assign) SEL selector;
 @property (nonatomic, assign) BOOL ambiguousIsDoubleWidth;
 
 // Maps a window ID as a string to a dictionary of window flags (see WindowFlag constants above).
-@property (nonatomic, retain) NSDictionary *windowFlags;
+@property (nonatomic, strong) NSDictionary *windowFlags;
 
 + (TmuxWindowOpener *)windowOpener;
 - (void)openWindows:(BOOL)initial;

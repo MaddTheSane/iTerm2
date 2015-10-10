@@ -181,10 +181,10 @@ static const CGFloat kMargin = 4;
         names_ = [[NSMutableArray alloc] init];
         pids_ = [[NSArray alloc] init];
 
-        kill_ = [[[NSButton alloc] initWithFrame:NSMakeRect(0,
+        kill_ = [[NSButton alloc] initWithFrame:NSMakeRect(0,
                                                             frame.size.height - kButtonHeight,
                                                             frame.size.width,
-                                                            kButtonHeight)] autorelease];
+                                                            kButtonHeight)];
         [kill_ setButtonType:NSMomentaryPushInButton];
         [kill_ setTitle:@"Send Signal"];
         [kill_ setTarget:self];
@@ -219,7 +219,6 @@ static const CGFloat kMargin = 4;
         NSFont *theFont = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
         [[col dataCell] setFont:theFont];
         tableView_.rowHeight = col.suggestedRowHeight;
-        [col release];
 
         col = [[NSTableColumn alloc] initWithIdentifier:@"pid"];
         [col setEditable:NO];
@@ -229,7 +228,6 @@ static const CGFloat kMargin = 4;
         [tableView_ addTableColumn:col];
         [[col dataCell] setFont:theFont];
         [[col headerCell] setStringValue:@"pid"];
-        [col release];
 
         [tableView_ setDataSource:self];
         [tableView_ setDelegate:self];
@@ -289,14 +287,8 @@ static const CGFloat kMargin = 4;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [signal_ release];
-    [tableView_ release];
-    [scrollView_ release];
     [timer_ invalidate];
     timer_ = nil;
-    [names_ release];
-    [pids_ release];
-    [super dealloc];
 }
 
 - (void)shutdown
@@ -319,9 +311,8 @@ static const CGFloat kMargin = 4;
     NSSet *pids = [[ProcessCache sharedInstance] childrenOfPid:rootPid levelsToSkip:0];
     if (![pids isEqualToSet:[NSSet setWithArray:pids_]]) {
         // Something changed. Get job names, which is expensive.
-        [pids_ release];
         NSArray *sortedArray = [[pids allObjects] sortedArrayUsingSelector:@selector(compare:)];
-        pids_ = [[NSMutableArray arrayWithArray:sortedArray] retain];
+        pids_ = [NSMutableArray arrayWithArray:sortedArray];
         [names_ removeAllObjects];
         int i = 0;
         for (NSNumber *pid in pids_) {

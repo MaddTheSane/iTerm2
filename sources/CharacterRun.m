@@ -12,7 +12,7 @@
 @implementation CRunStorage : NSObject
 
 + (CRunStorage *)cRunStorageWithCapacity:(int)capacity {
-    return [[[CRunStorage alloc] initWithCapacity:capacity] autorelease];
+    return [[CRunStorage alloc] initWithCapacity:capacity];
 }
 
 - (id)initWithCapacity:(int)capacity {
@@ -35,10 +35,7 @@
     free(glyphs_);
     free(advances_);
     for (NSColor *color in colors_.allObjects) {
-        [color release];
     }
-    [colors_ release];
-    [super dealloc];
 }
 
 - (unichar *)codesFromIndex:(int)theIndex {
@@ -77,7 +74,7 @@
 
 - (void)addColor:(NSColor *)color {
     if (![colors_ containsObject:color]) {
-        [colors_ addObject:[color retain]];
+        [colors_ addObject:color];
     }
 }
 
@@ -88,14 +85,14 @@ static void CRunDumpWithIndex(CRun *run, int offset) {
         NSLog(@"run[%d]=%@    advance=%f [complex]",
               offset++,
               run->string,
-              run->index < 0 ? -1.0 : (float)[run->storage advancesFromIndex:run->index][0].width);
+              run->index < 0 ? -1.0 : (float)[(__bridge CRunStorage*)run->storage advancesFromIndex:run->index][0].width);
     } else {
         for (int i = 0; i < run->length; i++) {
             assert(run->index >= 0);
             NSLog(@"run[%d]=%@    advance=%f",
                   offset++,
-                  [NSString stringWithCharacters:[run->storage codesFromIndex:run->index] + i length:1],
-                  (float)[run->storage advancesFromIndex:run->index][i].width);
+                  [NSString stringWithCharacters:[(__bridge CRunStorage*)run->storage codesFromIndex:run->index] + i length:1],
+                  (float)[(__bridge CRunStorage*)run->storage advancesFromIndex:run->index][i].width);
         }
     }
     if (run->next) {

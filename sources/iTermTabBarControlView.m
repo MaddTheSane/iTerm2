@@ -86,7 +86,6 @@ static const NSTimeInterval kAnimationDuration = 0.25;
 
 - (void)fadeIn {
     DLog(@"fade in");
-    [self retain];
     [NSView animateWithDuration:kAnimationDuration
                      animations:^{
                          self.flashState = kFlashFadingIn;
@@ -97,14 +96,12 @@ static const NSTimeInterval kAnimationDuration = 0.25;
                          if (self.flashState == kFlashFadingIn) {
                              self.flashState = kFlashHolding;
                          }
-                         [self release];
                      }];
 }
 
 - (void)scheduleFadeOutAfterDelay {
     DLog(@"schedule fade out after delay");
     // Schedule a fade out. This can be canceled.
-    [self retain];
     __block BOOL aborted = NO;
     _flashDelayedPerform = [NSView animateWithDuration:kAnimationDuration
                                                  delay:[iTermAdvancedSettingsModel tabAutoShowHoldTime]
@@ -130,7 +127,6 @@ static const NSTimeInterval kAnimationDuration = 0.25;
                                                 if (_flashDelayedPerform.completed) {
                                                     _flashDelayedPerform = nil;
                                                 }
-                                                [self release];
                                             }];
     DLog(@"Schedule dp %@", _flashDelayedPerform);
 }
@@ -151,7 +147,6 @@ static const NSTimeInterval kAnimationDuration = 0.25;
     _flashDelayedPerform.canceled = YES;
     _flashDelayedPerform = nil;
 
-    [self retain];
     [NSView animateWithDuration:kAnimationDuration
                      animations:^{
                          self.flashState = kFlashFadingOut;
@@ -162,7 +157,6 @@ static const NSTimeInterval kAnimationDuration = 0.25;
                              self.flashState = kFlashOff;
                              [_itermTabBarDelegate iTermTabBarDidFinishFlash];
                          }
-                         [self release];
                      }];
 }
 

@@ -22,18 +22,10 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [columns_ release];
-    [records_ release];
-    [map_ release];
-    [super dealloc];
-}
-
 - (NSString *)valueInRecord:(NSArray *)record forField:(NSString *)fieldName
 {
     if (!map_) {
-        map_ = [[NSMutableDictionary dictionary] retain];
+        map_ = [[NSMutableDictionary alloc] init];
         for (int i = 0; i < self.columns.count; i++) {
             [map_ setObject:[NSNumber numberWithInt:i]
                      forKey:[self.columns objectAtIndex:i]];
@@ -58,8 +50,8 @@
     if ([lines count] == 0) {
         return nil;
     }
-    TSVDocument *doc = [[[TSVDocument alloc] init] autorelease];
-    doc.columns = [[fields copy] autorelease];
+    TSVDocument *doc = [[TSVDocument alloc] init];
+    doc.columns = [fields copy];
     for (int i = 0; i < lines.count; i++) {
         NSString *row = [lines objectAtIndex:i];
         NSArray *rowArray = [row componentsSeparatedByString:@"\t"];

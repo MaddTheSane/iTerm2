@@ -41,10 +41,6 @@
 
 @implementation iTermApplication
 
-- (void)dealloc {
-    [_fakeCurrentEvent release];
-    [super dealloc];
-}
 
 - (BOOL)_eventUsesNavigationKeys:(NSEvent*)event {
     NSString* unmodkeystr = [event charactersIgnoringModifiers];

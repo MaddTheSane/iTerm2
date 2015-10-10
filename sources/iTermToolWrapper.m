@@ -51,7 +51,6 @@ static const CGFloat kCloseButtonLeftMargin = 5;
         [_title setAlignment:NSCenterTextAlignment];
         [_title setBezeled:NO];
         [self addSubview:_title];
-        [_title release];
 
         NSImage *closeImage = [NSImage imageNamed:@"closebutton"];
         _closeButton = [[NSButton alloc] initWithFrame:NSMakeRect(kCloseButtonLeftMargin, 10, kButtonSize, kButtonSize)];
@@ -62,14 +61,15 @@ static const CGFloat kCloseButtonLeftMargin = 5;
         [_closeButton setBordered:NO];
         [_closeButton setTitle:@""];
         [self addSubview:_closeButton];
-        [_closeButton release];
 
-        _container = [[[NSView alloc] initWithFrame:NSMakeRect(kLeftMargin,
+        NSView *tmpContainer;
+        tmpContainer = [[NSView alloc] initWithFrame:NSMakeRect(kLeftMargin,
                                                                kTitleHeight + kMargin,
                                                                frame.size.width - kLeftMargin - kRightMargin,
-                                                               frame.size.height - kTitleHeight - kMargin - kBottomMargin)] autorelease];
-        [_container setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-        [self addSubview:_container];
+                                                               frame.size.height - kTitleHeight - kMargin - kBottomMargin)];
+        _container = tmpContainer;
+        [tmpContainer setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+        [self addSubview:tmpContainer];
         [self relayout];
     }
     return self;
@@ -77,9 +77,7 @@ static const CGFloat kCloseButtonLeftMargin = 5;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_name release];
 
-    [super dealloc];
 }
 
 - (NSString *)description {
@@ -127,7 +125,6 @@ static const CGFloat kCloseButtonLeftMargin = 5;
 }
 
 - (void)setName:(NSString *)theName {
-    [_name autorelease];
     _name = [theName copy];
     [self performSelector:@selector(setTitleEditable) withObject:nil afterDelay:0];
 }
@@ -136,11 +133,11 @@ static const CGFloat kCloseButtonLeftMargin = 5;
     [_title setEditable:NO];
 }
 
-- (NSObject<ToolbeltTool> *)tool {
+- (id<ToolbeltTool>)tool {
     if ([[_container subviews] count] == 0) {
         return nil;
     }
-    return (NSObject<ToolbeltTool> *)[[_container subviews] firstObject];
+    return (id<ToolbeltTool>)[[_container subviews] firstObject];
 }
 
 @end

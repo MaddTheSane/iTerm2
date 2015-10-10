@@ -31,8 +31,6 @@
 
 - (void)dealloc {
     [_threeFingerTapGestureRecognizer disconnectTarget];
-    [_threeFingerTapGestureRecognizer release];
-    [super dealloc];
 }
 
 - (void)touchesBeganWithEvent:(NSEvent *)ev {

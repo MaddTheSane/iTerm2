@@ -42,7 +42,7 @@
 
 + (PasteboardEntry*)entryWithString:(NSString *)s score:(double)score
 {
-    PasteboardEntry* e = [[[PasteboardEntry alloc] init] autorelease];
+    PasteboardEntry* e = [[PasteboardEntry alloc] init];
     [e setMainValue:s];
     [e setScore:score];
     [e setPrefix:@""];
@@ -93,19 +93,13 @@
         NSString *appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
         path_ = [path_ stringByAppendingPathComponent:appname];
         [[NSFileManager defaultManager] createDirectoryAtPath:path_ withIntermediateDirectories:YES attributes:nil error:NULL];
-        path_ = [[path_ stringByAppendingPathComponent:@"pbhistory.plist"] copyWithZone:[self zone]];
+        path_ = [[path_ stringByAppendingPathComponent:@"pbhistory.plist"] copyWithZone:nil];
 
         [self _loadHistoryFromDisk];
     }
     return self;
 }
 
-- (void)dealloc
-{
-    [path_ release];
-    [entries_ release];
-    [super dealloc];
-}
 
 - (NSArray*)entries
 {
@@ -114,7 +108,7 @@
 
 - (NSDictionary*)_entriesToDict
 {
-    NSMutableArray* a = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray* a = [[NSMutableArray alloc] init];
 
     for (PasteboardEntry* entry in entries_) {
         [a addObject:[NSDictionary dictionaryWithObjectsAndKeys:[entry mainValue], PBHKEY_VALUE,
@@ -205,7 +199,7 @@
 
 - (id)init
 {
-    self = [super initWithWindowNibName:@"PasteboardHistory" tablePtr:nil model:[[[PopupModel alloc] init] autorelease]];
+    self = [super initWithWindowNibName:@"PasteboardHistory" tablePtr:nil model:[[PopupModel alloc] init]];
     if (!self) {
         return nil;
     }
@@ -222,7 +216,6 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (void)pasteboardHistoryDidChange:(id)sender

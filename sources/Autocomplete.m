@@ -75,7 +75,7 @@ const int kMaxResultContextWords = 4;
     const int kMaxOptions = [AutocompleteView maxOptions];
     self = [super initWithWindowNibName:@"Autocomplete"
                                tablePtr:nil
-                                  model:[[[PopupModel alloc] initWithMaxEntries:kMaxOptions] autorelease]];
+                                  model:[[PopupModel alloc] initWithMaxEntries:kMaxOptions]];
     if (!self) {
         return nil;
     }
@@ -90,16 +90,7 @@ const int kMaxResultContextWords = 4;
 
 - (void)dealloc
 {
-    [findResults_ release];
-    [stack_ release];
-    [moreText_ release];
-    [context_ release];
-    [prefix_ release];
     [populateTimer_ invalidate];
-    [populateTimer_ release];
-    [findContext_ release];
-    [wordSeparatorCharacterSet_ release];
-    [super dealloc];
 }
 
 - (void)appendContextAtX:(int)x y:(int)y into:(NSMutableArray*)context maxWords:(int)maxWords
@@ -144,8 +135,7 @@ const int kMaxResultContextWords = 4;
     VT100GridWindowedRange range;
     VT100Screen* screen = [[self delegate] popupVT100Screen];
 
-    [wordSeparatorCharacterSet_ autorelease];
-    wordSeparatorCharacterSet_ = [[iTermTextExtractor wordSeparatorCharacterSet] retain];
+    wordSeparatorCharacterSet_ = [iTermTextExtractor wordSeparatorCharacterSet];
 
     int x = [screen cursorX]-2;
     int y = [screen cursorY] + [screen numberOfLines] - [screen height] - 1;
@@ -352,7 +342,6 @@ const int kMaxResultContextWords = 4;
 - (void)onClose
 {
     [stack_ removeAllObjects];
-    [moreText_ release];
     moreText_ = nil;
 
     if (populateTimer_) {
@@ -369,7 +358,6 @@ const int kMaxResultContextWords = 4;
         [stack_ removeAllObjects];
         if (moreText_) {
             [[self delegate] popupInsertText:moreText_];
-            [moreText_ release];
             moreText_ = nil;
         }
         [[self delegate] popupInsertText:[e mainValue]];
@@ -399,8 +387,8 @@ const int kMaxResultContextWords = 4;
 - (void)_pushStackObject
 {
     NSArray* value = [NSArray arrayWithObjects:
-                      [[moreText_ ? moreText_ : @"" copy] autorelease],
-                      [[prefix_ copy] autorelease],
+                      [moreText_ ? moreText_ : @"" copy],
+                      [prefix_ copy],
                       [NSNumber numberWithBool:whitespaceBeforeCursor_],
                       nil];
     assert([value count] == 3);
@@ -411,11 +399,8 @@ const int kMaxResultContextWords = 4;
 {
     NSArray* value = [stack_ lastObject];
     assert([value count] == 3);
-    if (moreText_) {
-        [moreText_ release];
-    }
-    moreText_ = [[NSMutableString stringWithString:[value objectAtIndex:0]] retain];
-    prefix_ = [[NSMutableString stringWithString:[value objectAtIndex:1]] retain];
+    moreText_ = [NSMutableString stringWithString:[value objectAtIndex:0]];
+    prefix_ = [NSMutableString stringWithString:[value objectAtIndex:1]];
     whitespaceBeforeCursor_ = [[value objectAtIndex:2] boolValue];
     [stack_ removeLastObject];
 }

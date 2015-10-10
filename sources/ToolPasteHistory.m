@@ -37,7 +37,6 @@ static const CGFloat kMargin = 4;
         [clear_ sizeToFit];
         [clear_ setAutoresizingMask:NSViewMinYMargin];
         [self addSubview:clear_];
-        [clear_ release];
 
         scrollView_ = [[NSScrollView alloc] initWithFrame:NSMakeRect(0, 0, frame.size.width, frame.size.height - kButtonHeight - kMargin)];
         [scrollView_ setHasVerticalScroller:YES];
@@ -48,7 +47,7 @@ static const CGFloat kMargin = 4;
 
         tableView_ = [[NSTableView alloc] initWithFrame:NSMakeRect(0, 0, contentSize.width, contentSize.height)];
         NSTableColumn *col;
-        col = [[[NSTableColumn alloc] initWithIdentifier:@"contents"] autorelease];
+        col = [[NSTableColumn alloc] initWithIdentifier:@"contents"];
         [col setEditable:NO];
         [tableView_ addTableColumn:col];
         [[col headerCell] setStringValue:@"Contents"];
@@ -88,9 +87,6 @@ static const CGFloat kMargin = 4;
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [minuteRefreshTimer_ invalidate];
-    [tableView_ release];
-    [scrollView_ release];
-    [super dealloc];
 }
 
 - (void)shutdown {

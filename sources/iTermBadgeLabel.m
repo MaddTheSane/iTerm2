@@ -11,7 +11,7 @@
 #import "iTermAdvancedSettingsModel.h"
 
 @interface iTermBadgeLabel()
-@property(nonatomic, retain) NSImage *image;
+@property(nonatomic, strong) NSImage *image;
 @end
 
 @implementation iTermBadgeLabel {
@@ -29,22 +29,12 @@
     return self;
 }
 
-- (void)dealloc {
-    [_fillColor release];
-    [_backgroundColor release];
-    [_stringValue release];
-    [_image release];
-    [_paragraphStyle release];
-
-    [super dealloc];
-}
 
 - (void)setFillColor:(NSColor *)fillColor {
     if ([fillColor isEqual:_fillColor] || fillColor == _fillColor) {
         return;
     }
-    [_fillColor autorelease];
-    _fillColor = [fillColor retain];
+    _fillColor = fillColor;
     [self setDirty:YES];
 }
 
@@ -52,8 +42,7 @@
     if ([backgroundColor isEqual:_backgroundColor] || backgroundColor == _backgroundColor) {
         return;
     }
-    [_backgroundColor autorelease];
-    _backgroundColor = [backgroundColor retain];
+    _backgroundColor = backgroundColor;
     [self setDirty:YES];
 }
 
@@ -61,7 +50,6 @@
     if ([stringValue isEqual:_stringValue] || stringValue == _stringValue) {
         return;
     }
-    [_stringValue autorelease];
     _stringValue = [stringValue copy];
     [self setDirty:YES];
 }
@@ -76,7 +64,7 @@
 
 - (NSImage *)image {
     if (_fillColor && _stringValue && !NSEqualSizes(_viewSize, NSZeroSize) && !_image) {
-        _image = [[self freshlyComputedImage] retain];
+        _image = [self freshlyComputedImage];
     }
     return _image;
 }
@@ -116,9 +104,9 @@
         return nil;
     }
 
-    NSImage *image = [[[NSImage alloc] initWithSize:sizeWithFont] autorelease];
+    NSImage *image = [[NSImage alloc] initWithSize:sizeWithFont];
     [image lockFocus];
-    NSMutableDictionary *temp = [[attributes mutableCopy] autorelease];
+    NSMutableDictionary *temp = [attributes mutableCopy];
     temp[NSStrokeWidthAttributeName] = @-2;
     temp[NSStrokeColorAttributeName] =
         [_backgroundColor colorWithAlphaComponent:_fillColor.alphaComponent];

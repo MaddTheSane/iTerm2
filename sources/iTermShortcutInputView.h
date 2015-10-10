@@ -22,7 +22,7 @@
 // You can assign the shortcutDelegate in IB as it is an IBOutlet.
 @interface iTermShortcutInputView : NSTextField
 
-@property(nonatomic, assign) IBOutlet id<iTermShortcutInputViewDelegate> shortcutDelegate;
+@property(nonatomic, unsafe_unretained) IBOutlet id<iTermShortcutInputViewDelegate> shortcutDelegate;
 @property(nonatomic, assign) BOOL disableKeyRemapping;
 
 // If an instance of this class is currently the first responder, return it,

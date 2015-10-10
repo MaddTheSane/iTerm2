@@ -4,10 +4,10 @@
 // colors. All color properties must be set before a logo can be generated.
 @interface iTermLogoGenerator : NSObject
 
-@property(nonatomic, retain) NSColor *textColor;
-@property(nonatomic, retain) NSColor *cursorColor;
-@property(nonatomic, retain) NSColor *backgroundColor;
-@property(nonatomic, retain) NSColor *tabColor;
+@property(nonatomic, strong) NSColor *textColor;
+@property(nonatomic, strong) NSColor *cursorColor;
+@property(nonatomic, strong) NSColor *backgroundColor;
+@property(nonatomic, strong) NSColor *tabColor;
 
 - (NSImage *)generatedImage;
 

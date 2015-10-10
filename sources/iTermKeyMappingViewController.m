@@ -35,9 +35,7 @@
 }
 
 - (void)dealloc {
-    [_placeholderView release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (void)keyBindingsChanged {
@@ -45,7 +43,7 @@
 }
 
 - (void)setPlaceholderView:(NSView *)placeholderView {
-    _placeholderView = [placeholderView retain];
+    _placeholderView = placeholderView;
     [self.placeholderView addSubview:self.view];
     self.view.frame = self.placeholderView.bounds;
     self.view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
@@ -89,12 +87,11 @@
 #pragma mark - Modal Sheets
 
 - (void)presentEditActionSheet:(iTermEditKeyActionWindowController *)editActionWindowController {
-    [editActionWindowController retain];
     [NSApp beginSheet:editActionWindowController.window
        modalForWindow:self.view.window
         modalDelegate:self
        didEndSelector:@selector(genericCloseSheet:returnCode:contextInfo:)
-          contextInfo:editActionWindowController];
+          contextInfo:(__bridge void * _Null_unspecified)(editActionWindowController)];
 }
 
 - (void)genericCloseSheet:(NSWindow *)sheet
@@ -109,7 +106,6 @@
                    isAddition:editActionWindowController.isNewMapping];
     }
     [editActionWindowController close];
-    [editActionWindowController release];
     [_tableView reloadData];
     [sheet close];
 }
@@ -131,7 +127,7 @@
 - (IBAction)addNewMapping:(id)sender
 {
     iTermEditKeyActionWindowController *editActionWindowController;
-    editActionWindowController = [[[iTermEditKeyActionWindowController alloc] init] autorelease];
+    editActionWindowController = [[iTermEditKeyActionWindowController alloc] init];
     editActionWindowController.isNewMapping = YES;
     editActionWindowController.action = KEY_ACTION_IGNORE;
     [self presentEditActionSheet:editActionWindowController];
@@ -161,7 +157,7 @@
     NSString *keyCombination = sortedKeys[rowIndex];
 
     iTermEditKeyActionWindowController *editActionWindowController;
-    editActionWindowController = [[[iTermEditKeyActionWindowController alloc] init] autorelease];
+    editActionWindowController = [[iTermEditKeyActionWindowController alloc] init];
     editActionWindowController.isNewMapping = NO;
     editActionWindowController.currentKeyCombination = keyCombination;
     editActionWindowController.parameterValue = dict[keyCombination][@"Text"];  // TODO

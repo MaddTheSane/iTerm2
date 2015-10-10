@@ -13,7 +13,7 @@
 
 @interface FileTransferManager : NSObject
 
-@property(nonatomic, readonly) NSMutableArray *files;
+@property(nonatomic, readonly, strong) NSMutableArray *files;
 
 + (instancetype)sharedInstance;
 - (void)removeItem:(TransferrableFileMenuItemViewController *)viewController;

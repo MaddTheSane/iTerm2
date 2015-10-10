@@ -28,11 +28,11 @@ static NSError *SCPFileError(NSString *description) {
 }
 
 @interface SCPFile () <NMSSHSessionDelegate>
-@property(atomic, assign) NMSSHSession *session;
+@property(atomic, weak) NMSSHSession *session;
 @property(atomic, assign) BOOL stopped;
 @property(atomic, copy) NSString *error;
 @property(atomic, copy) NSString *destination;
-@property(nonatomic, assign) dispatch_queue_t queue;
+@property(nonatomic, unsafe_unretained) dispatch_queue_t queue;
 @end
 
 @implementation SCPFile {
@@ -56,16 +56,6 @@ static NSError *SCPFileError(NSString *description) {
     return self;
 }
 
-- (void)dealloc {
-    [_error release];
-    [_destination release];
-    dispatch_release(_queue);
-    [_homeDirectory release];
-    [_userName release];
-    [_hostName release];
-    [super dealloc];
-}
-
 - (NSError *)lastError {
   if (self.session.rawSession) {
     return self.session.lastError;
@@ -78,11 +68,7 @@ static NSError *SCPFileError(NSString *description) {
 - (void)setQueue:(dispatch_queue_t)queue {
     @synchronized(self) {
         if (queue != _queue) {
-            dispatch_release(_queue);
             _queue = queue;
-            if (queue) {
-                dispatch_retain(queue);
-            }
         }
     }
 }
@@ -155,16 +141,16 @@ static NSError *SCPFileError(NSString *description) {
     
     // Check if the host is {hostname}:{port} or {IPv4}:{port}
     if (components == 2) {
-        NSNumberFormatter *formatter = [[[NSNumberFormatter alloc] init] autorelease];
-        [formatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease]];
+        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+        [formatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]];
         
         return [[formatter numberFromString:[hostComponents lastObject]] intValue];
     } else if (components >= 4 &&
                [hostComponents[0] hasPrefix:@"["] &&
                [hostComponents[components-2] hasSuffix:@"]"]) {
         // Check if the host is [{IPv6}]:{port}
-        NSNumberFormatter *formatter = [[[NSNumberFormatter alloc] init] autorelease];
-        [formatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease]];
+        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+        [formatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]];
         
         return [[formatter numberFromString:[hostComponents lastObject]] intValue];
     }
@@ -240,10 +226,10 @@ static NSError *SCPFileError(NSString *description) {
     if (self.session) {
         self.session.delegate = self;
     } else {
-        self.session = [[[NMSSHSession alloc] initWithHost:[self hostname]
+        self.session = [[NMSSHSession alloc] initWithHost:[self hostname]
                                                    configs:[self configs]
                                            withDefaultPort:[self port]
-                                           defaultUsername:self.path.username] autorelease];
+                                           defaultUsername:self.path.username];
         self.session.delegate = self;
         [self.session connect];
         if (self.stopped) {
@@ -334,7 +320,7 @@ static NSError *SCPFileError(NSString *description) {
                                                      @"~/.ssh/id_ecdsa" ]];
                 }
                 NSFileManager *fileManager = [NSFileManager defaultManager];
-                for (NSString *keyPath in keyPaths) {
+                for (__strong NSString *keyPath in keyPaths) {
                     keyPath = [self filenameByExpandingMetasyntaticVariables:keyPath];
                     if (![fileManager fileExistsAtPath:keyPath]) {
                         NSLog(@"No key file at %@", keyPath);
@@ -448,8 +434,8 @@ static NSError *SCPFileError(NSString *description) {
             // We determine the filename and perform the move in the main thread to avoid two
             // threads trying to determine the final destination at the same time.
             dispatch_sync(dispatch_get_main_queue(), ^() {
-                finalDestination = [[self finalDestinationForPath:baseName
-                                             destinationDirectory:downloadDirectory] retain];
+                finalDestination = [self finalDestinationForPath:baseName
+                                             destinationDirectory:downloadDirectory];
                 [[NSFileManager defaultManager] moveItemAtPath:tempfile
                                                         toPath:finalDestination
                                                          error:&error];
@@ -459,7 +445,7 @@ static NSError *SCPFileError(NSString *description) {
                               tempfile, finalDestination];
             }
             [[NSFileManager defaultManager] removeItemAtPath:tempfile error:NULL];
-            self.destination = [finalDestination autorelease];
+            self.destination = finalDestination;
         } else {
             [[NSFileManager defaultManager] removeItemAtPath:tempfile error:NULL];
             if (self.stopped) {

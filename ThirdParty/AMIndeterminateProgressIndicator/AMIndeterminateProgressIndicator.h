@@ -10,7 +10,7 @@
 
 @interface AMIndeterminateProgressIndicator : NSView
 
-@property(nonatomic, retain) NSColor *color;
+@property(nonatomic, strong) NSColor *color;
 
 - (void)startAnimation:(id)sender;
 - (void)stopAnimation:(id)sender;

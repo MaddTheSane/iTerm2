@@ -103,20 +103,16 @@
 
         aScroller = [[PTYScroller alloc] init];
         [self setVerticalScroller:aScroller];
-        [aScroller release];
 
-        creationDate_ = [[NSDate date] retain];
+        creationDate_ = [NSDate date];
     }
     
     return self;
 }
 
 - (void)dealloc {
-    [creationDate_ release];
     [timer_ invalidate];
     timer_ = nil;
-
-    [super dealloc];
 }
 
 - (NSString *)description {

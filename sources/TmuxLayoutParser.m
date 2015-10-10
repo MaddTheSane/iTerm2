@@ -95,7 +95,7 @@ NSString *kLayoutDictStateKey = @"state";
         if ([[tree objectForKey:kLayoutDictNodeType] intValue] == kLeafLayoutNode) {
             // Add a do-nothing root splitter so that the root is always a splitter.
             NSMutableDictionary *oldRoot = tree;
-            tree = [[oldRoot mutableCopy]  autorelease];
+            tree = [oldRoot mutableCopy];
             [tree setObject:[NSNumber numberWithInt:kVSplitLayoutNode] forKey:kLayoutDictNodeType];
             [tree setObject:[NSArray arrayWithObject:oldRoot] forKey:kLayoutDictChildrenKey];
             [tree removeObjectForKey:kLayoutDictWindowPaneKey];
@@ -250,7 +250,7 @@ NSString *kLayoutDictStateKey = @"state";
     NSString *suffix = [components objectAtIndex:2];
     if ([suffix length] == 0) {
         // only item in array
-        NSString *result = [[layouts copy] autorelease];
+        NSString *result = [layouts copy];
         [rest setString:@""];
         return result;
     } else {

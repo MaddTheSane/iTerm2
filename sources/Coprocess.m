@@ -36,7 +36,7 @@ static NSString *kCoprocessMruKey = @"Coprocess MRU";
     NSArray *oldMru = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kCoprocessMruKey];
     NSMutableArray *newMru;
     if (oldMru) {
-        newMru = [[oldMru mutableCopy] autorelease];
+        newMru = [oldMru mutableCopy];
     } else {
         newMru = [NSMutableArray array];
     }
@@ -107,7 +107,7 @@ static NSString *kCoprocessMruKey = @"Coprocess MRU";
                        outputFd:(int)outputFd
                         inputFd:(int)inputFd
 {
-    Coprocess *result = [[[Coprocess alloc] init] autorelease];
+    Coprocess *result = [[Coprocess alloc] init];
     result.pid = pid;
     result.outputFd = outputFd;
     result.inputFd = inputFd;
@@ -129,13 +129,6 @@ static NSString *kCoprocessMruKey = @"Coprocess MRU";
         outputBuffer_ = [[NSMutableData alloc] init];
     }
     return self;
-}
-
-- (void)dealloc
-{
-    [inputBuffer_ release];
-    [outputBuffer_ release];
-    [super dealloc];
 }
 
 - (int)write

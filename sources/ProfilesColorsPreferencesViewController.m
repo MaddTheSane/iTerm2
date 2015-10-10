@@ -281,7 +281,6 @@ static NSString * const kColorGalleryURL = @"https://www.iterm2.com/colorgallery
                                                      keyEquivalent:@""];
         presetItem.target = self;
         [theMenu addItem:presetItem];
-        [presetItem release];
     }
 }
 
@@ -397,7 +396,7 @@ static NSString * const kColorGalleryURL = @"https://www.iterm2.com/colorgallery
                                        otherButton:nil
                          informativeTextWithFormat:@""];
 
-    NSPopUpButton* pub = [[[NSPopUpButton alloc] init] autorelease];
+    NSPopUpButton* pub = [[NSPopUpButton alloc] init];
     for (NSString* key in [[customPresets allKeys] sortedArrayUsingSelector:@selector(compare:)]) {
         [pub addItemWithTitle:key];
     }

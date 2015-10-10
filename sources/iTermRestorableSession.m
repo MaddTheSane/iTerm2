@@ -10,12 +10,5 @@
 
 @implementation iTermRestorableSession
 
-- (void)dealloc {
-    [_sessions release];
-    [_terminalGuid release];
-    [_arrangement release];
-    [_predecessors release];
-    [super dealloc];
-}
 
 @end

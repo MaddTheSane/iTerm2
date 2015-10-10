@@ -21,7 +21,7 @@
     NSTableViewDelegate,
     NSWindowDelegate>
 
-@property(nonatomic, retain) iTermOpenQuicklyModel *model;
+@property(nonatomic, strong) iTermOpenQuicklyModel *model;
 
 @end
 
@@ -53,10 +53,6 @@
     return self;
 }
 
-- (void)dealloc {
-    [_model release];
-    [super dealloc];
-}
 
 - (void)awakeFromNib {
     // Initialize the table
@@ -204,7 +200,7 @@
     result.imageView.image = item.icon;
 
     result.textField.attributedStringValue =
-        item.title ?: [[[NSAttributedString alloc] initWithString:@"Untitled" attributes:@{}] autorelease];
+        item.title ?: [[NSAttributedString alloc] initWithString:@"Untitled" attributes:@{}];
     [result.textField.cell setLineBreakMode:NSLineBreakByTruncatingTail];
     if (item.detail) {
         result.detailTextField.attributedStringValue = item.detail;
@@ -224,7 +220,7 @@
 }
 
 - (NSTableRowView *)tableView:(NSTableView *)tableView rowViewForRow:(NSInteger)row {
-    return [[[iTermOpenQuicklyTableRowView alloc] init] autorelease];
+    return [[iTermOpenQuicklyTableRowView alloc] init];
 }
 
 - (void)updateTextColorForAllRows {
@@ -304,8 +300,8 @@
         prefix = @"";
     }
     NSMutableAttributedString *theString =
-        [[[NSMutableAttributedString alloc] initWithString:prefix
-                                                attributes:[self attributes]] autorelease];
+        [[NSMutableAttributedString alloc] initWithString:prefix
+                                                attributes:[self attributes]];
     [theString appendAttributedString:[self attributedStringFromString:value
                                                  byHighlightingIndices:highlight]];
     return theString;
@@ -319,7 +315,7 @@
 - (NSAttributedString *)attributedStringFromString:(NSString *)source
                              byHighlightingIndices:(NSIndexSet *)indexSet {
     NSMutableAttributedString *attributedString =
-        [[[NSMutableAttributedString alloc] initWithString:source attributes:[self attributes]] autorelease];
+        [[NSMutableAttributedString alloc] initWithString:source attributes:[self attributes]];
     NSDictionary *highlight = @{ NSBackgroundColorAttributeName: [[NSColor yellowColor] colorWithAlphaComponent:0.4],
                                  NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle),
                                  NSUnderlineColorAttributeName: [NSColor yellowColor],
@@ -331,7 +327,7 @@
 }
 
 - (NSDictionary *)attributes {
-    NSMutableParagraphStyle *style = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
     style.lineBreakMode = NSLineBreakByTruncatingTail;
     return @{ NSParagraphStyleAttributeName: style };
 }

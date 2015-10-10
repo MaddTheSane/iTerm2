@@ -25,8 +25,8 @@
 
 @interface iTermTemporaryDoubleBufferedGridController : NSObject
 
-@property(nonatomic, assign) id<iTermTemporaryDoubleBufferedGridControllerDelegate> delegate;
-@property(nonatomic, readonly) VT100Grid *savedGrid;
+@property(nonatomic, unsafe_unretained) id<iTermTemporaryDoubleBufferedGridControllerDelegate> delegate;
+@property(strong, nonatomic, readonly) VT100Grid *savedGrid;
 
 // Set this to use if you're drawing the view from the saved grid in order to get a notification
 // when it expires.

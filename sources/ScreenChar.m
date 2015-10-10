@@ -53,7 +53,7 @@ static int ccmNextKey = 1;
 static BOOL hasWrapped = NO;
 
 @interface iTermStringLine()
-@property(nonatomic, retain) NSString *stringValue;
+@property(nonatomic, copy) NSString *stringValue;
 @end
 
 @implementation iTermStringLine {
@@ -69,7 +69,7 @@ static BOOL hasWrapped = NO;
         screenChars[i].code = [string characterAtIndex:i];
         screenChars[i].complexChar = NO;
     }
-    return [[[self alloc] initWithScreenChars:screenChars length:string.length] autorelease];
+    return [[self alloc] initWithScreenChars:screenChars length:string.length];
 }
 
 - (instancetype)initWithScreenChars:(screen_char_t *)screenChars
@@ -77,24 +77,22 @@ static BOOL hasWrapped = NO;
     self = [super init];
     if (self) {
         _length = length;
-        _stringValue = [ScreenCharArrayToString(screenChars,
+        _stringValue = ScreenCharArrayToString(screenChars,
                                                 0,
                                                 length,
                                                 &_backingStore,
-                                                &_deltas) retain];
+                                                &_deltas);
     }
     return self;
 }
 
 - (void)dealloc {
-    [_stringValue release];
     if (_backingStore) {
         free(_backingStore);
     }
     if (_deltas) {
         free(_deltas);
     }
-    [super dealloc];
 }
 
 - (NSRange)rangeOfScreenCharsForRangeInString:(NSRange)rangeInString {
@@ -238,7 +236,7 @@ screen_char_t ImageCharForNewImage(NSString *name, int width, int height, BOOL p
     c.image = 1;
     c.code = newKey;
 
-    iTermImageInfo *imageInfo = [[[iTermImageInfo alloc] initWithCode:c.code] autorelease];
+    iTermImageInfo *imageInfo = [[iTermImageInfo alloc] initWithCode:c.code];
     imageInfo.filename = name;
     imageInfo.preserveAspectRatio = preserveAspectRatio;
     imageInfo.size = NSMakeSize(width, height);
@@ -549,10 +547,10 @@ NSString* CharArrayToString(unichar* charHaystack, int o)
 #else
     encoding = NSUTF16LittleEndianStringEncoding;
 #endif
-    return [[[NSString alloc] initWithBytesNoCopy:charHaystack
+    return [[NSString alloc] initWithBytesNoCopy:charHaystack
                                            length:o * sizeof(unichar)
                                          encoding:encoding
-                                     freeWhenDone:NO] autorelease];
+                                     freeWhenDone:NO];
 }
 
 void DumpScreenCharArray(screen_char_t* screenChars, int lineLength) {
@@ -803,7 +801,7 @@ void ScreenCharDecodeRestorableState(NSDictionary *state) {
     AllocateImageMapsIfNeeded();
     for (id key in imageMap) {
         gEncodableImageMap[key] = imageMap[key];
-        iTermImageInfo *info = [[[iTermImageInfo alloc] initWithDictionary:imageMap[key]] autorelease];
+        iTermImageInfo *info = [[iTermImageInfo alloc] initWithDictionary:imageMap[key]];
         if (info) {
             gImages[key] = info;
         }

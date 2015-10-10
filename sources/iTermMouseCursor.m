@@ -74,7 +74,7 @@ enum {
         }
         if (!cursors[@(cursorType)]) {
             cursors[@(cursorType)] =
-                [[[self alloc] initWithType:cursorType] autorelease];
+                [[self alloc] initWithType:cursorType];
         }
         return cursors[@(cursorType)];
     }

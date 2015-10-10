@@ -67,7 +67,6 @@ static const CGFloat kHelpMargin = 5;
         [clear_ sizeToFit];
         [clear_ setAutoresizingMask:NSViewMinYMargin | NSViewMinXMargin];
         [self addSubview:clear_];
-        [clear_ release];
 
         scrollView_ = [[NSScrollView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
         [scrollView_ setHasVerticalScroller:YES];
@@ -77,7 +76,7 @@ static const CGFloat kHelpMargin = 5;
 
         tableView_ = [[NSTableView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
         NSTableColumn *col;
-        col = [[[NSTableColumn alloc] initWithIdentifier:@"directories"] autorelease];
+        col = [[NSTableColumn alloc] initWithIdentifier:@"directories"];
         [col setEditable:NO];
         [tableView_ addTableColumn:col];
         [[col headerCell] setStringValue:@"Directories"];
@@ -99,7 +98,7 @@ static const CGFloat kHelpMargin = 5;
         [tableView_ sizeToFit];
         [tableView_ setColumnAutoresizingStyle:NSTableViewSequentialColumnAutoresizingStyle];
 
-        tableView_.menu = [[[NSMenu alloc] init] autorelease];
+        tableView_.menu = [[NSMenu alloc] init];
         tableView_.menu.delegate = self;
         NSMenuItem *item;
         item = [[NSMenuItem alloc] initWithTitle:@"Toggle Star"
@@ -110,10 +109,10 @@ static const CGFloat kHelpMargin = 5;
         // Save the bold version of the table's default font
         NSFontManager *fontManager = [NSFontManager sharedFontManager];
         NSFont *font = [[col dataCell] font];
-        boldFont_ = [[fontManager fontWithFamily:font.familyName
+        boldFont_ = [fontManager fontWithFamily:font.familyName
                                           traits:NSBoldFontMask
                                           weight:0
-                                            size:font.pointSize] retain];
+                                            size:font.pointSize];
 
         [self relayout];
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -127,10 +126,6 @@ static const CGFloat kHelpMargin = 5;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [tableView_ release];
-    [scrollView_ release];
-    [boldFont_ release];
-    [super dealloc];
 }
 
 - (void)shutdown {
@@ -191,12 +186,12 @@ static const CGFloat kHelpMargin = 5;
 }
 
 - (void)updateDirectories {
-    [entries_ autorelease];
+    //[entries_ autorelease];
     iTermToolWrapper *wrapper = self.toolWrapper;
     VT100RemoteHost *host = [wrapper.delegate.delegate toolbeltCurrentHost];
     NSArray *entries = [[iTermDirectoriesModel sharedInstance] entriesSortedByScoreOnHost:host];
     NSArray *reversed = [[entries reverseObjectEnumerator] allObjects];
-    entries_ = [reversed retain];
+    entries_ = reversed;
     [tableView_ reloadData];
 
     [self computeFilteredEntries];
@@ -230,6 +225,9 @@ static const CGFloat kHelpMargin = 5;
     } else {
         text = entry.path;
     }
+    if (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask)) {
+        text = [text stringByAppendingString:@"\n"];
+    }
     [wrapper.delegate.delegate toolbeltInsertText:text];
 }
 
@@ -244,9 +242,8 @@ static const CGFloat kHelpMargin = 5;
 }
 
 - (void)computeFilteredEntries {
-    [filteredEntries_ release];
     if (searchField_.stringValue.length == 0) {
-        filteredEntries_ = [entries_ retain];
+        filteredEntries_ = entries_;
     } else {
         NSMutableArray *array = [NSMutableArray array];
         for (iTermDirectoryEntry *entry in entries_) {
@@ -255,7 +252,7 @@ static const CGFloat kHelpMargin = 5;
                 [array addObject:entry];
             }
         }
-        filteredEntries_ = [array retain];
+        filteredEntries_ = array;
     }
     [tableView_ reloadData];
 }

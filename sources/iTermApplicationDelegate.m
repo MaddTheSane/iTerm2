@@ -204,7 +204,6 @@ static BOOL hasBecomeActive = NO;
         autoLaunchScript = [[NSAppleScript alloc] initWithContentsOfURL:aURL
                                                                   error:&errorInfo];
         [autoLaunchScript executeAndReturnError:&errorInfo];
-        [autoLaunchScript release];
     } else {
         if ([WindowArrangements defaultArrangementName] == nil &&
             [WindowArrangements arrangementWithName:LEGACY_DEFAULT_ARRANGEMENT_NAME] != nil) {
@@ -280,10 +279,10 @@ static BOOL hasBecomeActive = NO;
 
 - (void)setDefaultTerminal:(NSString *)bundleId
 {
-    CFStringRef unixExecutableContentType = (CFStringRef)@"public.unix-executable";
+    CFStringRef unixExecutableContentType = CFSTR("public.unix-executable");
     LSSetDefaultRoleHandlerForContentType(unixExecutableContentType,
                                           kLSRolesShell,
-                                          (CFStringRef) bundleId);
+                                          (__bridge CFStringRef) bundleId);
 }
 
 - (IBAction)makeDefaultTerminal:(id)sender
@@ -300,14 +299,11 @@ static BOOL hasBecomeActive = NO;
 - (BOOL)isDefaultTerminal
 {
     LSSetDefaultHandlerForURLScheme((CFStringRef)@"iterm2",
-                                    (CFStringRef)[[NSBundle mainBundle] bundleIdentifier]);
+                                    (__bridge CFStringRef)[[NSBundle mainBundle] bundleIdentifier]);
     CFStringRef unixExecutableContentType = (CFStringRef)@"public.unix-executable";
-    CFStringRef unixHandler = LSCopyDefaultRoleHandlerForContentType(unixExecutableContentType, kLSRolesShell);
+    NSString *unixHandler = CFBridgingRelease(LSCopyDefaultRoleHandlerForContentType(unixExecutableContentType, kLSRolesShell));
     NSString *iTermBundleId = [[NSBundle mainBundle] bundleIdentifier];
-    BOOL result = [iTermBundleId isEqualToString:(NSString *)unixHandler];
-    if (unixHandler) {
-        CFRelease(unixHandler);
-    }
+    BOOL result = [iTermBundleId isEqualToString:unixHandler];
     return result;
 }
 
@@ -338,8 +334,8 @@ static BOOL hasBecomeActive = NO;
         [[NSProcessInfo processInfo] setAutomaticTerminationSupportEnabled:YES];
         [[NSProcessInfo processInfo] disableAutomaticTermination:@"User Preference"];
         _appNapStoppingActivity =
-                [[[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityUserInitiatedAllowingIdleSystemSleep
-                                                                reason:@"User Preference"] retain];
+                [[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityUserInitiatedAllowingIdleSystemSleep
+                                                                reason:@"User Preference"];
     }
     [iTermFontPanel makeDefault];
 
@@ -705,7 +701,7 @@ static BOOL hasBecomeActive = NO;
                                                          forEventClass:kInternetEventClass
                                                             andEventID:kAEGetURL];
 
-        launchTime_ = [[NSDate date] retain];
+        launchTime_ = [NSDate date];
         _workspaceSessionActive = YES;
     }
 
@@ -731,12 +727,12 @@ static BOOL hasBecomeActive = NO;
     NSMenu *viewMenu = [viewMenuItem submenu];
 
     [viewMenu addItem: [NSMenuItem separatorItem]];
-    ColorsMenuItemView *labelTrackView = [[[ColorsMenuItemView alloc]
-                                           initWithFrame:NSMakeRect(0, 0, 180, 50)] autorelease];
+    ColorsMenuItemView *labelTrackView = [[ColorsMenuItemView alloc]
+                                           initWithFrame:NSMakeRect(0, 0, 180, 50)];
     NSMenuItem *item;
-    item = [[[NSMenuItem alloc] initWithTitle:@"Current Tab Color"
+    item = [[NSMenuItem alloc] initWithTitle:@"Current Tab Color"
                                        action:@selector(changeTabColorToMenuAction:)
-                                keyEquivalent:@""] autorelease];
+                                keyEquivalent:@""];
     [item setView:labelTrackView];
     [viewMenu addItem:item];
 }
@@ -766,7 +762,6 @@ static BOOL hasBecomeActive = NO;
                returnCode:(int)returnCode
               contextInfo:(id)contextInfo {
     [sheet close];
-    [_passwordManagerWindowController release];
     _passwordManagerWindowController = nil;
 }
 
@@ -829,8 +824,6 @@ static BOOL hasBecomeActive = NO;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_appNapStoppingActivity release];
-    [super dealloc];
 }
 
 // Action methods
@@ -928,11 +921,10 @@ static BOOL hasBecomeActive = NO;
                                              action:nil
                                       keyEquivalent:@""];
     [superMenu addItem:newMenuItem];
-    [newMenuItem release];
 
     // Create the bookmark submenus for new session
     // Build the bookmark menu
-    bookmarksMenu = [[[NSMenu alloc] init] autorelease];
+    bookmarksMenu = [[NSMenu alloc] init];
 
     [[iTermController sharedInstance] addBookmarksToMenu:bookmarksMenu
                                             withSelector:selector
@@ -951,7 +943,7 @@ static BOOL hasBecomeActive = NO;
     NSMenuItem *container = [theMenu addItemWithTitle:@"Restore Arrangement"
                                                action:nil
                                         keyEquivalent:@""];
-    NSMenu *subMenu = [[[NSMenu alloc] init] autorelease];
+    NSMenu *subMenu = [[NSMenu alloc] init];
     [container setSubmenu:subMenu];
     [self _updateArrangementsMenu:container];
 }
@@ -978,7 +970,7 @@ static BOOL hasBecomeActive = NO;
          openAllSelector:@selector(newSessionsInWindow:)];
     [self _addArrangementsMenuTo:aMenu];
 
-    return ([aMenu autorelease]);
+    return (aMenu);
 }
 
 - (void)applicationWillBecomeActive:(NSNotification *)aNotification
@@ -1126,10 +1118,10 @@ static BOOL hasBecomeActive = NO;
                         }
                     } else {
                         // Create a new term and add the session to it.
-                        term = [[[PseudoTerminal alloc] initWithSmartLayout:YES
+                        term = [[PseudoTerminal alloc] initWithSmartLayout:YES
                                                                  windowType:WINDOW_TYPE_NORMAL
                                                             savedWindowType:WINDOW_TYPE_NORMAL
-                                                                     screen:-1] autorelease];
+                                                                     screen:-1];
                         if (term) {
                             [[iTermController sharedInstance] addTerminalWindow:term];
                             term.terminalGuid = restorableSession.terminalGuid;
@@ -1146,10 +1138,10 @@ static BOOL hasBecomeActive = NO;
                     BOOL fitTermToTabs = NO;
                     if (!term) {
                         // Create a new window
-                        term = [[[PseudoTerminal alloc] initWithSmartLayout:YES
+                        term = [[PseudoTerminal alloc] initWithSmartLayout:YES
                                                                  windowType:WINDOW_TYPE_NORMAL
                                                             savedWindowType:WINDOW_TYPE_NORMAL
-                                                                     screen:-1] autorelease];
+                                                                     screen:-1];
                         [[iTermController sharedInstance] addTerminalWindow:term];
                         term.terminalGuid = restorableSession.terminalGuid;
                         fitTermToTabs = YES;
@@ -1188,8 +1180,8 @@ static BOOL hasBecomeActive = NO;
                                    alternateButton:@"Cancel"
                                        otherButton:nil
                          informativeTextWithFormat:@"How many spaces for each tab?"];
-    NSTextField *input = [[[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 50, 24)] autorelease];
-    input.formatter = [[[iTermIntegerNumberFormatter alloc] init] autorelease];
+    NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 50, 24)];
+    input.formatter = [[iTermIntegerNumberFormatter alloc] init];
     input.stringValue = [NSString stringWithFormat:@"%d", defaultValue];
     alert.accessoryView = input;
     [alert layout];
@@ -1450,14 +1442,12 @@ static BOOL hasBecomeActive = NO;
                                              keyEquivalent:@""];
             [aMenuItem setTag:i-1];
             [aMenu addItem:aMenuItem];
-            [aMenuItem release];
         }
         i++;
     }
 
     [selectTab setSubmenu:aMenu];
 
-    [aMenu release];
 }
 
 - (void)_removeItemsFromMenu:(NSMenu*)menu
@@ -1479,7 +1469,7 @@ static BOOL hasBecomeActive = NO;
     params.openAllSelector = @selector(newSessionsInWindow:);
     params.alternateSelector = @selector(newSessionInWindowAtIndex:);
     params.alternateOpenAllSelector = @selector(newSessionsInWindow:);
-    params.target = [iTermController sharedInstance];
+    params.target = (__bridge CFTypeRef)([iTermController sharedInstance]);
 
     [ProfileModel applyJournal:[aNotification userInfo]
                          toMenu:bookmarkMenu
@@ -1490,12 +1480,12 @@ static BOOL hasBecomeActive = NO;
 - (NSMenu *)downloadsMenu
 {
     if (!downloadsMenu_) {
-        downloadsMenu_ = [[[NSMenuItem alloc] init] autorelease];
+        downloadsMenu_ = [[NSMenuItem alloc] init];
         downloadsMenu_.title = @"Downloads";
         NSMenu *mainMenu = [[NSApplication sharedApplication] mainMenu];
         [mainMenu insertItem:downloadsMenu_
                      atIndex:mainMenu.itemArray.count - 1];
-        [downloadsMenu_ setSubmenu:[[[NSMenu alloc] initWithTitle:@"Downloads"] autorelease]];
+        [downloadsMenu_ setSubmenu:[[NSMenu alloc] initWithTitle:@"Downloads"]];
     }
     return [downloadsMenu_ submenu];
 }
@@ -1503,12 +1493,12 @@ static BOOL hasBecomeActive = NO;
 - (NSMenu *)uploadsMenu
 {
     if (!uploadsMenu_) {
-        uploadsMenu_ = [[[NSMenuItem alloc] init] autorelease];
+        uploadsMenu_ = [[NSMenuItem alloc] init];
         uploadsMenu_.title = @"Uploads";
         NSMenu *mainMenu = [[NSApplication sharedApplication] mainMenu];
         [mainMenu insertItem:uploadsMenu_
                      atIndex:mainMenu.itemArray.count - 1];
-        [uploadsMenu_ setSubmenu:[[[NSMenu alloc] initWithTitle:@"Uploads"] autorelease]];
+        [uploadsMenu_ setSubmenu:[[NSMenu alloc] initWithTitle:@"Uploads"]];
     }
     return [uploadsMenu_ submenu];
 }
@@ -1636,7 +1626,7 @@ static BOOL hasBecomeActive = NO;
     }
 
     // create menu item with no title and set image
-    NSMenuItem *scriptMenuItem = [[[NSMenuItem alloc] initWithTitle:kScriptTitle action: nil keyEquivalent: @""] autorelease];
+    NSMenuItem *scriptMenuItem = [[NSMenuItem alloc] initWithTitle:kScriptTitle action: nil keyEquivalent: @""];
 
     // create submenu
     int count = 0;
@@ -1659,7 +1649,6 @@ static BOOL hasBecomeActive = NO;
             [scriptItem setTarget:[iTermController sharedInstance]];
             [scriptMenu addItem:scriptItem];
             count++;
-            [scriptItem release];
         }
     }
     if (count > 0) {
@@ -1670,9 +1659,7 @@ static BOOL hasBecomeActive = NO;
             [scriptItem setTarget:self];
             [scriptMenu addItem:scriptItem];
             count++;
-            [scriptItem release];
     }
-    [scriptMenu release];
 
     // add new menu item
     if (count) {

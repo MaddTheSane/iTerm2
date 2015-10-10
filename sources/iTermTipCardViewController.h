@@ -20,7 +20,7 @@
 @property(nonatomic, readonly) NSRect postAnimationFrame;
 
 // View that contains all subviews.
-@property(nonatomic, readonly) NSView *containerView;
+@property(weak, nonatomic, readonly) NSView *containerView;
 
 // Update the card title.
 - (void)setTitleString:(NSString *)titleString;

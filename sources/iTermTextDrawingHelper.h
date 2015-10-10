@@ -66,22 +66,22 @@
 @interface iTermTextDrawingHelper : NSObject
 
 // Holds the current selection, if any.
-@property(nonatomic, retain) iTermSelection *selection;
+@property(nonatomic, strong) iTermSelection *selection;
 
 // Color for the cursor guide, if any.
-@property(nonatomic, retain) NSColor *cursorGuideColor;
+@property(nonatomic, strong) NSColor *cursorGuideColor;
 
 // Image to show as badge.
-@property(nonatomic, retain) NSImage *badgeImage;
+@property(nonatomic, strong) NSImage *badgeImage;
 
 // Color for selection background when the view is not focused.
-@property(nonatomic, retain) NSColor *unfocusedSelectionColor;
+@property(nonatomic, strong) NSColor *unfocusedSelectionColor;
 
 // Holds colors.
-@property(nonatomic, retain) iTermColorMap *colorMap;
+@property(nonatomic, strong) iTermColorMap *colorMap;
 
 // Required delegate.
-@property(nonatomic, assign) NSView<iTermTextDrawingHelperDelegate> *delegate;
+@property(nonatomic, weak) NSView<iTermTextDrawingHelperDelegate> *delegate;
 
 // Size of a cell in pixels.
 @property(nonatomic, assign) NSSize cellSize;
@@ -195,7 +195,7 @@
 @property(nonatomic, assign) CGFloat antiAliasedShift;
 
 // NSTextInputClient support
-@property(nonatomic, retain) NSAttributedString *markedText;
+@property(nonatomic, strong) NSAttributedString *markedText;
 
 // Marked text may have a selection. This gives the range of selected characters.
 @property(nonatomic, assign) NSRange inputMethodSelectedRange;

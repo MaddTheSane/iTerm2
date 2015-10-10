@@ -15,6 +15,9 @@
     double score_;
     double hitMultiplier_;
 }
+@synthesize mainValue = s_;
+@synthesize score = score_;
+@synthesize prefix = prefix_;
 
 - (id)init
 {
@@ -25,12 +28,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [s_ release];
-    [prefix_ release];
-    [super dealloc];
-}
 
 - (NSString *)description
 {
@@ -48,7 +45,7 @@
 
 + (PopupEntry*)entryWithString:(NSString*)s score:(double)score
 {
-    PopupEntry* e = [[[PopupEntry alloc] init] autorelease];
+    PopupEntry* e = [[PopupEntry alloc] init];
     [e _setDefaultValues];
     [e setMainValue:s];
     [e setScore:score];
@@ -56,31 +53,10 @@
     return e;
 }
 
-- (NSString*)mainValue
-{
-    return s_;
-}
-
-- (void)setScore:(double)score
-{
-    score_ = score;
-}
-
-- (void)setMainValue:(NSString*)s
-{
-    [s_ autorelease];
-    s_ = [s retain];
-}
-
 - (double)advanceHitMult
 {
     hitMultiplier_ *= 0.8;
     return hitMultiplier_;
-}
-
-- (double)score
-{
-    return score_;
 }
 
 - (BOOL)isEqual:(id)o
@@ -95,17 +71,6 @@
 - (NSComparisonResult)compare:(id)otherObject
 {
     return [[NSNumber numberWithDouble:score_] compare:[NSNumber numberWithDouble:[otherObject score]]];
-}
-
-- (void)setPrefix:(NSString*)prefix
-{
-    [prefix_ autorelease];
-    prefix_ = [prefix retain];
-}
-
-- (NSString*)prefix
-{
-    return prefix_;
 }
 
 @end

@@ -18,7 +18,7 @@
                             delayKey:(NSString *)delayKey
                         tabTransform:(iTermTabTransformTags)tabTransform
                         spacesPerTab:(int)spacesPerTab {
-    PasteEvent *pasteEvent = [[[PasteEvent alloc] init] autorelease];
+    PasteEvent *pasteEvent = [[PasteEvent alloc] init];
     pasteEvent.string = string;
     pasteEvent.flags = flags;
     pasteEvent.chunkKey = chunkKey;
@@ -30,11 +30,5 @@
     return pasteEvent;
 }
 
-- (void)dealloc {
-    [_string release];
-    [_chunkKey release];
-    [_delayKey release];
-    [super dealloc];
-}
 
 @end

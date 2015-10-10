@@ -4,14 +4,14 @@
 @interface AATreeNode : NSObject <NSCopying>
 
 // AA tree properties.
-@property(retain) AATreeNode *left;
-@property(retain) AATreeNode *right;
+@property(strong) AATreeNode *left;
+@property(strong) AATreeNode *right;
 @property(assign) int level;
 @property(assign) BOOL deleted;
 
 // Data properties.
-@property(retain) id data;
-@property(retain) id key;
+@property(strong) id data;
+@property(strong) id key;
 
 
 /*!
@@ -24,7 +24,7 @@
  * @param aKey				The key the node is bound to.
  * @result					An initialized node.
  */ 
-- (id) initWithData:(id)aDataObject boundToKey:(id)aKey;
+- (instancetype) initWithData:(id)aDataObject boundToKey:(id)aKey;
 
 
 /*!

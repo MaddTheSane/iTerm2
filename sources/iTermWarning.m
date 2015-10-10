@@ -8,8 +8,7 @@ static BOOL gShowingWarning;
 @implementation iTermWarning
 
 + (void)setWarningHandler:(id<iTermWarningHandler>)handler {
-    [gWarningHandler autorelease];
-    gWarningHandler = [handler retain];
+    gWarningHandler = handler;
 }
 
 + (id<iTermWarningHandler>)warningHandler {

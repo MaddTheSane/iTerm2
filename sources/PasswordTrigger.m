@@ -28,13 +28,8 @@
     return self;
 }
 
-- (void)dealloc {
-    [_accountNames release];
-    [super dealloc];
-}
 
 - (void)reloadData {
-    [_accountNames release];
     _accountNames = [[iTermPasswordManagerWindowController accountNamesWithFilter:nil] copy];
     if (!_accountNames.count) {
         _accountNames = [@[ @"" ] copy];

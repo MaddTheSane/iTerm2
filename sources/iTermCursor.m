@@ -25,13 +25,13 @@
 + (iTermCursor *)cursorOfType:(ITermCursorType)theType {
     switch (theType) {
         case CURSOR_UNDERLINE:
-            return [[[iTermUnderlineCursor alloc] init] autorelease];
+            return [[iTermUnderlineCursor alloc] init];
 
         case CURSOR_VERTICAL:
-            return [[[iTermVerticalCursor alloc] init] autorelease];
+            return [[iTermVerticalCursor alloc] init];
 
         case CURSOR_BOX:
-            return [[[iTermBoxCursor alloc] init] autorelease];
+            return [[iTermBoxCursor alloc] init];
 
         default:
             return nil;

@@ -16,17 +16,10 @@
 @synthesize italicVersion = italicVersion_;
 
 + (PTYFontInfo *)fontInfoWithFont:(NSFont *)font baseline:(double)baseline {
-    PTYFontInfo *fontInfo = [[[PTYFontInfo alloc] init] autorelease];
+    PTYFontInfo *fontInfo = [[PTYFontInfo alloc] init];
     fontInfo.font = font;
     fontInfo.baselineOffset = baseline;
     return fontInfo;
-}
-
-- (void)dealloc {
-    [font_ release];
-    [boldVersion_ release];
-    [italicVersion_ release];
-    [super dealloc];
 }
 
 - (PTYFontInfo *)computedBoldVersion {

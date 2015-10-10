@@ -33,12 +33,6 @@ static const NSTimeInterval kDefaultMaxTime = 0.1;
     return self;
 }
 
-- (void)dealloc {
-    [results_ release];
-    [substring_ release];
-    [super dealloc];
-}
-
 - (void)copyFromFindContext:(FindContext *)other {
     self.absBlockNum = other.absBlockNum;
     self.substring = other.substring;
@@ -59,7 +53,6 @@ static const NSTimeInterval kDefaultMaxTime = 0.1;
 }
 
 - (void)setSubstring:(NSString *)substring {
-    [substring_ autorelease];
     substring_ = [substring copy];
 }
 

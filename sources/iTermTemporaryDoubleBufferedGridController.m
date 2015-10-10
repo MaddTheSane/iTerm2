@@ -11,17 +11,12 @@
 #import "VT100Grid.h"
 
 @interface iTermTemporaryDoubleBufferedGridController()
-@property(nonatomic, retain) VT100Grid *savedGrid;
+@property(nonatomic, strong) VT100Grid *savedGrid;
 @end
 
 @implementation iTermTemporaryDoubleBufferedGridController {
     NSTimer *_timer;
     VT100Grid *_savedGrid;
-}
-
-- (void)dealloc {
-    [_savedGrid release];
-    [super dealloc];
 }
 
 - (void)start {

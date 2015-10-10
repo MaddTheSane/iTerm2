@@ -9,9 +9,9 @@
 #import <Foundation/Foundation.h>
 
 @interface iTermRule : NSObject
-@property(nonatomic, readonly) NSString *username;
-@property(nonatomic, readonly) NSString *hostname;
-@property(nonatomic, readonly) NSString *path;
+@property(nonatomic, readonly, copy) NSString *username;
+@property(nonatomic, readonly, copy) NSString *hostname;
+@property(nonatomic, readonly, copy) NSString *path;
 
 + (instancetype)ruleWithString:(NSString *)string;
 - (int)scoreForHostname:(NSString *)hostname

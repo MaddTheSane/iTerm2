@@ -31,18 +31,18 @@ typedef NS_ENUM(NSInteger, PTYNoteViewTipEdge) {
     NSPoint point_;
     NSView *contentView_;
     PTYNoteViewTipEdge tipEdge_;
-    id<PTYNoteViewDelegate> delegate_;
+    id<PTYNoteViewDelegate> __unsafe_unretained delegate_;
     NSButton *killButton_;
     NSColor *backgroundColor_;
 }
 
-@property(nonatomic, assign) id<PTYNoteViewDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<PTYNoteViewDelegate> delegate;
 
 // Location of arrow relative to top-left corner of this view.
 @property(nonatomic, assign) NSPoint point;
-@property(nonatomic, retain) NSView *contentView;
+@property(nonatomic, strong) NSView *contentView;
 @property(nonatomic, assign) PTYNoteViewTipEdge tipEdge;
-@property(nonatomic, retain) NSColor *backgroundColor;
+@property(nonatomic, strong) NSColor *backgroundColor;
 
 - (NSColor *)defaultBackgroundColor;
 - (void)layoutSubviews;

@@ -18,7 +18,7 @@
 
 @interface iTermProfilePreferencesBaseViewController : iTermPreferencesBaseViewController
 
-@property(nonatomic, assign) IBOutlet id<iTermProfilePreferencesBaseViewControllerDelegate> delegate;
+@property(nonatomic, unsafe_unretained) IBOutlet id<iTermProfilePreferencesBaseViewControllerDelegate> delegate;
 
 // Update controls' values after the selected profile changes.
 - (void)reloadProfile;

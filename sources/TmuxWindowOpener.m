@@ -55,7 +55,7 @@ NSString *const kTmuxWindowOpenerWindowFlagStyleValueFullScreen = @"FullScreen";
 
 + (TmuxWindowOpener *)windowOpener
 {
-    return [[[TmuxWindowOpener alloc] init] autorelease];
+    return [[TmuxWindowOpener alloc] init];
 }
 
 - (id)init
@@ -67,21 +67,6 @@ NSString *const kTmuxWindowOpenerWindowFlagStyleValueFullScreen = @"FullScreen";
         states_ = [[NSMutableDictionary alloc] init];
     }
     return self;
-}
-
-- (void)dealloc
-{
-    [name_ release];
-    [layout_ release];
-    [gateway_ release];
-    [parseTree_ release];
-    [target_ release];
-    [histories_ release];
-    [altHistories_ release];
-    [states_ release];
-    [tabToUpdate_ release];
-    [_windowFlags release];
-    [super dealloc];
 }
 
 - (void)openWindows:(BOOL)initial
@@ -136,7 +121,7 @@ NSString *const kTmuxWindowOpenerWindowFlagStyleValueFullScreen = @"FullScreen";
         }
     }
     if (cmdList.count) {
-        tabToUpdate_ = [tab retain];
+        tabToUpdate_ = tab;
         [gateway_ sendCommandList:cmdList];
     } else {
         [tab setTmuxLayout:self.parseTree
@@ -274,7 +259,7 @@ NSString *const kTmuxWindowOpenerWindowFlagStyleValueFullScreen = @"FullScreen";
         [pending appendBytes:&c length:1];
     }
 
-    NSMutableDictionary *state = [[[states_ objectForKey:wp] mutableCopy] autorelease];
+    NSMutableDictionary *state = [[states_ objectForKey:wp] mutableCopy];
     [state setObject:pending forKey:kTmuxWindowOpenerStatePendingOutput];
     [states_ setObject:state forKey:wp];
     [self requestDidComplete];

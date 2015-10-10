@@ -48,7 +48,7 @@ int DebugLogImpl(const char *file, int line, const char *function, NSString* val
 @property(nonatomic, readonly) BOOL isApplescriptTestApp;
 
 // Returns one of the kMarkAlertAction strings defined above.
-@property(nonatomic, readonly) NSString *markAlertAction;
+@property(weak, nonatomic, readonly) NSString *markAlertAction;
 
 // Is Sparkle in the process of restarting us?
 @property(nonatomic, readonly) BOOL sparkleRestarting;
@@ -118,7 +118,7 @@ int DebugLogImpl(const char *file, int line, const char *function, NSString* val
 - (IBAction)editCurrentSession:(id)sender;
 
 - (IBAction)toggleUseBackgroundPatternIndicator:(id)sender;
-- (BOOL)useBackgroundPatternIndicator;
+@property (readonly) BOOL useBackgroundPatternIndicator;
 
 - (void)makeHotKeyWindowKeyIfOpen;
 
@@ -126,7 +126,7 @@ int DebugLogImpl(const char *file, int line, const char *function, NSString* val
 
 // Call this when the user has any nontrivial interaction with a session, such as typing in it or closing a window.
 - (void)userDidInteractWithASession;
-- (BOOL)warnBeforeMultiLinePaste;
+@property (readonly) BOOL warnBeforeMultiLinePaste;
 
 - (NSMenu *)downloadsMenu;
 - (NSMenu *)uploadsMenu;

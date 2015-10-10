@@ -86,7 +86,7 @@ NSString *const kLineBlockMayHaveDWCKey = @"May Have Double Width Character";
 }
 
 + (instancetype)blockWithDictionary:(NSDictionary *)dictionary {
-    return [[[self alloc] initWithDictionary:dictionary] autorelease];
+    return [[self alloc] initWithDictionary:dictionary];
 }
 
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary {
@@ -103,7 +103,7 @@ NSString *const kLineBlockMayHaveDWCKey = @"May Have Double Width Character";
                                    kLineBlockMayHaveDWCKey ];
         for (NSString *requiredKey in requiredKeys) {
             if (!dictionary[requiredKey]) {
-                [self autorelease];
+                //[self autorelease];
                 return nil;
             }
         }
@@ -151,7 +151,6 @@ NSString *const kLineBlockMayHaveDWCKey = @"May Have Double Width Character";
     if (metadata_) {
         free(metadata_);
     }
-    [super dealloc];
 }
 
 - (LineBlock *)copy {
@@ -1034,7 +1033,7 @@ static int Search(NSString* needle,
                 --numUnichars;
             }
             if (tempPosition != -1 && tempPosition <= skip) {
-                ResultRange* r = [[[ResultRange alloc] init] autorelease];
+                ResultRange* r = [[ResultRange alloc] init];
                 r->position = tempPosition;
                 r->length = tempResultLength;
                 [results addObject:r];
@@ -1051,7 +1050,7 @@ static int Search(NSString* needle,
             tempPosition = Search(needle, rawline, raw_line_length, skip, raw_line_length,
                                   options, &tempResultLength);
             if (tempPosition != -1) {
-                ResultRange* r = [[[ResultRange alloc] init] autorelease];
+                ResultRange* r = [[ResultRange alloc] init];
                 r->position = tempPosition;
                 r->length = tempResultLength;
                 [results addObject:r];

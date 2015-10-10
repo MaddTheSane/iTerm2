@@ -36,15 +36,11 @@
     }
     self = [super init];
     if (self) {
-        _pathsToOrphanedServerSockets = [[self findOrphanServers] retain];
+        _pathsToOrphanedServerSockets = [self findOrphanServers];
     }
     return self;
 }
 
-- (void)dealloc {
-    [_pathsToOrphanedServerSockets release];
-    [super dealloc];
-}
 
 - (NSMutableArray *)findOrphanServers {
     NSMutableArray *array = [NSMutableArray array];

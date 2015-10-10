@@ -30,14 +30,6 @@ const CGFloat rightMargin = 5;
     return self;
 }
 
-- (void)dealloc {
-    [_filename release];
-    [_subheading release];
-    [_statusMessage release];
-    [_progressIndicator release];
-    [super dealloc];
-}
-
 - (NSString *)formattedSize:(long long)size {
     if (size < 0) {
         return @"?";
@@ -95,12 +87,12 @@ const CGFloat rightMargin = 5;
     NSRectFill(dirtyRect);
 
     NSMutableParagraphStyle *leftAlignStyle =
-        [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+        [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
     [leftAlignStyle setAlignment:NSLeftTextAlignment];
     [leftAlignStyle setLineBreakMode:NSLineBreakByTruncatingTail];
 
     NSMutableParagraphStyle *rightAlignStyle =
-        [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+        [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
     [rightAlignStyle setAlignment:NSRightTextAlignment];
     [rightAlignStyle setLineBreakMode:NSLineBreakByTruncatingTail];
 

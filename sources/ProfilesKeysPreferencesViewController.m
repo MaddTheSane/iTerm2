@@ -28,7 +28,6 @@ static NSString *const kDeleteKeyString = @"0x7f-0x0";
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (void)awakeFromNib {
@@ -79,7 +78,7 @@ static NSString *const kDeleteKeyString = @"0x7f-0x0";
     // modifying key mappings.
     BOOL sendCtrlH = ([sender state] == NSOnState);
     NSMutableDictionary *mutableProfile =
-        [[[self.delegate profilePreferencesCurrentProfile] mutableCopy] autorelease];
+        [[self.delegate profilePreferencesCurrentProfile] mutableCopy];
     if (sendCtrlH) {
         [iTermKeyBindingMgr setMappingAtIndex:0
                                        forKey:kDeleteKeyString
@@ -159,7 +158,7 @@ static NSString *const kDeleteKeyString = @"0x7f-0x0";
         isAddition:(BOOL)addition {
     Profile *profile = [self.delegate profilePreferencesCurrentProfile];
     assert(profile);
-    NSMutableDictionary *dict = [[profile mutableCopy] autorelease];
+    NSMutableDictionary *dict = [profile mutableCopy];
     
     if ([iTermKeyBindingMgr haveGlobalKeyMappingForKeyString:keyCombo]) {
         if (![self warnAboutOverride]) {
@@ -187,7 +186,7 @@ static NSString *const kDeleteKeyString = @"0x7f-0x0";
     Profile *profile = [self.delegate profilePreferencesCurrentProfile];
     assert(profile);
     
-    NSMutableDictionary *dict = [[profile mutableCopy] autorelease];
+    NSMutableDictionary *dict = [profile mutableCopy];
     NSUInteger index =
         [[iTermKeyBindingMgr sortedKeyCombinationsForProfile:profile] indexOfObject:keyCombo];
     assert(index != NSNotFound);
@@ -209,7 +208,7 @@ static NSString *const kDeleteKeyString = @"0x7f-0x0";
     Profile *profile = [self.delegate profilePreferencesCurrentProfile];
     assert(profile);
     
-    NSMutableDictionary *dict = [[profile mutableCopy] autorelease];
+    NSMutableDictionary *dict = [profile mutableCopy];
     
     [iTermKeyBindingMgr setKeyMappingsToPreset:presetName inBookmark:dict];
     [[self.delegate profilePreferencesCurrentModel] setBookmark:dict withGuid:profile[KEY_GUID]];

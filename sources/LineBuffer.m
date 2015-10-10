@@ -80,7 +80,6 @@ static const int kLineBufferVersion = 1;
     LineBlock* block = [[LineBlock alloc] initWithRawBufferSize: size];
     block.mayHaveDoubleWidthCharacter = self.mayHaveDoubleWidthCharacter;
     [blocks addObject:block];
-    [block release];
     return block;
 }
 
@@ -120,7 +119,6 @@ static const int kLineBufferVersion = 1;
     if (self) {
         [self commonInit];
         if ([dictionary[kLineBufferVersionKey] intValue] != kLineBufferVersion) {
-            [self autorelease];
             return nil;
         }
         _mayHaveDoubleWidthCharacter = [dictionary[kLineBufferMayHaveDWCKey] boolValue];
@@ -134,7 +132,6 @@ static const int kLineBufferVersion = 1;
         for (NSDictionary *blockDictionary in dictionary[kLineBufferBlocksKey]) {
             LineBlock *block = [LineBlock blockWithDictionary:blockDictionary];
             if (!block) {
-                [self autorelease];
                 return nil;
             }
             [blocks addObject:block];
@@ -152,8 +149,6 @@ static const int kLineBufferVersion = 1;
                    onThread:[BackgroundThread backgroundThread]
                  withObject:nil
               waitUntilDone:NO];
-    [blocks release];
-    [super dealloc];
 }
 
 - (void)setMayHaveDoubleWidthCharacter:(BOOL)mayHaveDoubleWidthCharacter {
@@ -479,7 +474,7 @@ static int RawNumLines(LineBuffer* buffer, int width) {
                            continuation:(screen_char_t *)continuation {
     int line = lineNum;
     int i;
-    ScreenCharArray *result = [[[ScreenCharArray alloc] init] autorelease];
+    ScreenCharArray *result = [[ScreenCharArray alloc] init];
     for (i = 0; i < [blocks count]; ++i) {
         LineBlock* block = [blocks objectAtIndex:i];
 
@@ -822,7 +817,7 @@ static int RawNumLines(LineBuffer* buffer, int width) {
         NSValue *start = [intermediate objectForKey:[NSNumber numberWithInt:rr->position]];
         NSValue *end = [intermediate objectForKey:[NSNumber numberWithInt:rr->position + rr->length - 1]];
         if (start && end) {
-            XYRange *xyrange = [[[XYRange alloc] init] autorelease];
+            XYRange *xyrange = [[XYRange alloc] init];
             NSPoint startPoint = [start pointValue];
             NSPoint endPoint = [end pointValue];
             xyrange->xStart = startPoint.x;
@@ -1086,7 +1081,7 @@ static int RawNumLines(LineBuffer* buffer, int width) {
     LineBlock *lastBlock = [blocks lastObject];
     if (lastBlock) {
         [theCopy->blocks removeLastObject];
-        [theCopy->blocks addObject:[[lastBlock copy] autorelease]];
+        [theCopy->blocks addObject:[lastBlock copy]];
     }
     theCopy->block_size = block_size;
     theCopy->cursor_x = cursor_x;
@@ -1225,7 +1220,7 @@ static int RawNumLines(LineBuffer* buffer, int width) {
     const int numDroppedBlocks = totalBlocks - numBlocks;
 
     // Make a copy of the whole thing (cheap)
-    LineBuffer *theCopy = [[self newAppendOnlyCopy] autorelease];
+    LineBuffer *theCopy = [self newAppendOnlyCopy];
 
     // Remove the blocks we don't need.
     [theCopy->blocks removeObjectsInRange:NSMakeRange(0, numDroppedBlocks)];

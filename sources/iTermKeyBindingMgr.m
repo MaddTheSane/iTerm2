@@ -285,7 +285,7 @@ static NSString *const kFactoryDefaultsGlobalPreset = @"Factory Defaults";
         [theKeyString appendString: @"num-"];
     }
     [theKeyString appendString: aString];
-    return [theKeyString autorelease];
+    return theKeyString;
 }
 
 + (NSString*)_bookmarkNameForGuid:(NSString*)guid
@@ -514,7 +514,6 @@ static NSString *const kFactoryDefaultsGlobalPreset = @"Factory Defaults";
         NSString* plistFile = [[NSBundle bundleForClass: [self class]] pathForResource:@"DefaultGlobalKeyMap" ofType:@"plist"];
         globalKeyMap = [NSDictionary dictionaryWithContentsOfFile:plistFile];
     }
-    [globalKeyMap retain];
 }
 
 + (NSDictionary*)globalKeyMap
@@ -527,7 +526,6 @@ static NSString *const kFactoryDefaultsGlobalPreset = @"Factory Defaults";
 
 + (void)setGlobalKeyMap:(NSDictionary*)src
 {
-    [globalKeyMap release];
     globalKeyMap = [src copy];
     [[NSUserDefaults standardUserDefaults] setObject:globalKeyMap forKey:@"GlobalKeyMap"];
 }
@@ -578,7 +576,6 @@ static NSString *const kFactoryDefaultsGlobalPreset = @"Factory Defaults";
 {
     assert([presetName isEqualToString:kFactoryDefaultsGlobalPreset]);
     if (globalKeyMap) {
-        [globalKeyMap release];
         [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GlobalKeyMap"];
     }
     [self _loadGlobalKeyMap];
@@ -636,10 +633,10 @@ static NSString *const kFactoryDefaultsGlobalPreset = @"Factory Defaults";
     }
 
     NSMutableDictionary* keyBinding =
-        [[[NSMutableDictionary alloc] init] autorelease];
+        [[NSMutableDictionary alloc] init];
     [keyBinding setObject:[NSNumber numberWithInt:actionIndex]
                    forKey:@"Action"];
-    [keyBinding setObject:[[valueToSend copy] autorelease] forKey:@"Text"];
+    [keyBinding setObject:[valueToSend copy] forKey:@"Text"];
     if (origKeyCombo) {
         [km removeObjectForKey:origKeyCombo];
     }

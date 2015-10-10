@@ -272,7 +272,7 @@ NSString *const kSemanticHistoryWorkingDirectorySubstitutionKey = @"semanticHist
     }
 
     NSString *script = [prefs_ objectForKey:kSemanticHistoryTextKey];
-    NSMutableDictionary *augmentedSubs = [[substitutions mutableCopy] autorelease];
+    NSMutableDictionary *augmentedSubs = [substitutions mutableCopy];
     augmentedSubs[@"1"] = path ? [path stringWithEscapedShellCharacters] : @"";
     augmentedSubs[@"2"] = lineNumber ? lineNumber : @"";
     augmentedSubs[@"3"] = substitutions[kSemanticHistoryPrefixSubstitutionKey];
@@ -385,8 +385,8 @@ NSString *const kSemanticHistoryWorkingDirectorySubstitutionKey = @"semanticHist
              workingDirectory);
     }
 
-    NSMutableString *beforeString = [[beforeStringIn mutableCopy] autorelease];
-    NSMutableString *afterString = [[afterStringIn mutableCopy] autorelease];
+    NSMutableString *beforeString = [beforeStringIn mutableCopy];
+    NSMutableString *afterString = [afterStringIn mutableCopy];
 
     // Remove escaping slashes
     NSString *removeEscapingSlashes = @"\\\\([ \\(\\[\\]\\\\)])";
@@ -396,7 +396,7 @@ NSString *const kSemanticHistoryWorkingDirectorySubstitutionKey = @"semanticHist
 
     [beforeString replaceOccurrencesOfRegex:removeEscapingSlashes withString:@"$1"];
     [afterString replaceOccurrencesOfRegex:removeEscapingSlashes withString:@"$1"];
-    beforeString = [[beforeString copy] autorelease];
+    beforeString = [beforeString copy];
     // The parens here cause "Foo bar" to become {"Foo", " ", "bar"} rather than {"Foo", "bar"}.
     // Also, there is some kind of weird bug in regexkit. If you do [[beforeChunks mutableCopy] autorelease]
     // then the items in the array get over-released.
@@ -448,7 +448,7 @@ NSString *const kSemanticHistoryWorkingDirectorySubstitutionKey = @"semanticHist
             if ([paths containsObject:[NSString stringWithString:trimmedPath]]) {
                 continue;
             }
-            [paths addObject:[[trimmedPath copy] autorelease]];
+            [paths addObject:[trimmedPath copy]];
 
             for (NSString *modifiedPossiblePath in [self pathsFromPath:trimmedPath byRemovingBadSuffixes:questionableSuffixes]) {
                 BOOL exists = NO;

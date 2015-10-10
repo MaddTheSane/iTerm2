@@ -26,10 +26,10 @@ static const CGFloat kMaximumToolbeltSizeAsFractionOfWindow = 0.5;
 
 @interface iTermRootTerminalView()<iTermTabBarControlViewDelegate>
 
-@property(nonatomic, retain) PTYTabView *tabView;
-@property(nonatomic, retain) iTermTabBarControlView *tabBarControl;
-@property(nonatomic, retain) SolidColorView *divisionView;
-@property(nonatomic, retain) iTermToolbeltView *toolbelt;
+@property(nonatomic, strong) PTYTabView *tabView;
+@property(nonatomic, strong) iTermTabBarControlView *tabBarControl;
+@property(nonatomic, strong) SolidColorView *divisionView;
+@property(nonatomic, strong) iTermToolbeltView *toolbelt;
 @end
 
 
@@ -48,7 +48,7 @@ static const CGFloat kMaximumToolbeltSizeAsFractionOfWindow = 0.5;
         self.autoresizesSubviews = YES;
 
         // Create the tab view.
-        self.tabView = [[[PTYTabView alloc] initWithFrame:self.bounds] autorelease];
+        self.tabView = [[PTYTabView alloc] initWithFrame:self.bounds];
         _tabView.autoresizingMask = (NSViewWidthSizable | NSViewHeightSizable);
         _tabView.autoresizesSubviews = YES;
         _tabView.allowsTruncatedLabels = NO;
@@ -59,7 +59,7 @@ static const CGFloat kMaximumToolbeltSizeAsFractionOfWindow = 0.5;
         // Create the tab bar.
         NSRect tabBarFrame = self.bounds;
         tabBarFrame.size.height = kHorizontalTabBarHeight;
-        self.tabBarControl = [[[iTermTabBarControlView alloc] initWithFrame:tabBarFrame] autorelease];
+        self.tabBarControl = [[iTermTabBarControlView alloc] initWithFrame:tabBarFrame];
         _tabBarControl.itermTabBarDelegate = self;
 
         int theModifier =
@@ -92,8 +92,8 @@ static const CGFloat kMaximumToolbeltSizeAsFractionOfWindow = 0.5;
         _toolbeltWidth = kDefaultToolbeltWidth;
         [self constrainToolbeltWidth];
 
-        self.toolbelt = [[[iTermToolbeltView alloc] initWithFrame:self.toolbeltFrame
-                                                         delegate:(id)_delegate] autorelease];
+        self.toolbelt = [[iTermToolbeltView alloc] initWithFrame:self.toolbeltFrame
+                                                         delegate:(id)_delegate];
         _toolbelt.autoresizingMask = (NSViewMinXMargin | NSViewHeightSizable);
         [self addSubview:_toolbelt];
         [self updateToolbelt];
@@ -102,16 +102,11 @@ static const CGFloat kMaximumToolbeltSizeAsFractionOfWindow = 0.5;
 }
 
 - (void)dealloc {
-    [_tabView release];
 
     _tabBarControl.itermTabBarDelegate = nil;
     _tabBarControl.delegate = nil;
-    [_tabBarControl release];
 
-    [_divisionView release];
-    [_toolbelt release];
 
-    [super dealloc];
 }
 
 #pragma mark - Division View
@@ -136,7 +131,6 @@ static const CGFloat kMaximumToolbeltSizeAsFractionOfWindow = 0.5;
     } else if (_divisionView) {
         // Remove existing division
         [_divisionView removeFromSuperview];
-        [_divisionView release];
         _divisionView = nil;
     }
 }
@@ -190,7 +184,6 @@ static const CGFloat kMaximumToolbeltSizeAsFractionOfWindow = 0.5;
 
 - (void)shutdown {
     [_toolbelt shutdown];
-    [_toolbelt release];
     _toolbelt = nil;
     _delegate = nil;
 }

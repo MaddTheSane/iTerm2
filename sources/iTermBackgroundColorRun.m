@@ -46,7 +46,7 @@ static void iTermMakeBackgroundColorRun(iTermBackgroundColorRun *run,
     run->range = range;
 
     // Add it to the array.
-    iTermBoxedBackgroundColorRun *box = [[[iTermBoxedBackgroundColorRun alloc] init] autorelease];
+    iTermBoxedBackgroundColorRun *box = [[iTermBoxedBackgroundColorRun alloc] init];
     memcpy(box.valuePointer, run, sizeof(*run));
     [runs addObject:box];
 }
@@ -98,17 +98,13 @@ static void iTermMakeBackgroundColorRun(iTermBackgroundColorRun *run,
     }
 
     iTermBackgroundColorRunsInLine *backgroundColorRuns =
-        [[[iTermBackgroundColorRunsInLine alloc] init] autorelease];
+        [[iTermBackgroundColorRunsInLine alloc] init];
     backgroundColorRuns.array = runs;
     backgroundColorRuns.y = y;
     backgroundColorRuns.line = line;
     return backgroundColorRuns;
 }
 
-- (void)dealloc {
-    [_array release];
-    [super dealloc];
-}
 
 @end
 
@@ -116,11 +112,6 @@ static void iTermMakeBackgroundColorRun(iTermBackgroundColorRun *run,
     iTermBackgroundColorRun _value;
 }
 
-- (void)dealloc {
-    [_backgroundColor release];
-    [_unprocessedBackgroundColor release];
-    [super dealloc];
-}
 
 - (iTermBackgroundColorRun *)valuePointer {
     return &_value;

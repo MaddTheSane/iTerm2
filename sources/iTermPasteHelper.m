@@ -41,7 +41,7 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
 }
 
 + (NSMutableCharacterSet *)unsafeControlCodeSet {
-    NSMutableCharacterSet *controlSet = [[[NSMutableCharacterSet alloc] init] autorelease];
+    NSMutableCharacterSet *controlSet = [[NSMutableCharacterSet alloc] init];
     [controlSet addCharactersInRange:NSMakeRange(0, 32)];
     [controlSet removeCharactersInRange:NSMakeRange(9, 2)];  // Tab and line feed
     [controlSet removeCharactersInRange:NSMakeRange(12, 2)];  // Form feed and carriage return
@@ -58,14 +58,9 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
 }
 
 - (void)dealloc {
-    [_eventQueue release];
-    [_pasteViewController release];
-    [_pasteContext release];
-    [_buffer release];
     if (_timer) {
         [_timer invalidate];
     }
-    [super dealloc];
 }
 
 - (void)showPasteOptionsInWindow:(NSWindow *)window bracketingEnabled:(BOOL)bracketingEnabled {
@@ -318,7 +313,7 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
 - (void)dequeueEvents {
     DLog(@"Dequeueing paste events...");
     while (_eventQueue.count) {
-        NSEvent *event = [[[_eventQueue firstObject] retain] autorelease];
+        NSEvent *event = [_eventQueue firstObject];
         [_eventQueue removeObjectAtIndex:0];
         if ([event isKindOfClass:[PasteEvent class]]) {
             DLog(@"Found a queued paste event");
@@ -353,7 +348,6 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
 
 - (void)hidePasteIndicator {
     [_pasteViewController close];
-    [_pasteViewController release];
     _pasteViewController = nil;
 }
 
@@ -400,7 +394,6 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
         DLog(@"Done pasting");
         _timer = nil;
         [self hidePasteIndicator];
-        [_pasteContext release];
         _pasteContext = nil;
         [self dequeueEvents];
     }
@@ -427,7 +420,6 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
            delayBetweenCallsPrefKey:(NSString*)delayBetweenCallsKey
                        defaultValue:(float)delayBetweenCallsDefault
                      blockAtNewline:(BOOL)blockAtNewline {
-    [_pasteContext release];
     _pasteContext = [[PasteContext alloc] initWithBytesPerCallPrefKey:bytesPerCallKey
                                                          defaultValue:bytesPerCallDefault
                                              delayBetweenCallsPrefKey:delayBetweenCallsKey
@@ -501,7 +493,7 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
 - (int)numberOfSpacesToConvertTabsTo:(NSString *)source {
     if ([source rangeOfString:@"\t"].location != NSNotFound) {
         iTermNumberOfSpacesAccessoryViewController *accessoryController =
-            [[[iTermNumberOfSpacesAccessoryViewController alloc] init] autorelease];
+            [[iTermNumberOfSpacesAccessoryViewController alloc] init];
 
         iTermWarningSelection selection =
             [iTermWarning showWarningWithTitle:@"You're about to paste a string with tabs."
@@ -530,9 +522,7 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
     [self hidePasteIndicator];
     [_timer invalidate];
     _timer = nil;
-    [_buffer release];
     _buffer = [[NSMutableData alloc] init];
-    [_pasteContext release];
     _pasteContext = nil;
     [self dequeueEvents];
 }

@@ -1,13 +1,13 @@
 #import <Cocoa/Cocoa.h>
 #import "ScreenChar.h"
 
-typedef enum {
+typedef NS_ENUM(NSInteger, ITermCursorType) {
     CURSOR_UNDERLINE,
     CURSOR_VERTICAL,
     CURSOR_BOX,
 
     CURSOR_DEFAULT = -1  // Use the default cursor type for a profile. Internally used for DECSTR.
-} ITermCursorType;
+};
 
 typedef struct {
     screen_char_t chars[3][3];
@@ -37,7 +37,7 @@ typedef struct {
 
 @interface iTermCursor : NSObject
 
-@property(nonatomic, assign) id<iTermCursorDelegate> delegate;
+@property(nonatomic, unsafe_unretained) id<iTermCursorDelegate> delegate;
 
 + (iTermCursor *)cursorOfType:(ITermCursorType)theType;
 

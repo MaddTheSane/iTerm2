@@ -14,17 +14,10 @@
 {
     self = [super init];
     if (self) {
-        guid = [[bookmark objectForKey:KEY_GUID] retain];
-        self->underlyingModel = [newUnderlyingModel retain];
+        guid = [bookmark objectForKey:KEY_GUID];
+        self->underlyingModel = newUnderlyingModel;
     }
     return self;
-}
-
-- (void)dealloc
-{
-    [underlyingModel release];
-    [guid release];
-    [super dealloc];
 }
 
 - (Profile*)bookmark

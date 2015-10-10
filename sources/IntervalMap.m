@@ -13,8 +13,8 @@
     id value_;
 }
 
-@property (nonatomic, retain) IntRange *range;
-@property (nonatomic, retain) id value;
+@property (nonatomic, strong) IntRange *range;
+@property (nonatomic, strong) id value;
 
 + (IntervalMapElement *)elementWithRange:(IntRange *)range value:(id)value;
 
@@ -27,18 +27,12 @@
 
 + (IntervalMapElement *)elementWithRange:(IntRange *)range value:(id)value
 {
-    IntervalMapElement *element = [[[IntervalMapElement alloc] init] autorelease];
+    IntervalMapElement *element = [[IntervalMapElement alloc] init];
     element.range = range;
     element.value = value;
     return element;
 }
 
-- (void)dealloc
-{
-    [range_ release];
-    [value_ release];
-    [super dealloc];
-}
 
 - (NSComparisonResult)compare:(IntervalMapElement *)other
 {
@@ -61,7 +55,7 @@
 
 + (IntRange *)rangeWithMin:(int)min limit:(int)limit
 {
-    IntRange *range = [[[IntRange alloc] init] autorelease];
+    IntRange *range = [[IntRange alloc] init];
     range->min = min;
     range->size = MAX(0, limit - min);
     return range;
@@ -132,11 +126,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [elements_ release];
-    [super dealloc];
-}
 
 - (NSArray *)elementsInRange:(IntRange *)range
 {

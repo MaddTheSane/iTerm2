@@ -21,7 +21,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
 
 + (instancetype)subSelectionWithRange:(VT100GridWindowedRange)range
                                  mode:(iTermSelectionMode)mode {
-    iTermSubSelection *sub = [[[iTermSubSelection alloc] init] autorelease];
+    iTermSubSelection *sub = [[iTermSubSelection alloc] init];
     sub.range = range;
     sub.selectionMode = mode;
     return sub;
@@ -151,10 +151,6 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
     return self;
 }
 
-- (void)dealloc {
-    [_subSelections release];
-    [super dealloc];
-}
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: %p liveRange=%@ initialRange=%@ live=%d extend=%d "
@@ -259,7 +255,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
         }
     }
     [self extendPastNulls];
-    [_delegate selectionDidChange:[[self retain] autorelease]];
+    [_delegate selectionDidChange:self];
 }
 
 // needAccurateWindow means that soft boundaries must be recomputed. If it's
@@ -344,7 +340,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
 
     DLog(@"Begin selection, range=%@", VT100GridWindowedRangeDescription(_range));
     [self extendPastNulls];
-    [_delegate selectionDidChange:[[self retain] autorelease]];
+    [_delegate selectionDidChange:self];
 }
 
 - (void)endLiveSelection {
@@ -379,7 +375,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
             _initialRange = _range;
         }
         if ([self haveLiveSelection]) {
-            iTermSubSelection *sub = [[[iTermSubSelection alloc] init] autorelease];
+            iTermSubSelection *sub = [[iTermSubSelection alloc] init];
             sub.range = _range;
             sub.selectionMode = _selectionMode;
             [_subSelections addObject:sub];
@@ -392,7 +388,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
     _extend = NO;
     _live = NO;
 
-    [_delegate selectionDidChange:[[self retain] autorelease]];
+    [_delegate selectionDidChange:self];
 }
 
 - (BOOL)haveLiveSelection {
@@ -410,7 +406,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
         DLog(@"Clear selection");
         _range = VT100GridWindowedRangeMake(VT100GridCoordRangeMake(-1, -1, -1, -1), 0, 0);
         [_subSelections removeAllObjects];
-        [_delegate selectionDidChange:[[self retain] autorelease]];
+        [_delegate selectionDidChange:self];
     }
 }
 
@@ -464,7 +460,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
 
     _extend = YES;
     [self extendPastNulls];
-    [_delegate selectionDidChange:[[self retain] autorelease]];
+    [_delegate selectionDidChange:self];
 }
 
 - (void)moveSelectionEndpointToRange:(VT100GridWindowedRange)range {
@@ -598,7 +594,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
 
 - (void)setSelectedRange:(VT100GridWindowedRange)selectedRange {
     _range = selectedRange;
-    [_delegate selectionDidChange:[[self retain] autorelease]];
+    [_delegate selectionDidChange:self];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -608,7 +604,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
     theCopy->_live = _live;
     theCopy->_extend = _extend;
     for (iTermSubSelection *sub in _subSelections) {
-        [theCopy->_subSelections addObject:[[sub copy] autorelease]];
+        [theCopy->_subSelections addObject:[sub copy]];
     }
     theCopy->_resumable = _resumable;
 
@@ -748,7 +744,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
                                   withObject:[iTermSubSelection subSelectionWithRange:firstRange
                                                                                  mode:mode]];
     }
-    [_delegate selectionDidChange:[[self retain] autorelease]];
+    [_delegate selectionDidChange:self];
 }
 
 - (void)setLastRange:(VT100GridWindowedRange)lastRange mode:(iTermSelectionMode)mode {
@@ -761,7 +757,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
         [_subSelections addObject:[iTermSubSelection subSelectionWithRange:lastRange
                                                                       mode:mode]];
     }
-    [_delegate selectionDidChange:[[self retain] autorelease]];
+    [_delegate selectionDidChange:self];
 }
 
 - (void)addSubSelection:(iTermSubSelection *)sub {
@@ -769,7 +765,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
         sub.range = [self rangeByExtendingRangePastNulls:sub.range];
     }
     [_subSelections addObject:sub];
-    [_delegate selectionDidChange:[[self retain] autorelease]];
+    [_delegate selectionDidChange:self];
 }
 
 - (void)removeWindowsWithWidth:(int)width {
@@ -789,8 +785,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
             }
         }
     }
-    [_subSelections autorelease];
-    _subSelections = [newSubs retain];
+    _subSelections = newSubs;
 }
 
 - (NSRange)rangeOfIndexesInRange:(VT100GridWindowedRange)range
@@ -900,7 +895,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
     }
 
     // Add in tab fillers preceding already-selected tabs.
-    NSMutableIndexSet *indexes = [[basicIndexes mutableCopy] autorelease];
+    NSMutableIndexSet *indexes = [basicIndexes mutableCopy];
 
     NSRange range;
     if (_range.columnWindow.length > 0) {
@@ -943,7 +938,7 @@ static NSString *const kiTermSubSelectionMode = @"Mode";
         // Live ranges can have box subs, which is just a pain to deal with, so make a copy,
         // end live selection in the copy (which converts boxes to individual selections), and
         // then try again on the copy.
-        iTermSelection *temp = [[self copy] autorelease];
+        iTermSelection *temp = [self copy];
         [temp endLiveSelection];
         [temp enumerateSelectedRanges:block];
         return;

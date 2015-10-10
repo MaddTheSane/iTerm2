@@ -30,7 +30,7 @@
 
 @end
 
-@protocol ToolWrapperDelegate
+@protocol ToolWrapperDelegate <NSObject>
 
 @property(nonatomic, assign) id<iTermToolbeltViewDelegate> delegate;
 
@@ -41,7 +41,7 @@
 
 @end
 
-@protocol ToolbeltTool
+@protocol ToolbeltTool <NSObject>
 - (CGFloat)minimumHeight;
 
 @optional
@@ -57,11 +57,11 @@
 @interface iTermToolWrapper : NSView
 
 @property (nonatomic, copy) NSString *name;
-@property (nonatomic, readonly) __weak NSView *container;
-@property (nonatomic, assign) id<ToolWrapperDelegate> delegate;
+@property (weak, nonatomic, readonly) __weak NSView *container;
+@property (nonatomic, unsafe_unretained) id<ToolWrapperDelegate> delegate;
 
 - (void)relayout;
-- (NSObject<ToolbeltTool> *)tool;
+- (id<ToolbeltTool>)tool;
 - (void)removeToolSubviews;
 - (CGFloat)minimumHeight;
 

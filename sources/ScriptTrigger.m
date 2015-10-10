@@ -47,10 +47,10 @@
 
 + (void)runCommand:(NSString *)command
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    DLog(@"Invoking command %@", command);
-    system([command UTF8String]);
-    [pool drain];
+    @autoreleasepool {
+        DLog(@"Invoking command %@", command);
+        system([command UTF8String]);
+    }
 }
 
 @end

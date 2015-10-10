@@ -11,10 +11,10 @@
 @interface iTermBadgeLabel : NSObject
 
 // Color for badge text fill
-@property(nonatomic, retain) NSColor *fillColor;
+@property(nonatomic, strong) NSColor *fillColor;
 
 // Color for badge text outline
-@property(nonatomic, retain) NSColor *backgroundColor;
+@property(nonatomic, strong) NSColor *backgroundColor;
 
 // Badge text
 @property(nonatomic, copy) NSString *stringValue;
@@ -23,7 +23,7 @@
 @property(nonatomic, assign) NSSize viewSize;
 
 // Lazily computed image.
-@property(nonatomic, readonly) NSImage *image;
+@property(nonatomic, readonly, strong) NSImage *image;
 
 // If true then the inputs to |image| have changed. Set by other setters, and
 // can also be explicitly set to invalidate the image.
