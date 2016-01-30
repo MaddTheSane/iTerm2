@@ -31,6 +31,7 @@
 #import "NSStringITerm.h"
 #import "NSCharacterSet+iTerm.h"
 #import "RegexKitLite.h"
+#import "ScreenChar.h"
 #import <apr-1/apr_base64.h>
 #import <Carbon/Carbon.h>
 #import <wctype.h>
@@ -713,6 +714,103 @@ int decode_utf8_char(const unsigned char *datap,
                exact ? @"" :@ "≈", (double)num / 100, iecPrefixes[pow]];
 }
 
+- (NSArray<NSString *> *)helpfulSynonyms {
+    NSMutableArray *array = [NSMutableArray array];
+    NSString *hexOrDecimalConversion = [self hexOrDecimalConversionHelp];
+    if (hexOrDecimalConversion) {
+        [array addObject:hexOrDecimalConversion];
+    }
+    NSString *timestampConversion = [self timestampConversionHelp];
+    if (timestampConversion) {
+        [array addObject:timestampConversion];
+    }
+    NSString *utf8Help = [self utf8Help];
+    if (utf8Help) {
+        [array addObject:utf8Help];
+    }
+    if (array.count) {
+        return array;
+    } else {
+        return nil;
+    }
+}
+
+- (NSString *)utf8Help {
+    if (self.length == 0) {
+        return nil;
+    }
+
+    CFRange graphemeClusterRange = CFStringGetRangeOfComposedCharactersAtIndex((CFStringRef)self, 0);
+    if (graphemeClusterRange.location != 0 ||
+        graphemeClusterRange.length != self.length) {
+        // Only works for a single grapheme cluster.
+        return nil;
+    }
+
+    if ([self characterAtIndex:0] < 128 && self.length == 1) {
+        // No help for ASCII
+        return nil;
+    }
+
+    // Convert to UCS-4
+    NSData *data = [self dataUsingEncoding:NSUTF32StringEncoding];
+    const int *characters = (int *)data.bytes;
+    int numCharacters = data.length / 4;
+
+    // Output UTF-8 hex codes
+    NSMutableArray *byteStrings = [NSMutableArray array];
+    const char *utf8 = [self UTF8String];
+    for (size_t i = 0; utf8[i]; i++) {
+        [byteStrings addObject:[NSString stringWithFormat:@"0x%02x", utf8[i] & 0xff]];
+    }
+    NSString *utf8String = [byteStrings componentsJoinedByString:@" "];
+
+    // Output UCS-4 hex codes
+    NSMutableArray *ucs4Strings = [NSMutableArray array];
+    for (NSUInteger i = 0; i < numCharacters; i++) {
+        if (characters[i] == 0xfeff) {
+            // Ignore byte order mark
+            continue;
+        }
+        [ucs4Strings addObject:[NSString stringWithFormat:@"U+%04x", characters[i]]];
+    }
+    NSString *ucs4String = [ucs4Strings componentsJoinedByString:@" "];
+
+    return [NSString stringWithFormat:@"“%@” = %@ = %@ (UTF-8)", self, ucs4String, utf8String];
+}
+
+- (NSString *)timestampConversionHelp {
+    static const NSUInteger kTimestampLength = 10;
+    static const NSUInteger kJavaTimestampLength = 13;
+    if ((self.length == kTimestampLength ||
+         self.length == kJavaTimestampLength) &&
+        [self hasPrefix:@"1"]) {
+        for (int i = 0; i < kTimestampLength; i++) {
+            if (!isdigit([self characterAtIndex:i])) {
+                return nil;
+            }
+        }
+        NSDateFormatter *fmt = [[[NSDateFormatter alloc] init] autorelease];
+        // doubles run out of precision at 2^53. The largest Java timestamp we will convert is less
+        // than 2^41, so this is fine.
+        NSTimeInterval timestamp = [self doubleValue];
+        NSString *template;
+        if (self.length == kJavaTimestampLength) {
+            // Convert milliseconds to seconds
+            timestamp /= 1000.0;
+            template = @"yyyyMMMd hh:mm:ss.SSS z";
+        } else {
+            template = @"yyyyMMMd hh:mm:ss z";
+        }
+        [fmt setDateFormat:[NSDateFormatter dateFormatFromTemplate:template
+                                                           options:0
+                                                            locale:[NSLocale currentLocale]]];
+        return [fmt stringFromDate:[NSDate dateWithTimeIntervalSince1970:timestamp]];
+    } else {
+        return nil;
+    }
+}
+
 - (NSString *)hexOrDecimalConversionHelp {
     unsigned long long value;
     BOOL mustBePositive = NO;
@@ -1320,6 +1418,37 @@ static TECObjectRef CreateTECConverterForUTF8Variants(TextEncodingVariant varian
     } else {
         return YES;
     }
+}
+
+- (void)enumerateComposedCharacters:(void (^)(NSRange, unichar, NSString *, BOOL *))block {
+    if (self.length == 0) {
+        return;
+    }
+    CFIndex index = 0;
+    NSRange range;
+    do {
+        CFRange tempRange = CFStringGetRangeOfComposedCharactersAtIndex((CFStringRef)self, index);
+        range = NSMakeRange(tempRange.location, tempRange.length);
+        if (range.length > 0) {
+            unichar simple = range.length == 1 ? [self characterAtIndex:range.location] : 0;
+            NSString *complexString = range.length == 1 ? nil : [self substringWithRange:range];
+            BOOL stop = NO;
+            block(range, simple, complexString, &stop);
+            if (stop) {
+                return;
+            }
+        }
+        index = NSMaxRange(range);
+    } while (NSMaxRange(range) < self.length);
+}
+
+- (NSUInteger)iterm_unsignedIntegerValue {
+    NSScanner *scanner = [NSScanner scannerWithString:self];
+    unsigned long long ull;
+    if (![scanner scanUnsignedLongLong:&ull]) {
+        ull = 0;
+    }
+    return ull;
 }
 
 @end

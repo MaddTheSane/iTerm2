@@ -77,8 +77,8 @@
 #import "iTermPreferences.h"
 #import "iTermRemotePreferences.h"
 #import "iTermAdvancedSettingsModel.h"
+#import "iTermLaunchServices.h"
 #import "iTermSizeRememberingView.h"
-#import "iTermURLSchemeController.h"
 #import "iTermWarning.h"
 #import "KeysPreferencesViewController.h"
 #import "NSDictionary+iTerm.h"
@@ -160,7 +160,7 @@ NSString *const kSessionProfileDidChange = @"kSessionProfileDidChange";
 }
 
 - (instancetype)initWithProfileModel:(ProfileModel*)model
-    editCurrentSessionMode:(BOOL)editCurrentSessionMode {
+              editCurrentSessionMode:(BOOL)editCurrentSessionMode {
     self = [super initWithWindowNibName:@"PreferencePanel"];
     if (self) {
         _profileModel = model;
@@ -397,11 +397,6 @@ NSString *const kSessionProfileDidChange = @"kSessionProfileDidChange";
     rect.origin = topLeft;
     rect.origin.y -= rect.size.height;
     [[self window] setFrame:rect display:YES animate:YES];
-}
-
-- (void)removeProfileWithGuid:(NSString *)guid {
-    [_profilesViewController removeProfileWithGuid:guid
-                                         fromModel:[ProfileModel sharedInstance]];
 }
 
 @end

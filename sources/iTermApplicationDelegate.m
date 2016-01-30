@@ -36,6 +36,7 @@
 #import "iTermFileDescriptorSocketPath.h"
 #import "iTermFontPanel.h"
 #import "iTermIntegerNumberFormatter.h"
+#import "iTermLaunchServices.h"
 #import "iTermPreferences.h"
 #import "iTermRemotePreferences.h"
 #import "iTermAdvancedSettingsModel.h"
@@ -44,11 +45,13 @@
 #import "iTermProfilesWindowController.h"
 #import "iTermPasswordManagerWindowController.h"
 #import "iTermRestorableSession.h"
+#import "iTermQuickLookController.h"
+#import "iTermSystemVersion.h"
 #import "iTermTipController.h"
-#import "iTermURLSchemeController.h"
 #import "iTermWarning.h"
 #import "iTermTipWindowController.h"
 #import "NSApplication+iTerm.h"
+#import "NSFileManager+iTerm.h"
 #import "NSStringITerm.h"
 #import "NSView+RecursiveDescription.h"
 #import "PreferencePanel.h"
@@ -61,16 +64,14 @@
 #import "Sparkle/SUUpdater.h"
 #import "ToastWindowController.h"
 #import "VT100Terminal.h"
+
+#import <Quartz/Quartz.h>
 #import <objc/runtime.h>
+
 #include "iTermFileDescriptorClient.h"
 #include <sys/stat.h>
 #include <unistd.h>
 
-static NSString *APP_SUPPORT_DIR = @"~/Library/Application Support/iTerm";
-static NSString *SCRIPT_DIRECTORY = @"~/Library/Application Support/iTerm/Scripts";
-static NSString* AUTO_LAUNCH_SCRIPT = @"~/Library/Application Support/iTerm/AutoLaunch.scpt";
-static NSString *ITERM2_FLAG = @"~/Library/Application Support/iTerm/version.txt";
-static NSString *ITERM2_QUIET = @"~/Library/Application Support/iTerm/quiet";
 static NSString *kUseBackgroundPatternIndicatorKey = @"Use background pattern indicator";
 NSString *kUseBackgroundPatternIndicatorChangedNotification = @"kUseBackgroundPatternIndicatorChangedNotification";
 NSString *const kSavedArrangementDidChangeNotification = @"kSavedArrangementDidChangeNotification";
@@ -78,6 +79,7 @@ NSString *const kNonTerminalWindowBecameKeyNotification = @"kNonTerminalWindowBe
 static NSString *const kMarkAlertAction = @"Mark Alert Action";
 NSString *const kMarkAlertActionModalAlert = @"Modal Alert";
 NSString *const kMarkAlertActionPostNotification = @"Post Notification";
+NSString *const kShowFullscreenTabsSettingDidChange = @"kShowFullscreenTabsSettingDidChange";
 
 static NSString *const kScreenCharRestorableStateKey = @"kScreenCharRestorableStateKey";
 static NSString *const kHotkeyWindowRestorableState = @"kHotkeyWindowRestorableState";
@@ -85,6 +87,8 @@ static NSString *const kHotkeyWindowRestorableState = @"kHotkeyWindowRestorableS
 // There was an older userdefaults key "Multi-Line Paste Warning" that had the opposite semantics.
 // This was changed for compatibility with the iTermWarning mechanism.
 NSString *const kMultiLinePasteWarningUserDefaultsKey = @"NoSyncDoNotWarnBeforeMultilinePaste";
+
+static NSString *const kRestoreDefaultWindowArrangementShortcut = @"R";
 
 static BOOL gStartupActivitiesPerformed = NO;
 // Prior to 8/7/11, there was only one window arrangement, always called Default.
@@ -103,13 +107,11 @@ static BOOL hasBecomeActive = NO;
     iTermPasswordManagerWindowController *_passwordManagerWindowController;
 
     // Menu items
-    IBOutlet NSMenu     *bookmarkMenu;
-    IBOutlet NSMenu     *toolbeltMenu;
+    IBOutlet NSMenu *bookmarkMenu;
+    IBOutlet NSMenu *toolbeltMenu;
     NSMenuItem *downloadsMenu_;
     NSMenuItem *uploadsMenu_;
     IBOutlet NSMenuItem *selectTab;
-    IBOutlet NSMenuItem *previousTerminal;
-    IBOutlet NSMenuItem *nextTerminal;
     IBOutlet NSMenuItem *logStart;
     IBOutlet NSMenuItem *logStop;
     IBOutlet NSMenuItem *closeTab;
@@ -117,8 +119,6 @@ static BOOL hasBecomeActive = NO;
     IBOutlet NSMenuItem *sendInputToAllSessions;
     IBOutlet NSMenuItem *sendInputToAllPanes;
     IBOutlet NSMenuItem *sendInputNormally;
-    IBOutlet NSMenuItem *toggleBookmarksView;
-    IBOutlet NSMenuItem *irNext;
     IBOutlet NSMenuItem *irPrev;
     IBOutlet NSMenuItem *windowArrangements_;
 
@@ -126,6 +126,7 @@ static BOOL hasBecomeActive = NO;
     IBOutlet NSMenuItem *showFullScreenTabs;
     IBOutlet NSMenuItem *useTransparency;
     IBOutlet NSMenuItem *maximizePane;
+    IBOutlet NSMenuItem *_showTipOfTheDay;  // Here because we must remove it for older OS versions.
     BOOL secureInputDesired_;
     BOOL quittingBecauseLastWindowClosed_;
 
@@ -156,6 +157,12 @@ static BOOL hasBecomeActive = NO;
         TurnOnDebugLoggingSilently();
     }
 
+    if ([iTermAdvancedSettingsModel hideFromDockAndAppSwitcher]) {
+        ProcessSerialNumber psn = { 0, kCurrentProcess };
+        TransformProcessType(&psn, kProcessTransformToUIElementApplication);
+        [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+    }
+
     // set the TERM_PROGRAM environment variable
     putenv("TERM_PROGRAM=iTerm.app");
 
@@ -178,8 +185,7 @@ static BOOL hasBecomeActive = NO;
 }
 
 // This performs startup activities as long as they haven't been run before.
-- (void)_performStartupActivities
-{
+- (void)performStartupActivities {
     if (gStartupActivitiesPerformed) {
         return;
     }
@@ -189,14 +195,15 @@ static BOOL hasBecomeActive = NO;
         return;
     }
     [[iTermController sharedInstance] setStartingUp:YES];
-    // Check if we have an autolauch script to execute. Do it only once, i.e. at application launch.
+    // Check if we have an autolaunch script to execute. Do it only once, i.e. at application launch.
+    NSString *autolaunchScriptPath = [[NSFileManager defaultManager] autolaunchScriptPath];
     if (ranAutoLaunchScript == NO &&
-        [[NSFileManager defaultManager] fileExistsAtPath:[AUTO_LAUNCH_SCRIPT stringByExpandingTildeInPath]]) {
+        [[NSFileManager defaultManager] fileExistsAtPath:autolaunchScriptPath]) {
         ranAutoLaunchScript = YES;
 
         NSAppleScript *autoLaunchScript;
         NSDictionary *errorInfo = [NSDictionary dictionary];
-        NSURL *aURL = [NSURL fileURLWithPath:[AUTO_LAUNCH_SCRIPT stringByExpandingTildeInPath]];
+        NSURL *aURL = [NSURL fileURLWithPath:autolaunchScriptPath];
 
         // Make sure our script suite registry is loaded
         [NSScriptSuiteRegistry sharedScriptSuiteRegistry];
@@ -244,86 +251,42 @@ static BOOL hasBecomeActive = NO;
                    });
 }
 
-- (void)_createFlag
-{
-    mkdir([[APP_SUPPORT_DIR stringByExpandingTildeInPath] UTF8String], 0755);
+- (void)createVersionFile {
     NSDictionary *myDict = [[NSBundle bundleForClass:[self class]] infoDictionary];
     NSString *versionString = [myDict objectForKey:@"CFBundleVersion"];
-    NSString *flagFilename = [ITERM2_FLAG stringByExpandingTildeInPath];
-    [versionString writeToFile:flagFilename
+    [versionString writeToFile:[[NSFileManager defaultManager] versionNumberFilename]
                     atomically:NO
                       encoding:NSUTF8StringEncoding
                          error:nil];
 }
 
-- (void)_updateArrangementsMenu:(NSMenuItem *)container
-{
-    while ([[container submenu] numberOfItems]) {
-        [[container submenu] removeItemAtIndex:0];
-    }
-
-    NSString *defaultName = [WindowArrangements defaultArrangementName];
-
-    for (NSString *theName in [WindowArrangements allNames]) {
-        NSString *theShortcut;
-        if ([theName isEqualToString:defaultName]) {
-            theShortcut = @"R";
-        } else {
-            theShortcut = @"";
-        }
-        [[container submenu] addItemWithTitle:theName
-                                       action:@selector(restoreWindowArrangement:)
-                                keyEquivalent:theShortcut];
-    }
+- (void)updateRestoreWindowArrangementsMenu:(NSMenuItem *)menuItem {
+    [WindowArrangements refreshRestoreArrangementsMenu:menuItem
+                                          withSelector:@selector(restoreWindowArrangement:)
+                                       defaultShortcut:kRestoreDefaultWindowArrangementShortcut];
 }
 
-- (void)setDefaultTerminal:(NSString *)bundleId
-{
-    CFStringRef unixExecutableContentType = CFSTR("public.unix-executable");
-    LSSetDefaultRoleHandlerForContentType(unixExecutableContentType,
-                                          kLSRolesShell,
-                                          (__bridge CFStringRef) bundleId);
+- (IBAction)makeDefaultTerminal:(id)sender {
+    [[iTermLaunchServices sharedInstance] makeITermDefaultTerminal];
 }
 
-- (IBAction)makeDefaultTerminal:(id)sender
-{
-    NSString *iTermBundleId = [[NSBundle mainBundle] bundleIdentifier];
-    [self setDefaultTerminal:iTermBundleId];
-}
-
-- (IBAction)unmakeDefaultTerminal:(id)sender
-{
-    [self setDefaultTerminal:@"com.apple.terminal"];
-}
-
-- (BOOL)isDefaultTerminal
-{
-    LSSetDefaultHandlerForURLScheme((CFStringRef)@"iterm2",
-                                    (__bridge CFStringRef)[[NSBundle mainBundle] bundleIdentifier]);
-    CFStringRef unixExecutableContentType = (CFStringRef)@"public.unix-executable";
-    NSString *unixHandler = CFBridgingRelease(LSCopyDefaultRoleHandlerForContentType(unixExecutableContentType, kLSRolesShell));
-    NSString *iTermBundleId = [[NSBundle mainBundle] bundleIdentifier];
-    BOOL result = [iTermBundleId isEqualToString:unixHandler];
-    return result;
-}
-
-- (NSString *)quietFileName {
-    return [ITERM2_QUIET stringByExpandingTildeInPath];
+- (IBAction)unmakeDefaultTerminal:(id)sender {
+    [[iTermLaunchServices sharedInstance] makeTerminalDefaultTerminal];
 }
 
 - (BOOL)quietFileExists {
-    return [[NSFileManager defaultManager] fileExistsAtPath:[self quietFileName]];
+    return [[NSFileManager defaultManager] fileExistsAtPath:[[NSFileManager defaultManager] quietFilePath]];
 }
 
 - (void)checkForQuietMode {
     if ([self quietFileExists]) {
         NSError *error = nil;
-        [[NSFileManager defaultManager] removeItemAtPath:[self quietFileName]
+        [[NSFileManager defaultManager] removeItemAtPath:[[NSFileManager defaultManager] quietFilePath]
                                                    error:&error];
         if (error) {
-            NSLog(@"Failed to remove %@: %@; not launching in quiet mode", [self quietFileName], error);
+            NSLog(@"Failed to remove %@: %@; not launching in quiet mode", [[NSFileManager defaultManager] quietFilePath], error);
         } else {
-            NSLog(@"%@ exists, launching in quiet mode", [self quietFileName]);
+            NSLog(@"%@ exists, launching in quiet mode", [[NSFileManager defaultManager] quietFilePath]);
             quiet_ = YES;
         }
     }
@@ -341,7 +304,7 @@ static BOOL hasBecomeActive = NO;
 
     finishedLaunching_ = YES;
     // Create the app support directory
-    [self _createFlag];
+    [self createVersionFile];
 
     // Prevent the input manager from swallowing control-q. See explanation here:
     // http://b4winckler.wordpress.com/2009/07/19/coercing-the-cocoa-text-system/
@@ -366,15 +329,15 @@ static BOOL hasBecomeActive = NO;
                                                       withObject:nil
                                                       afterDelay:0.5];
     }
-    [self _updateArrangementsMenu:windowArrangements_];
+    [self updateRestoreWindowArrangementsMenu:windowArrangements_];
 
     // register for services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType, nil]
                                                        returnTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSStringPboardType, nil]];
     // Sometimes, open untitled doc isn't called in Lion. We need to give application:openFile:
-    // a chance to run because a "special" filename cancels _performStartupActivities.
+    // a chance to run because a "special" filename cancels performStartupActivities.
     [self checkForQuietMode];
-    [self performSelector:@selector(_performStartupActivities)
+    [self performSelector:@selector(performStartupActivities)
                withObject:nil
                afterDelay:0];
     [[NSNotificationCenter defaultCenter] postNotificationName:kApplicationDidFinishLaunchingNotification
@@ -481,7 +444,7 @@ static BOOL hasBecomeActive = NO;
     }
 
     // This causes all windows to be closed and all sessions to be terminated.
-    [iTermController sharedInstanceRelease];
+    [iTermController releaseSharedInstance];
 
     // save preferences
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -529,7 +492,7 @@ static BOOL hasBecomeActive = NO;
     }
     NSLog(@"Quiet launch");
     quiet_ = YES;
-    if ([filename isEqualToString:[ITERM2_FLAG stringByExpandingTildeInPath]]) {
+    if ([filename isEqualToString:[[NSFileManager defaultManager] versionNumberFilename]]) {
         return YES;
     }
     if (filename) {
@@ -648,9 +611,7 @@ static BOOL hasBecomeActive = NO;
     }
 }
 
-// init
-- (instancetype)init
-{
+- (instancetype)init {
     self = [super init];
     if (self) {
         // Add ourselves as an observer for notifications.
@@ -708,9 +669,8 @@ static BOOL hasBecomeActive = NO;
     return self;
 }
 
-- (void)windowArrangementsDidChange:(id)sender
-{
-    [self _updateArrangementsMenu:windowArrangements_];
+- (void)windowArrangementsDidChange:(id)sender {
+    [self updateRestoreWindowArrangementsMenu:windowArrangements_];
 }
 
 - (void)restoreWindowArrangement:(id)sender
@@ -718,8 +678,7 @@ static BOOL hasBecomeActive = NO;
     [[iTermController sharedInstance] loadWindowArrangementWithName:[sender title]];
 }
 
-- (void)awakeFromNib
-{
+- (void)awakeFromNib {
     secureInputDesired_ = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Secure Input"] boolValue];
 
     NSMenu *appMenu = [NSApp mainMenu];
@@ -735,6 +694,10 @@ static BOOL hasBecomeActive = NO;
                                 keyEquivalent:@""];
     [item setView:labelTrackView];
     [viewMenu addItem:item];
+
+    if (![iTermTipController sharedInstance]) {
+        [_showTipOfTheDay.menu removeItem:_showTipOfTheDay];
+    }
 }
 
 - (IBAction)openPasswordManager:(id)sender {
@@ -806,7 +769,7 @@ static BOOL hasBecomeActive = NO;
     NSURL *url = [NSURL URLWithString: urlStr];
     NSString *scheme = [url scheme];
 
-    Profile *profile = [[iTermURLSchemeController sharedInstance] profileForScheme:scheme];
+    Profile *profile = [[iTermLaunchServices sharedInstance] profileForScheme:scheme];
     if (!profile) {
         profile = [[ProfileModel sharedInstance] defaultBookmark];
     }
@@ -817,6 +780,7 @@ static BOOL hasBecomeActive = NO;
                                                  withURL:urlStr
                                                 isHotkey:NO
                                                  makeKey:NO
+                                             canActivate:NO
                                                  command:nil
                                                    block:nil];
     }
@@ -827,9 +791,12 @@ static BOOL hasBecomeActive = NO;
 }
 
 // Action methods
-- (IBAction)toggleFullScreenTabBar:(id)sender
-{
-    [[[iTermController sharedInstance] currentTerminal] toggleFullScreenTabBar];
+- (IBAction)toggleFullScreenTabBar:(id)sender {
+    BOOL value = [iTermPreferences boolForKey:kPreferenceKeyShowFullscreenTabBar];
+    [iTermPreferences setBool:!value forKey:kPreferenceKeyShowFullscreenTabBar];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kShowFullscreenTabsSettingDidChange
+                                                        object:nil
+                                                      userInfo:nil];
 }
 
 - (BOOL)possiblyTmuxValueForWindow:(BOOL)isWindow {
@@ -871,17 +838,6 @@ static BOOL hasBecomeActive = NO;
     [[iTermController sharedInstance] newSession:sender possiblyTmux:[self possiblyTmuxValueForWindow:NO]];
 }
 
-// navigation
-- (IBAction)previousTerminal:(id)sender
-{
-    [[iTermController sharedInstance] previousTerminal:sender];
-}
-
-- (IBAction)nextTerminal:(id)sender
-{
-    [[iTermController sharedInstance] nextTerminal:sender];
-}
-
 - (IBAction)arrangeHorizontally:(id)sender
 {
     [[iTermController sharedInstance] arrangeHorizontally];
@@ -896,16 +852,6 @@ static BOOL hasBecomeActive = NO;
 - (IBAction)showBookmarkWindow:(id)sender
 {
     [[iTermProfilesWindowController sharedInstance] showWindow:sender];
-}
-
-- (IBAction)instantReplayPrev:(id)sender
-{
-    [[iTermController sharedInstance] irAdvance:-1];
-}
-
-- (IBAction)instantReplayNext:(id)sender
-{
-    [[iTermController sharedInstance] irAdvance:1];
 }
 
 - (void)newSessionMenu:(NSMenu*)superMenu
@@ -933,19 +879,17 @@ static BOOL hasBecomeActive = NO;
     [newMenuItem setSubmenu:bookmarksMenu];
 }
 
-- (NSMenu*)bookmarksMenu
-{
+- (NSMenu*)bookmarksMenu {
     return bookmarkMenu;
 }
 
-- (void)_addArrangementsMenuTo:(NSMenu *)theMenu
-{
+- (void)_addArrangementsMenuTo:(NSMenu *)theMenu {
     NSMenuItem *container = [theMenu addItemWithTitle:@"Restore Arrangement"
                                                action:nil
                                         keyEquivalent:@""];
     NSMenu *subMenu = [[NSMenu alloc] init];
     [container setSubmenu:subMenu];
-    [self _updateArrangementsMenu:container];
+    [self updateRestoreWindowArrangementsMenu:container];
 }
 
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender
@@ -972,6 +916,7 @@ static BOOL hasBecomeActive = NO;
 
     return (aMenu);
 }
+
 
 - (void)applicationWillBecomeActive:(NSNotification *)aNotification
 {
@@ -1258,6 +1203,9 @@ static BOOL hasBecomeActive = NO;
             .size = { 0, 0 }
         };
         for (NSWindow *window in [NSApp orderedWindows]) {
+            if (!window.isOnActiveSpace) {
+                continue;
+            }
             NSPoint pointInWindow = [window convertRectFromScreen:mouseRect].origin;
             if ([window isKindOfClass:[PTYWindow class]]) {
                 NSView *view = [window.contentView hitTest:pointInWindow];
@@ -1349,14 +1297,11 @@ static BOOL hasBecomeActive = NO;
 }
 
 // Notifications
-- (void)reloadMenus:(NSNotification *)aNotification
-{
+- (void)reloadMenus:(NSNotification *)aNotification {
     PseudoTerminal *frontTerminal = [self currentTerminal];
     if (frontTerminal != [aNotification object]) {
         return;
     }
-    [previousTerminal setAction: (frontTerminal ? @selector(previousTerminal:) : nil)];
-    [nextTerminal setAction: (frontTerminal ? @selector(nextTerminal:) : nil)];
 
     [self buildSessionSubmenu: aNotification];
     // reset the close tab/window shortcuts
@@ -1365,14 +1310,6 @@ static BOOL hasBecomeActive = NO;
     [closeTab setKeyEquivalent:@"w"];
     [closeWindow setKeyEquivalent:@"W"];
     [closeWindow setKeyEquivalentModifierMask: NSCommandKeyMask];
-
-
-    // set some menu item states
-    if (frontTerminal && [[frontTerminal tabView] numberOfTabViewItems]) {
-        [toggleBookmarksView setEnabled:YES];
-    } else {
-        [toggleBookmarksView setEnabled:NO];
-    }
 }
 
 - (void)updateBroadcastMenuState
@@ -1462,8 +1399,8 @@ static BOOL hasBecomeActive = NO;
     }
 }
 
-- (void)updateAddressBookMenu:(NSNotification*)aNotification
-{
+- (void)updateAddressBookMenu:(NSNotification*)aNotification {
+    DLog(@"Updating address book menu");
     JournalParams params;
     params.selector = @selector(newSessionInTabAtIndex:);
     params.openAllSelector = @selector(newSessionsInWindow:);
@@ -1585,7 +1522,7 @@ static BOOL hasBecomeActive = NO;
         [menuItem setState:[[self markAlertAction] isEqualToString:kMarkAlertActionPostNotification] ? NSOnState : NSOffState];
         return YES;
     } else if ([menuItem action] == @selector(makeDefaultTerminal:)) {
-        return ![self isDefaultTerminal];
+        return ![[iTermLaunchServices sharedInstance] iTermIsDefaultTerminal];
     } else if (menuItem == maximizePane) {
         if ([[[iTermController sharedInstance] currentTerminal] inInstantReplay]) {
             // Things get too complex if you allow this. It crashes.
@@ -1603,16 +1540,13 @@ static BOOL hasBecomeActive = NO;
                [menuItem action] == @selector(newSessionWithSameProfile:)) {
         return [[iTermController sharedInstance] currentTerminal] != nil;
     } else if ([menuItem action] == @selector(toggleFullScreenTabBar:)) {
-        PseudoTerminal *term = [[iTermController sharedInstance] currentTerminal];
-        if (!term || ![term anyFullScreen]) {
-            return NO;
-        } else {
-            [menuItem setState:[term fullScreenTabControl] ? NSOnState : NSOffState];
-            return YES;
-        }
+        [menuItem setState:[iTermPreferences boolForKey:kPreferenceKeyShowFullscreenTabBar] ? NSOnState : NSOffState];
+        return YES;
     } else if ([menuItem action] == @selector(toggleMultiLinePasteWarning:)) {
         menuItem.state = [self warnBeforeMultiLinePaste] ? NSOnState : NSOffState;
         return YES;
+    } else if ([menuItem action] == @selector(showTipOfTheDay:)) {
+        return ![[iTermTipController sharedInstance] showingTip];
     } else {
         return YES;
     }
@@ -1633,11 +1567,12 @@ static BOOL hasBecomeActive = NO;
     NSMenu *scriptMenu = [[NSMenu alloc] initWithTitle:kScriptTitle];
     [scriptMenuItem setSubmenu: scriptMenu];
     // populate the submenu with ascripts found in the script directory
+    NSString *scriptsPath = [[NSFileManager defaultManager] scriptsPath];
     NSDirectoryEnumerator *directoryEnumerator =
-        [[NSFileManager defaultManager] enumeratorAtPath:[SCRIPT_DIRECTORY stringByExpandingTildeInPath]];
+        [[NSFileManager defaultManager] enumeratorAtPath:scriptsPath];
     NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
     for (NSString *file in directoryEnumerator) {
-        NSString *path = [[SCRIPT_DIRECTORY stringByExpandingTildeInPath] stringByAppendingPathComponent:file];
+        NSString *path = [scriptsPath stringByAppendingPathComponent:file];
         if ([workspace isFilePackageAtPath:path]) {
             [directoryEnumerator skipDescendents];
         }
@@ -1688,13 +1623,11 @@ static BOOL hasBecomeActive = NO;
     [pty editCurrentSession:sender];
 }
 
-- (BOOL)useBackgroundPatternIndicator
-{
+- (BOOL)useBackgroundPatternIndicator {
     return [[NSUserDefaults standardUserDefaults] boolForKey:kUseBackgroundPatternIndicatorKey];
 }
 
-- (IBAction)toggleUseBackgroundPatternIndicator:(id)sender
-{
+- (IBAction)toggleUseBackgroundPatternIndicator:(id)sender {
     BOOL value = [self useBackgroundPatternIndicator];
     value = !value;
     [[NSUserDefaults standardUserDefaults] setBool:value forKey:kUseBackgroundPatternIndicatorKey];
@@ -1719,6 +1652,10 @@ static BOOL hasBecomeActive = NO;
     }
 }
 
+- (IBAction)showTipOfTheDay:(id)sender {
+    [[iTermTipController sharedInstance] showTip];
+}
+
 #pragma mark - iTermPasswordManagerDelegate
 
 - (void)iTermPasswordManagerEnterPassword:(NSString *)password {
@@ -1732,6 +1669,11 @@ static BOOL hasBecomeActive = NO;
 
 - (void)currentSessionDidChange {
     [_passwordManagerWindowController update];
+    QLPreviewPanel *panel = [QLPreviewPanel sharedPreviewPanel];
+    PseudoTerminal *currentWindow = [[iTermController sharedInstance] currentTerminal];
+    if (panel.currentController == currentWindow) {
+        [currentWindow.currentSession.quickLookController takeControl];
+    }
 }
 
 - (PseudoTerminal *)currentTerminal {

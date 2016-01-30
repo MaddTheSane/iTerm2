@@ -21,9 +21,9 @@
 
 @interface SessionTitleView : NSView
 
-@property (nonatomic, copy) NSString *title;
-@property (nonatomic, unsafe_unretained) id<SessionTitleViewDelegate> delegate;
-@property (nonatomic, assign) double dimmingAmount;
-@property (nonatomic, assign) int ordinal;
+@property(nonatomic, copy) NSString *title;
+@property(nonatomic, weak) id<SessionTitleViewDelegate> delegate;
+@property(nonatomic, assign) double dimmingAmount;
+@property(nonatomic, assign) int ordinal;
 
 @end

@@ -28,7 +28,7 @@ static const NSInteger kRecycleDirectoryTag = 2;
     return [super initWithWindowNibName:@"AdvancedWorkingDirectoryWindow"];
 }
 
-- (NSArray *)allKeys {
+- (NSArray<NSString *> *)allKeys {
     return @[ KEY_AWDS_WIN_OPTION,
               KEY_AWDS_WIN_DIRECTORY,
               KEY_AWDS_TAB_OPTION,

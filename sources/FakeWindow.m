@@ -8,7 +8,7 @@
  **
  **  Project: iTerm2
  **
- **  Description: Shell window that takes over for a session during instant 
+ **  Description: Shell window that takes over for a session during instant
  **  replay.
  **
  **  This program is free software; you can redistribute it and/or modify
@@ -30,11 +30,35 @@
 #import "PTYSession.h"
 #import "PTYTab.h"
 
-@implementation FakeWindow
+@implementation FakeWindow {
+    // FakeWindow always has exactly one session.
+    PTYSession* session;
+
+    // Saved state from old window.
+    BOOL isFullScreen;
+    BOOL isLionFullScreen;
+    BOOL isMiniaturized;
+    NSRect frame;
+    NSScreen* screen;
+    NSWindowController<iTermWindowController> * realWindow;
+
+    // Changes the session has initiated that will be delayed and performed
+    // in -[rejoin:].
+    BOOL hasPendingBlurChange;
+    double pendingBlurRadius;
+    BOOL pendingBlur;
+    BOOL hasPendingClose;
+    BOOL hasPendingFitWindowToTab;
+    BOOL hasPendingSizeChange;
+    int pendingW;
+    int pendingH;
+    BOOL hasPendingSetWindowTitle;
+
+    BOOL scrollbarShouldBeVisible;
+}
 
 - (instancetype)initFromRealWindow:(NSWindowController<iTermWindowController> *)aTerm
-                 session:(PTYSession*)aSession
-{
+                           session:(PTYSession*)aSession {
     self = [super init];
     if (!self) {
         return nil;
@@ -77,9 +101,6 @@
     }
     if (hasPendingSetWindowTitle) {
         [aTerm setWindowTitle];
-    }
-    if (hasPendingResetTempTitle) {
-        [aTerm resetTempTitle];
     }
     [aTerm updateTabColors];
 }
@@ -137,11 +158,6 @@
     pendingBlur = NO;
 }
 
-- (BOOL)tempTitle
-{
-    return NO;
-}
-
 - (void)fitWindowToTab:(PTYTab*)tab
 {
     hasPendingFitWindowToTab = YES;
@@ -155,11 +171,6 @@
 - (void)setWindowTitle
 {
     hasPendingSetWindowTitle = YES;
-}
-
-- (void)resetTempTitle
-{
-    hasPendingResetTempTitle = YES;
 }
 
 - (PTYTab*)currentTab

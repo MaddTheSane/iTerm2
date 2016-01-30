@@ -7,6 +7,8 @@
 //
 
 #import "iTermFindCursorView.h"
+#import "NSBezierPath+iTerm.h"
+#import "NSDate+iTerm.h"
 #import <QuartzCore/QuartzCore.h>
 
 // Delay before teardown.
@@ -25,8 +27,56 @@ const double kFindCursorHoleRadius = 30;
 @interface iTermFindCursorViewArrowImpl : iTermFindCursorView
 @end
 
+@interface iTermFindCursorViewSpotlightImpl : iTermFindCursorView
+@end
+
 #pragma mark - Concrete implementations
 
+@implementation iTermFindCursorViewSpotlightImpl
+
++ (instancetype)allocWithZone:(struct _NSZone *)zone {
+    return NSAllocateObject([self class], 0, zone);
+}
+
+- (instancetype)initWithFrame:(NSRect)frameRect {
+    self = [super initWithFrame:frameRect];
+
+    if (self) {
+        self.alphaValue = 0.7;
+    }
+    return self;
+}
+
+// drawLayer:inContext: only gets called if drawRect: is implemented. wtf.
+- (void)drawRect:(CGRect)dirtyRect {
+    NSGradient *grad = [[NSGradient alloc] initWithStartingColor:[NSColor whiteColor]
+                                                     endingColor:[NSColor blackColor]];
+    NSPoint relativeCursorPosition = NSMakePoint(2 * (self.cursorPosition.x / self.frame.size.width - 0.5),
+                                                 2 * (self.cursorPosition.y / self.frame.size.height - 0.5));
+    NSRect rect = NSMakeRect(0, 0, self.frame.size.width, self.frame.size.height);
+    [grad drawInRect:rect relativeCenterPosition:relativeCursorPosition];
+    [grad release];
+
+    double x = self.cursorPosition.x;
+    double y = self.cursorPosition.y;
+
+    const double focusRadius = kFindCursorHoleRadius;
+    [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeCopy];
+    NSBezierPath *circle = [NSBezierPath bezierPathWithOvalInRect:NSMakeRect(x - focusRadius,
+                                                                             y - focusRadius,
+                                                                             focusRadius * 2,
+                                                                             focusRadius * 2)];
+    [[NSColor clearColor] set];
+    [circle fill];
+}
+
+- (void)setCursorPosition:(NSPoint)cursorPosition {
+    [super setCursorPosition:cursorPosition];
+    [self setNeedsDisplay:YES];
+}
+
+
+@end
 @implementation iTermFindCursorViewArrowImpl {
     CALayer *_arrowLayer;
 }
@@ -119,6 +169,22 @@ const double kFindCursorHoleRadius = 30;
 - (void)setCursorPosition:(NSPoint)cursorPosition {
     [super setCursorPosition:cursorPosition];
     _emitterLayer.emitterPosition = cursorPosition;
+
+    CAShapeLayer *mask = [[CAShapeLayer alloc] init];
+
+    NSBezierPath *outerPath = [NSBezierPath bezierPathWithRect:self.bounds];
+    outerPath.windingRule = NSEvenOddWindingRule;
+
+    NSBezierPath *path = [NSBezierPath bezierPathWithOvalInRect:NSMakeRect(cursorPosition.x - 20,
+                                                                           cursorPosition.y - 20,
+                                                                           40,
+                                                                           40)];
+    [outerPath appendBezierPath:path];
+
+    mask.fillRule = kCAFillRuleEvenOdd;
+    mask.path = [outerPath iterm_CGPath];
+    mask.fillColor = [[NSColor blackColor] CGColor];
+    self.layer.mask = mask;
 }
 
 #pragma mark - Private methods
@@ -193,12 +259,16 @@ const double kFindCursorHoleRadius = 30;
 }
 
 + (instancetype)allocWithZone:(struct _NSZone *)zone {
-    static int count;
-    ++count;
-    if (count % 2) {
-        return [iTermFindCursorViewStarsImpl alloc];
+    if ([NSDate isAprilFools] && [[NSView class] instancesRespondToSelector:@selector(allowsVibrancy)]) {
+        // 10.10+ users get spiffy views on 4/1
+        static int i;
+        if (i++ % 2) {
+            return [iTermFindCursorViewArrowImpl alloc];
+        } else {
+            return [iTermFindCursorViewStarsImpl alloc];
+        }
     } else {
-        return [iTermFindCursorViewArrowImpl alloc];
+        return [iTermFindCursorViewSpotlightImpl alloc];
     }
 }
 

@@ -14,6 +14,58 @@
 
 static NSTimeInterval kHighlightAnimationDuration = 0.5;
 
+// A timer that does not keep a strong reference to its target. The target
+// should invoke -invalidate from its -dealloc method and release the timer to
+// avoid getting called posthumously.
+@interface PSMWeakTimer : NSObject
+@property(nonatomic, assign) id target;
+@property(nonatomic, assign) SEL selector;
+
+- (instancetype)initWithTimeInterval:(NSTimeInterval)timeInterval
+                              target:(id)target
+                            selector:(SEL)selector
+                             repeats:(BOOL)repeats;
+- (void)invalidate;
+
+@end
+
+@implementation PSMWeakTimer {
+    NSTimer *_timer;
+    BOOL _repeats;
+}
+
+- (instancetype)initWithTimeInterval:(NSTimeInterval)timeInterval
+                              target:(id)target
+                            selector:(SEL)selector
+                             repeats:(BOOL)repeats {
+    self = [super init];
+    if (self) {
+        _target = target;
+        _selector = selector;
+        _repeats = repeats;
+        _timer = [NSTimer scheduledTimerWithTimeInterval:timeInterval
+                                                  target:self
+                                                selector:@selector(timerDidFire:)
+                                                userInfo:nil
+                                                 repeats:repeats];
+    }
+    return self;
+}
+
+- (void)invalidate {
+    [_timer invalidate];
+    _timer = nil;
+}
+
+- (void)timerDidFire:(NSTimer *)timer {
+    [_target performSelector:_selector withObject:timer];
+    if (!_repeats) {
+        _timer = nil;
+    }
+}
+
+@end
+
 @interface PSMTabBarCell()<PSMProgressIndicatorDelegate>
 @end
 
@@ -21,6 +73,8 @@ static NSTimeInterval kHighlightAnimationDuration = 0.5;
     NSSize _stringSize;
     PSMProgressIndicator *_indicator;
     NSTimeInterval _highlightChangeTime;
+    PSMWeakTimer *_delayedStringValueTimer;  // For bug 3957
+    BOOL _hasIcon;
 }
 
 #pragma mark - Creation/Destruction
@@ -37,6 +91,7 @@ static NSTimeInterval kHighlightAnimationDuration = 0.5;
         _indicator.light = controlView.style.useLightControls;
         _hasCloseButton = YES;
         _modifierString = [@"" copy];
+        _truncationStyle = NSLineBreakByTruncatingTail;
     }
     return self;
 }
@@ -65,6 +120,7 @@ static NSTimeInterval kHighlightAnimationDuration = 0.5;
         _count = 0;
         _tabColor = nil;
         _modifierString = [@"" copy];
+        _truncationStyle = NSLineBreakByTruncatingTail;
         if (value) {
             [self setCurrentStep:(kPSMTabDragAnimationSteps - 1)];
         } else {
@@ -75,6 +131,9 @@ static NSTimeInterval kHighlightAnimationDuration = 0.5;
 }
 
 - (void)dealloc {
+    [_delayedStringValueTimer invalidate];
+    [_delayedStringValueTimer release];
+
     [_modifierString release];
     _indicator.delegate = nil;
     [_indicator release];
@@ -105,6 +164,20 @@ static NSTimeInterval kHighlightAnimationDuration = 0.5;
 
 - (void)setStringValue:(NSString *)aString {
     [super setStringValue:aString];
+    
+    if (!_delayedStringValueTimer) {
+        static const NSTimeInterval kStringValueSettingDelay = 0.1;
+        _delayedStringValueTimer =
+                [[PSMWeakTimer alloc] initWithTimeInterval:kStringValueSettingDelay
+                                                    target:self
+                                                  selector:@selector(updateStringValue:)
+                                                   repeats:NO];
+    }
+}
+
+- (void)updateStringValue:(NSTimer *)timer {
+    [_delayedStringValueTimer release];
+    _delayedStringValueTimer = nil;
     _stringSize = [[self attributedStringValue] size];
     // need to redisplay now - binding observation was too quick.
     [[self psmTabControlView] update:[[self psmTabControlView] automaticallyAnimates]];
@@ -127,6 +200,11 @@ static NSTimeInterval kHighlightAnimationDuration = 0.5;
 - (void)setHasIcon:(BOOL)value {
     _hasIcon = value;
     [[self psmTabControlView] update:[[self psmTabControlView] automaticallyAnimates]]; // binding notice is too fast
+}
+
+- (BOOL)hasIcon {
+    BOOL hasIndicator = [self indicator] && !self.indicator.isHidden;
+    return _hasIcon && !hasIndicator;
 }
 
 - (void)setCount:(int)value {

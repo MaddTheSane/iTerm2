@@ -7,8 +7,9 @@
 //
 
 #import "CommandHistoryPopup.h"
-#import "CommandHistory.h"
-#import "CommandHistoryEntry.h"
+
+#import "iTermCommandHistoryEntryMO+Additions.h"
+#import "iTermShellHistoryController.h"
 #import "NSDateFormatterExtras.h"
 #import "PopupModel.h"
 
@@ -21,8 +22,7 @@
     int _partialCommandLength;
 }
 
-- (instancetype)init
-{
+- (instancetype)init {
     self = [super initWithWindowNibName:@"CommandHistoryPopup"
                                tablePtr:nil
                                   model:[[PopupModel alloc] init]];
@@ -41,7 +41,7 @@
 - (NSArray *)commandsForHost:(VT100RemoteHost *)host
               partialCommand:(NSString *)partialCommand
                       expand:(BOOL)expand {
-    CommandHistory *history = [CommandHistory sharedInstance];
+    iTermShellHistoryController *history = [iTermShellHistoryController sharedInstance];
     if (expand) {
         return [history autocompleteSuggestionsWithPartialCommand:partialCommand onHost:host];
     } else {
@@ -54,14 +54,14 @@
     _partialCommandLength = partialCommand.length;
     for (id obj in commands) {
         CommandHistoryPopupEntry *popupEntry = [[CommandHistoryPopupEntry alloc] init];
-        if ([obj isKindOfClass:[CommandUse class]]) {
-            CommandUse *commandUse = obj;
+        if ([obj isKindOfClass:[iTermCommandHistoryCommandUseMO class]]) {
+            iTermCommandHistoryCommandUseMO *commandUse = obj;
             popupEntry.command = commandUse.command;
-            popupEntry.date = [NSDate dateWithTimeIntervalSinceReferenceDate:commandUse.time];
+            popupEntry.date = [NSDate dateWithTimeIntervalSinceReferenceDate:commandUse.time.doubleValue];
         } else {
-            CommandHistoryEntry *entry = obj;
+            iTermCommandHistoryEntryMO *entry = obj;
             popupEntry.command = entry.command;
-            popupEntry.date = [NSDate dateWithTimeIntervalSinceReferenceDate:entry.lastUsed];
+            popupEntry.date = [NSDate dateWithTimeIntervalSinceReferenceDate:entry.timeOfLastUse.doubleValue];
         }
         [popupEntry setMainValue:popupEntry.command];
         [[self unfilteredModel] addObject:popupEntry];

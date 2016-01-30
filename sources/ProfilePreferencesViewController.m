@@ -8,6 +8,7 @@
 
 #import "ProfilePreferencesViewController.h"
 #import "BulkCopyProfilePreferencesWindowController.h"
+#import "DebugLogging.h"
 #import "ITAddressBookMgr.h"
 #import "iTermController.h"
 #import "iTermFlippedView.h"
@@ -110,6 +111,10 @@ NSString *const kProfileSessionNameDidEndEditing = @"kProfileSessionNameDidEndEd
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(sessionProfileDidChange:)
                                                      name:kSessionProfileDidChange
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(profileWasDeleted:)
+                                                     name:kProfileWasDeletedNotification
                                                    object:nil];
     }
     return self;
@@ -342,27 +347,6 @@ NSString *const kProfileSessionNameDidEndEditing = @"kProfileSessionNameDidEndEd
               _advancedViewController ];
 }
 
-- (void)removeKeyMappingsReferringToGuid:(NSString*)badRef {
-    for (NSString* guid in [[ProfileModel sharedInstance] guids]) {
-        Profile* profile = [[ProfileModel sharedInstance] bookmarkWithGuid:guid];
-        profile = [iTermKeyBindingMgr removeMappingsReferencingGuid:badRef fromBookmark:profile];
-        if (profile) {
-            [[ProfileModel sharedInstance] setBookmark:profile withGuid:guid];
-        }
-    }
-    for (NSString* guid in [[ProfileModel sessionsInstance] guids]) {
-        Profile* profile = [[ProfileModel sessionsInstance] bookmarkWithGuid:guid];
-        profile = [iTermKeyBindingMgr removeMappingsReferencingGuid:badRef fromBookmark:profile];
-        if (profile) {
-            [[ProfileModel sessionsInstance] setBookmark:profile withGuid:guid];
-        }
-    }
-    [iTermKeyBindingMgr removeMappingsReferencingGuid:badRef fromBookmark:nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kKeyBindingsChangedNotification
-                                                        object:nil
-                                                      userInfo:nil];
-}
-
 - (void)updateSubviewsForProfile:(Profile *)profile {
     ProfileModel *model = [_delegate profilePreferencesModel];
     if ([model numberOfBookmarks] < 2 || !profile) {
@@ -430,32 +414,31 @@ NSString *const kProfileSessionNameDidEndEditing = @"kProfileSessionNameDidEndEd
 #pragma mark - Actions
 
 - (IBAction)removeProfile:(id)sender {
+    DLog(@"removeProfile called");
     Profile *profile = [self selectedProfile];
-    if ([[_delegate profilePreferencesModel] numberOfBookmarks] == 1 || !profile) {
+    ProfileModel *model = [_delegate profilePreferencesModel];
+
+    if (![ITAddressBookMgr canRemoveProfile:profile fromModel:model]) {
         NSBeep();
     } else if ([self confirmProfileDeletion:profile]) {
         NSString *guid = profile[KEY_GUID];
-        [self removeProfileWithGuid:guid fromModel:[_delegate profilePreferencesModel]];
+        DLog(@"Remove profile with guid %@ named %@", guid, profile[KEY_NAME]);
+        int lastIndex = [_profilesListView selectedRow];
+        [ITAddressBookMgr removeProfile:profile fromModel:model];
+        // profileWasDeleted: gets called by notification from within removeProfile:fromModel:.
+        int toSelect = lastIndex - 1;
+        if (toSelect < 0) {
+            toSelect = 0;
+        }
+        [_profilesListView selectRowIndex:toSelect];
     }
-    [[_delegate profilePreferencesModel] flush];
 }
 
-- (void)removeProfileWithGuid:(NSString *)guid fromModel:(ProfileModel *)model {
-    if ([model numberOfBookmarks] == 1) {
-        return;
+- (void)profileWasDeleted:(NSNotification *)notification {
+    DLog(@"A profile was deleted.");
+    if ([_profilesListView selectedRow] == -1) {
+        [_profilesListView selectRowIndex:0];
     }
-
-    int lastIndex = [_profilesListView selectedRow];
-    [self removeKeyMappingsReferringToGuid:guid];
-    [[_delegate profilePreferencesModel] removeProfileWithGuid:guid];
-    [_profilesListView reloadData];
-
-    int toSelect = lastIndex - 1;
-    if (toSelect < 0) {
-        toSelect = 0;
-    }
-    [_profilesListView selectRowIndex:toSelect];
-
     // If a profile was deleted, update the shortcut titles that might refer to it.
     [_generalViewController updateShortcutTitles];
 }
@@ -480,7 +463,7 @@ NSString *const kProfileSessionNameDidEndEditing = @"kProfileSessionNameDidEndEd
         [newDict removeObjectForKey:KEY_BONJOUR_GROUP];
         [newDict removeObjectForKey:KEY_BONJOUR_SERVICE];
         [newDict removeObjectForKey:KEY_BONJOUR_SERVICE_ADDRESS];
-        newDict[KEY_COMMAND] = @"";
+        newDict[KEY_COMMAND_LINE] = @"";
         newDict[KEY_INITIAL_TEXT] = @"";
         newDict[KEY_CUSTOM_COMMAND] = @"No";
         newDict[KEY_WORKING_DIRECTORY] = @"";

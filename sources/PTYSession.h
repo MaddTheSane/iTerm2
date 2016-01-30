@@ -4,10 +4,10 @@
 #import "FindViewController.h"
 #import "iTermFileDescriptorClient.h"
 #import "ITAddressBookMgr.h"
+#import "iTermPopupWindowController.h"
 #import "LineBuffer.h"
 #import "PTYTask.h"
 #import "PTYTextView.h"
-#import "Popup.h"
 #import "ProfileModel.h"
 #import "TextViewWrapper.h"
 #import "TmuxController.h"
@@ -37,8 +37,10 @@ extern NSString *const kPTYSessionCapturedOutputDidChange;
 @class VT100Screen;
 @class VT100Terminal;
 @class iTermColorMap;
+@class iTermCommandHistoryCommandUseMO;
 @class iTermController;
 @class iTermGrowlDelegate;
+@class iTermQuickLookController;
 
 // The time period for just blinking is in -[iTermAdvancedSettingsModel timeBetweenBlinks].
 // Timer period when receiving lots of data.
@@ -163,6 +165,9 @@ typedef enum {
 // The code to send in the anti idle timer.
 @property(nonatomic, assign) char antiIdleCode;
 
+// The interval between sending anti-idle codes.
+@property(nonatomic, assign) NSTimeInterval antiIdlePeriod;
+
 // If true, close the tab when the session ends.
 @property(nonatomic, assign) BOOL autoClose;
 
@@ -192,7 +197,7 @@ typedef enum {
 @property(nonatomic, assign) float transparency;
 @property(nonatomic, assign) float blend;
 @property(nonatomic, assign) BOOL useBoldFont;
-@property(nonatomic, assign) BOOL thinStrokes;
+@property(nonatomic, assign) iTermThinStrokesSetting thinStrokes;
 @property(nonatomic, assign) BOOL useItalicFont;
 
 @property(nonatomic, readonly) BOOL logging;
@@ -291,7 +296,10 @@ typedef enum {
 // layout changes due to a user-initiated pane split.
 @property(nonatomic, assign) BOOL sessionIsSeniorToTmuxSplitPane;
 
-@property(nonatomic, readonly) NSArray *commandUses;
+@property(nonatomic, readonly) NSArray<iTermCommandHistoryCommandUseMO *> *commandUses;
+
+// If we want to show quicklook this will not be nil.
+@property(nonatomic, readonly) iTermQuickLookController *quickLookController;
 
 #pragma mark - methods
 

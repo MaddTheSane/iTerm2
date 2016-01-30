@@ -112,6 +112,8 @@ NSString *const kPreferenceKeyPasteSpecialBracketedPasteMode = @"BracketedPasteM
 
 NSString *const kPreferenceKeyPasteWarningNumberOfSpacesPerTab = @"PasteTabToStringTabStopSize";
 
+NSString *const kPreferenceKeyShowFullscreenTabBar = @"ShowFullScreenTabBar";
+
 static NSMutableDictionary *gObservers;
 
 @implementation iTermPreferences
@@ -257,6 +259,7 @@ static NSMutableDictionary *gObservers;
                   kPreferenceKeyPasteSpecialBracketedPasteMode: @YES,
 
                   kPreferenceKeyPasteWarningNumberOfSpacesPerTab: @4,
+                  kPreferenceKeyShowFullscreenTabBar: @YES
               };
     }
     return dict;
@@ -275,10 +278,15 @@ static NSMutableDictionary *gObservers;
     id defaultValue = [self defaultValueMap][key];
     switch (type) {
         case kPreferenceInfoTypeIntegerTextField:
+        case kPreferenceInfoTypeDoubleTextField:
         case kPreferenceInfoTypePopup:
             return ([defaultValue isKindOfClass:[NSNumber class]] &&
                     [defaultValue doubleValue] == ceil([defaultValue doubleValue]));
+        case kPreferenceInfoTypeUnsignedIntegerTextField:
+        case kPreferenceInfoTypeUnsignedIntegerPopup:
+            return ([defaultValue isKindOfClass:[NSNumber class]]);
         case kPreferenceInfoTypeCheckbox:
+        case kPreferenceInfoTypeInvertedCheckbox:
             return ([defaultValue isKindOfClass:[NSNumber class]] &&
                     ([defaultValue intValue] == YES ||
                      [defaultValue intValue] == NO));
@@ -385,11 +393,27 @@ static NSMutableDictionary *gObservers;
     [self setObject:@(value) forKey:key];
 }
 
++ (NSUInteger)unsignedIntegerForKey:(NSString *)key {
+    return [(NSNumber *)[self objectForKey:key] unsignedIntegerValue];
+}
+
++ (void)setUnsignedInteger:(NSUInteger)value forKey:(NSString *)key {
+    [self setObject:@(value) forKey:key];
+}
+
 + (double)floatForKey:(NSString *)key {
     return [(NSNumber *)[self objectForKey:key] doubleValue];
 }
 
 + (void)setFloat:(double)value forKey:(NSString *)key {
+    [self setObject:@(value) forKey:key];
+}
+
++ (double)doubleForKey:(NSString *)key {
+    return [(NSNumber *)[self objectForKey:key] doubleValue];
+}
+
++ (void)setDouble:(double)value forKey:(NSString *)key {
     [self setObject:@(value) forKey:key];
 }
 

@@ -99,23 +99,29 @@
 // have 0 pixels.
 - (NSImage *)imageWithPointSize:(CGFloat)pointSize {
     NSDictionary *attributes = [self attributesWithPointSize:pointSize];
-    NSSize sizeWithFont = [self sizeWithAttributes:attributes];
+    NSMutableDictionary *temp = [attributes mutableCopy];
+    temp[NSStrokeColorAttributeName] = [_backgroundColor colorWithAlphaComponent:1];
+    NSSize sizeWithFont = [self sizeWithAttributes:temp];
     if (sizeWithFont.width <= 0 && sizeWithFont.height <= 0) {
         return nil;
     }
 
     NSImage *image = [[NSImage alloc] initWithSize:sizeWithFont];
     [image lockFocus];
-    NSMutableDictionary *temp = [attributes mutableCopy];
-    temp[NSStrokeWidthAttributeName] = @-2;
-    temp[NSStrokeColorAttributeName] =
-        [_backgroundColor colorWithAlphaComponent:_fillColor.alphaComponent];
     [_stringValue drawWithRect:NSMakeRect(0, 0, sizeWithFont.width, sizeWithFont.height)
                        options:NSStringDrawingUsesLineFragmentOrigin
                     attributes:temp];
     [image unlockFocus];
 
-    return image;
+    NSImage *reducedAlphaImage = [[NSImage alloc] initWithSize:sizeWithFont];
+    [reducedAlphaImage lockFocus];
+    [image drawInRect:NSMakeRect(0, 0, image.size.width, image.size.height)
+             fromRect:NSZeroRect
+            operation:NSCompositeSourceOver
+             fraction:_fillColor.alphaComponent];
+    [reducedAlphaImage unlockFocus];
+
+    return reducedAlphaImage;
 }
 
 // Attributed string attributes for a given font point size.
@@ -135,12 +141,15 @@
 
     NSDictionary *attributes = @{ NSFontAttributeName: font,
                                   NSForegroundColorAttributeName: _fillColor,
-                                  NSParagraphStyleAttributeName: _paragraphStyle };
+                                  NSParagraphStyleAttributeName: _paragraphStyle,
+                                  NSStrokeWidthAttributeName: @-2 };
     return attributes;
 }
 
 // Size of the image resulting from drawing an attributed string with |attributes|.
 - (NSSize)sizeWithAttributes:(NSDictionary *)attributes {
+    NSSize size = self.maxSize;
+    size.height = CGFLOAT_MAX;
     NSRect bounds = [_stringValue boundingRectWithSize:self.maxSize
                                                options:NSStringDrawingUsesLineFragmentOrigin
                                             attributes:attributes];

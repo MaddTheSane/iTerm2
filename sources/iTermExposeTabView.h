@@ -22,59 +22,39 @@
 
 // This view holds one tab's image and label.
 @interface iTermExposeTabView : NSView
-{
-    NSImage* image_;
-    NSString* label_;
-    NSInteger tabIndex_;
-    NSInteger windowIndex_;
-    BOOL showLabel_;
-    NSRect originalFrame_;
-    NSRect fullSizeFrame_;
-    NSRect normalFrame_;
-    NSTrackingRectTag trackingRectTag_;
-    BOOL highlight_;
-    id __unsafe_unretained tabObject_;
-    id<iTermExposeTabViewDelegate> delegate_;
-    BOOL dirty_;
-    BOOL hasResult_;
-    NSSize origSize_;
-    int index_;
-    BOOL wasMaximized_;
-}
+
+@property(nonatomic, readonly) NSRect originalFrame;
+@property(nonatomic, nonatomic, retain) NSImage *image;
+@property(nonatomic, nonatomic, retain) NSString *label;
+@property(nonatomic, assign) id tabObject;
+@property(nonatomic, assign) BOOL dirty;
+@property(nonatomic, assign) NSRect normalFrame;
+@property(nonatomic, assign) NSRect fullSizeFrame;
+@property(nonatomic, readonly) int index;
+@property(nonatomic, readonly) BOOL wasMaximized;
+@property(nonatomic, assign) NSTrackingRectTag trackingRectTag;
+@property(nonatomic, readonly) PTYTab *tab;
+@property(nonatomic, readonly) NSSize origSize;
+@property(nonatomic, readonly) NSInteger tabIndex;
+@property(nonatomic, readonly) NSInteger windowIndex;
 
 - (instancetype)initWithImage:(NSImage*)image
-              label:(NSString*)label
-                tab:(PTYTab*)tab
-              frame:(NSRect)frame
-      fullSizeFrame:(NSRect)fullSizeFrame
-        normalFrame:(NSRect)normalFrame
-           delegate:(id<iTermExposeTabViewDelegate>)delegate
-              index:(int)theIndex
-       wasMaximized:(BOOL)wasMaximized;
+                        label:(NSString*)label
+                          tab:(PTYTab*)tab
+                        frame:(NSRect)frame
+                fullSizeFrame:(NSRect)fullSizeFrame
+                  normalFrame:(NSRect)normalFrame
+                     delegate:(id<iTermExposeTabViewDelegate>)delegate
+                        index:(int)theIndex
+                 wasMaximized:(BOOL)wasMaximized;
 
-- (NSRect)imageFrame:(NSSize)thumbSize;
-@property (readonly) NSRect originalFrame;
-- (void)drawRect:(NSRect)rect;
-- (void)showLabel;
-- (NSTrackingRectTag)trackingRectTag;
-- (void)setTrackingRectTag:(NSTrackingRectTag)tag;
 - (void)moveToTop;
-- (void)bringTabToFore;
-- (NSInteger)tabIndex;
-- (NSInteger)windowIndex;
-@property (nonatomic, strong) NSImage *image;
-@property (nonatomic, strong) NSString *label;
-@property (unsafe_unretained) id tabObject;
-- (void)clear;
-@property BOOL dirty;
 - (void)setWindowIndex:(int)windowIndex tabIndex:(int)tabIndex;
+- (void)clear;
 - (void)setHasResult:(BOOL)hasResult;
-@property NSRect normalFrame;
-@property NSRect fullSizeFrame;
-- (NSSize)origSize;
-@property (readonly) int index;
-- (PTYTab*)tab;
-@property (readonly) BOOL wasMaximized;
+- (void)bringTabToFore;
+- (NSRect)imageFrame:(NSSize)thumbSize;
+- (void)showLabel;
 - (void)onMouseExit;
 - (void)onMouseEnter;
 

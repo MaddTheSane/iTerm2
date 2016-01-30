@@ -72,7 +72,7 @@
     contentView.wantsLayer = YES;
     contentView.layer.cornerRadius = 6;
     contentView.layer.masksToBounds = YES;
-    contentView.layer.borderColor = [[NSColor colorWithCalibratedRed:0.75 green:0.75 blue:0.75 alpha:1] iterm_CGColor];
+    contentView.layer.borderColor = [[NSColor colorWithCalibratedRed:0.75 green:0.75 blue:0.75 alpha:1] CGColor];
     contentView.layer.borderWidth = 1;
 }
 
@@ -170,6 +170,7 @@
                                withURL:nil
                               isHotkey:NO
                                makeKey:YES
+                           canActivate:YES
                                command:nil
                                  block:nil];
         } else if ([object isKindOfClass:[NSString class]]) {

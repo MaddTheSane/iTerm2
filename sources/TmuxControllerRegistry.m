@@ -10,7 +10,10 @@
 
 NSString *const kTmuxControllerRegistryDidChange = @"kTmuxControllerRegistryDidChange";
 
-@implementation TmuxControllerRegistry
+@implementation TmuxControllerRegistry {
+    // Key gives a client name.
+    NSMutableDictionary<NSString *, TmuxController *> *controllers_;
+}
 
 + (TmuxControllerRegistry *)sharedInstance
 {
@@ -21,8 +24,7 @@ NSString *const kTmuxControllerRegistryDidChange = @"kTmuxControllerRegistryDidC
     return instance;
 }
 
-- (instancetype)init
-{
+- (instancetype)init {
     self = [super init];
     if (self) {
         controllers_ = [[NSMutableDictionary alloc] init];

@@ -1766,7 +1766,7 @@ static NSString *const kGridSizeKey = @"Size";
     }
 }
 
-- (VT100GridCoord)coordinateBefore:(VT100GridCoord)coord {
+- (VT100GridCoord)coordinateBefore:(VT100GridCoord)coord movedBackOverDoubleWidth:(BOOL *)dwc {
     // set cx, cy to the char before the given coordinate.
     VT100GridCoord invalid = VT100GridCoordMake(-1, -1);
     int cx = coord.x;
@@ -1804,11 +1804,16 @@ static NSString *const kGridSizeKey = @"Size";
     screen_char_t *line = [self screenCharsAtLineNumber:cy];
     if (line[cx].code == DWC_RIGHT) {
         if (cx > 0) {
+            if (dwc) {
+                *dwc = YES;
+            }
             cx--;
         } else {
             // This should never happen.
             return invalid;
         }
+    } else if (dwc) {
+        *dwc = NO;
     }
 
     return VT100GridCoordMake(cx, cy);
@@ -1836,6 +1841,23 @@ static NSString *const kGridSizeKey = @"Size";
     }
     return YES;
 }
+
+- (NSString *)stringForCharacterAt:(VT100GridCoord)coord {
+    screen_char_t *theLine = [self screenCharsAtLineNumber:coord.y];
+    if (!theLine) {
+        return nil;
+    }
+    screen_char_t theChar = theLine[coord.x];
+    if (theChar.code == 0 && !theChar.complexChar) {
+        return nil;
+    }
+    if (theChar.complexChar) {
+        return ComplexCharToStr(theChar.code);
+    } else {
+        return [NSString stringWithFormat:@"%C", theChar.code];
+    }
+}
+
 
 #ifdef VERBOSE_STRING
 static void DumpBuf(screen_char_t* p, int n) {

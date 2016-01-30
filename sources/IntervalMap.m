@@ -115,10 +115,11 @@
 
 @end
 
-@implementation IntervalMap
+@implementation IntervalMap {
+    NSMutableArray *elements_;
+}
 
-- (instancetype)init
-{
+- (instancetype)init {
     self = [super init];
     if (self) {
         elements_ = [[NSMutableArray alloc] init];

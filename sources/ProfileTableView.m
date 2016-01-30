@@ -7,7 +7,9 @@
 
 #import "ProfileTableView.h"
 
-@implementation ProfileTableView
+@implementation ProfileTableView {
+    id<ProfileTableMenuHandler> handler_;
+}
 
 - (instancetype)initWithFrame:(NSRect)frameRect {
     self = [super initWithFrame:frameRect];
@@ -28,8 +30,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)setMenuHandler:(id<ProfileTableMenuHandler>)handler
-{
+- (void)setMenuHandler:(id<ProfileTableMenuHandler>)handler {
     handler_ = handler;
 }
 

@@ -34,10 +34,15 @@
 
 @interface iTermApplication : NSApplication
 
++ (iTermApplication *)sharedApplication;
+
 // Sets the return value for -currentEvent. Only for testing.
 @property(atomic, strong) NSEvent *fakeCurrentEvent;
 
 - (void)sendEvent:(NSEvent *)anEvent;
 - (iTermApplicationDelegate *)delegate;
+
+// Like orderedWindows, but only PTYWindow objects are returned.
+- (NSArray *)orderedTerminalWindows;
 
 @end

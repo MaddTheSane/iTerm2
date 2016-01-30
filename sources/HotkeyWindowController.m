@@ -2,13 +2,14 @@
 
 #import "DebugLogging.h"
 #import "GTMCarbonEvent.h"
+#import "iTermAdvancedSettingsModel.h"
 #import "iTermApplication.h"
 #import "iTermApplicationDelegate.h"
 #import "iTermController.h"
 #import "iTermKeyBindingMgr.h"
 #import "iTermPreferences.h"
-#import "iTermAdvancedSettingsModel.h"
 #import "iTermShortcutInputView.h"
+#import "iTermSystemVersion.h"
 #import "NSTextField+iTerm.h"
 #import "PseudoTerminal.h"
 #import "PTYTab.h"
@@ -21,7 +22,18 @@
 
 #define HKWLog DLog
 
-@implementation HotkeyWindowController
+@interface HotkeyWindowController()
+// For restoring previously active app when exiting hotkey window.
+@property(nonatomic, copy) NSNumber *previouslyActiveAppPID;
+@end
+
+@implementation HotkeyWindowController {
+    // Records the index of the front terminal in -[iTermController terminals]
+    // at the time the hotkey window was opened. -1 if invalid. Used to bring
+    // the proper window front when hiding "quickly" (when entering Expose
+    // while a hotkey window is open). TODO: I'm not sure why this is necessary.
+    NSInteger _savedIndexOfFrontTerminal;
+}
 
 + (HotkeyWindowController *)sharedInstance {
     static HotkeyWindowController *instance;
@@ -63,16 +75,20 @@ static void RollInHotkeyTerm(PseudoTerminal* term)
 
     [NSApp activateIgnoringOtherApps:YES];
     [[term window] makeKeyAndOrderFront:nil];
+    
+    [NSAnimationContext beginGrouping];
     [[NSAnimationContext currentContext] setDuration:[iTermAdvancedSettingsModel hotkeyTermAnimationDuration]];
+    [[NSAnimationContext currentContext] setCompletionHandler:^{
+        [[HotkeyWindowController sharedInstance] rollInFinished];
+    }];
     [[[term window] animator] setAlphaValue:1];
-    [[HotkeyWindowController sharedInstance] performSelector:@selector(rollInFinished)
-                                                  withObject:nil
-                                                  afterDelay:[[NSAnimationContext currentContext] duration]];
+    [NSAnimationContext endGrouping];
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
+        _savedIndexOfFrontTerminal = -1;
         [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self
                                                                selector:@selector(activeSpaceDidChange:)
                                                                    name:NSWorkspaceActiveSpaceDidChangeNotification
@@ -102,6 +118,14 @@ static void RollInHotkeyTerm(PseudoTerminal* term)
         ![iTermPreferences boolForKey:kPreferenceKeyHotkeyAutoHides]) {
       DLog(@"Just switched spaces. Hotkey window is visible, joins all spaces, and does not autohide. Show it in half a second.");
         [self performSelector:@selector(bringHotkeyWindowToFore:) withObject:window afterDelay:0.5];
+    }
+    if ([window isVisible] && window.isOnActiveSpace && [term fullScreen]) {
+        // Issue 4136: If you press the hotkey while in a fullscreen app, the
+        // dock stays up. Looks like the OS doesn't respect the window's
+        // presentation option when switching from a fullscreen app, so we have
+        // to toggle it after the switch is complete.
+        [term showMenuBar];
+        [term hideMenuBar];
     }
 }
 
@@ -161,6 +185,7 @@ static void RollInHotkeyTerm(PseudoTerminal* term)
                                            withURL:nil
                                           isHotkey:YES
                                            makeKey:YES
+                                       canActivate:YES
                                            command:nil
                                              block:nil];
         if (session) {
@@ -181,14 +206,16 @@ static void RollInHotkeyTerm(PseudoTerminal* term)
         }
         if (rollIn) {
             RollInHotkeyTerm(term);
+        } else {
+            // Order out for issue 4065.
+            [[term window] orderOut:nil];
         }
         return YES;
     }
     return NO;
 }
 
-- (void)showNonHotKeyWindowsAndSetAlphaTo:(float)a
-{
+- (void)showNonHotKeyWindowsAndSetAlphaTo:(float)a {
     PseudoTerminal* hotkeyTerm = GetHotkeyWindow();
     for (PseudoTerminal* term in [[iTermController sharedInstance] terminals]) {
         [[term window] setAlphaValue:a];
@@ -197,7 +224,7 @@ static void RollInHotkeyTerm(PseudoTerminal* term)
         }
     }
     // Unhide all windows and bring the one that was at the top to the front.
-    int i = [[iTermController sharedInstance] keyWindowIndexMemo];
+    NSInteger i = _savedIndexOfFrontTerminal;
     if (i >= 0 && i < [[[iTermController sharedInstance] terminals] count]) {
         [[[[[iTermController sharedInstance] terminals] objectAtIndex:i] window] makeKeyAndOrderFront:nil];
     }
@@ -264,19 +291,42 @@ static void RollOutHotkeyTerm(PseudoTerminal* term, BOOL itermWasActiveWhenHotke
     }
 }
 
-- (void)showHotKeyWindow
-{
-    [[iTermController sharedInstance] storePreviouslyActiveApp];
+- (void)storePreviouslyActiveApp {
+    NSDictionary *activeAppDict = [[NSWorkspace sharedWorkspace] activeApplication];
+    if (![[activeAppDict objectForKey:@"NSApplicationBundleIdentifier"] isEqualToString:@"com.googlecode.iterm2"]) {
+        self.previouslyActiveAppPID = activeAppDict[@"NSApplicationProcessIdentifier"];
+    } else {
+        self.previouslyActiveAppPID = nil;
+    }
+}
+
+- (void)restorePreviouslyActiveApp {
+    if (!_previouslyActiveAppPID) {
+        return;
+    }
+
+    NSRunningApplication *app =
+        [NSRunningApplication runningApplicationWithProcessIdentifier:[_previouslyActiveAppPID intValue]];
+
+    if (app) {
+        DLog(@"Restore app %@", app);
+        [app activateWithOptions:0];
+    }
+    self.previouslyActiveAppPID = nil;
+}
+
+- (void)showHotKeyWindow {
+    [self storePreviouslyActiveApp];
     itermWasActiveWhenHotkeyOpened_ = [NSApp isActive];
     PseudoTerminal* hotkeyTerm = GetHotkeyWindow();
     if (hotkeyTerm) {
         HKWLog(@"Showing existing hotkey window");
-        int i = 0;
-        [[iTermController sharedInstance] setKeyWindowIndexMemo:-1];
+        NSInteger i = 0;
+        _savedIndexOfFrontTerminal = -1;
         for (PseudoTerminal* term in [[iTermController sharedInstance] terminals]) {
             if ([NSApp isActive]) {
                 if (term != hotkeyTerm && [[term window] isKeyWindow]) {
-                    [[iTermController sharedInstance] setKeyWindowIndexMemo:i];
+                    _savedIndexOfFrontTerminal = i;
                 }
             }
             i++;
@@ -306,8 +356,7 @@ static void RollOutHotkeyTerm(PseudoTerminal* term, BOOL itermWasActiveWhenHotke
     return term && [[term window] isVisible];
 }
 
-- (void)fastHideHotKeyWindow
-{
+- (void)fastHideHotKeyWindow {
     HKWLog(@"fastHideHotKeyWindow");
     PseudoTerminal* term = GetHotkeyWindow();
     if (term) {
@@ -344,7 +393,7 @@ static void RollOutHotkeyTerm(PseudoTerminal* term, BOOL itermWasActiveWhenHotke
         if (!theKeyWindow ||
             ([theKeyWindow isKindOfClass:[PTYWindow class]] &&
              [(PseudoTerminal*)[theKeyWindow windowController] isHotKeyWindow])) {
-                [[iTermController sharedInstance] restorePreviouslyActiveApp];
+                [self restorePreviouslyActiveApp];
             }
     }
     RollOutHotkeyTerm(hotkeyTerm, itermWasActiveWhenHotkeyOpened_);
@@ -439,7 +488,7 @@ static BOOL UserIsActive() {
  */
 static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
-    iTermApplicationDelegate *ad = [[NSApplication sharedApplication] delegate];
+    iTermApplicationDelegate *ad = iTermApplication.sharedApplication.delegate;
     if (!ad.workspaceSessionActive) {
         return event;
     }
@@ -698,7 +747,7 @@ static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEvent
 }
 
 - (void)carbonHotkeyPressed:(id)handler {
-    iTermApplicationDelegate *ad = [[NSApplication sharedApplication] delegate];
+    iTermApplicationDelegate *ad = iTermApplication.sharedApplication.delegate;
     if (!ad.workspaceSessionActive) {
         return;
     }
@@ -706,19 +755,14 @@ static CGEventRef OnTappedEvent(CGEventTapProxy proxy, CGEventType type, CGEvent
 }
 
 - (void)requestAccessibilityPermissionMavericks {
-    static BOOL alreadyAsked;
-    if (alreadyAsked) {
-        return;
-    }
-    alreadyAsked = YES;
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1090
-    NSDictionary *options = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
-                                                        forKey:(__bridge NSString *)kAXTrustedCheckOptionPrompt];
-    // Show a dialog prompting the user to open system prefs.
-    if (!AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options)) {
-        return;
-    }
-#endif
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSDictionary *options = @{ (__bridge NSString *)kAXTrustedCheckOptionPrompt: @YES };
+        // Show a dialog prompting the user to open system prefs.
+        if (!AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options)) {
+            return;
+        }
+    });
 }
 
 - (void)beginRemappingModifiers

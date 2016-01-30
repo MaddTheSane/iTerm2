@@ -20,15 +20,13 @@
 - (BOOL)intersectsRange:(IntRange *)other;
 - (instancetype)intersectionWithRange:(IntRange *)other;
 - (int)limit;
-- (NSArray<IntRange*> *)rangesAfterSubtractingRange:(IntRange *)other;
+- (NSArray<IntRange *> *)rangesAfterSubtractingRange:(IntRange *)other;
 
 @end
 
-@interface IntervalMap : NSObject {
-    NSMutableArray *elements_;
-}
+// Maps a range of integers to an object. There is special handling for objects that are numbers.
+@interface IntervalMap : NSObject
 
-- (instancetype)init;
 - (void)setObject:(id)object forRange:(IntRange *)range;
 - (void)incrementNumbersBy:(int)amount inRange:(IntRange *)range;
 - (NSArray *)allValues;

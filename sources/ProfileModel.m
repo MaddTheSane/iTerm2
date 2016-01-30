@@ -22,11 +22,13 @@
  **  along with this program; if not, write to the Free Software
  */
 
+#import "ProfileModel.h"
+
+#import "DebugLogging.h"
 #import "ITAddressBookMgr.h"
 #import "iTermProfileSearchToken.h"
 #import "NSStringITerm.h"
 #import "PreferencePanel.h"
-#import "ProfileModel.h"
 
 NSString *const kReloadAddressBookNotification = @"iTermReloadAddressBook";
 
@@ -315,8 +317,8 @@ int gMigrated;
     if (![newBookmark objectForKey:KEY_CUSTOM_COMMAND]) {
         [newBookmark setObject:@"No" forKey:KEY_CUSTOM_COMMAND];
     }
-    if (![newBookmark objectForKey:KEY_COMMAND]) {
-        [newBookmark setObject:@"/bin/bash --login" forKey:KEY_COMMAND];
+    if (![newBookmark objectForKey:KEY_COMMAND_LINE]) {
+        [newBookmark setObject:@"/bin/bash --login" forKey:KEY_COMMAND_LINE];
     }
     if (![newBookmark objectForKey:KEY_GUID]) {
         [newBookmark setObject:[ProfileModel freshGuid] forKey:KEY_GUID];
@@ -415,11 +417,12 @@ int gMigrated;
     [self postChangeNotification];
 }
 
-- (void)removeBookmarkAtIndex:(int)i
-{
+- (void)removeBookmarkAtIndex:(int)i {
+    DLog(@"Remove profile at index %d", i);
     assert(i >= 0);
     [journal_ addObject:[BookmarkJournalEntry journalWithAction:JOURNAL_REMOVE bookmark:[bookmarks_ objectAtIndex:i] model:self]];
     [bookmarks_ removeObjectAtIndex:i];
+    DLog(@"Number of profiles is now %d", (int)bookmarks_.count);
     if (![self defaultBookmark] && [bookmarks_ count]) {
         [self setDefaultByGuid:[[bookmarks_ objectAtIndex:0] objectForKey:KEY_GUID]];
     }
@@ -431,9 +434,10 @@ int gMigrated;
     [self removeBookmarkAtIndex:[self convertFilteredIndex:i withFilter:filter]];
 }
 
-- (void)removeProfileWithGuid:(NSString*)guid
-{
+- (void)removeProfileWithGuid:(NSString*)guid {
+    DLog(@"Remove profile with guid %@", guid);
     int i = [self indexOfProfileWithGuid:guid];
+    DLog(@"Index is %d", i);
     if (i >= 0) {
         [self removeBookmarkAtIndex:i];
     }
@@ -448,7 +452,7 @@ int gMigrated;
         ![[a objectForKey:KEY_SHORTCUT] isEqualToString:[b objectForKey:KEY_SHORTCUT]] ||
         ![[a objectForKey:KEY_TAGS] isEqualToArray:[b objectForKey:KEY_TAGS]] ||
         ![[a objectForKey:KEY_GUID] isEqualToString:[b objectForKey:KEY_GUID]] ||
-        ![[a objectForKey:KEY_COMMAND] isEqualToString:[b objectForKey:KEY_COMMAND]] ||
+        ![[a objectForKey:KEY_COMMAND_LINE] isEqualToString:[b objectForKey:KEY_COMMAND_LINE]] ||
         ![[a objectForKey:KEY_CUSTOM_COMMAND] isEqualToString:[b objectForKey:KEY_CUSTOM_COMMAND]]) {
         return YES;
     } else {
@@ -679,9 +683,10 @@ int gMigrated;
     [self postChangeNotification];
 }
 
-- (void)postChangeNotification
-{
+- (void)postChangeNotification {
+    DLog(@"Post bookmark changed notification");
     if (postChanges_) {
+        DLog(@"Posting notification");
         [[NSNotificationCenter defaultCenter] postNotificationName:kReloadAddressBookNotification
                                                             object:nil
                                                           userInfo:[NSDictionary dictionaryWithObject:journal_ forKey:@"array"]];

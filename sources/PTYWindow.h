@@ -36,19 +36,22 @@
 
 @interface PTYWindow : NSWindow
 
+@property(nonatomic, readonly) int screenNumber;
+@property(nonatomic, readonly, getter=isTogglingLionFullScreen) BOOL togglingLionFullScreen;
+
 - (void)smartLayout;
 - (void)setLayoutDone;
 
 - (void)enableBlur:(double)radius;
 - (void)disableBlur;
 
-@property (readonly) int screenNumber;
-@property (readonly, getter=isTogglingLionFullScreen) BOOL togglingLionFullScreen;
-
 - (void)setRestoreState:(NSObject *)restoreState;
 
 // Returns the approximate fraction of this window that is occluded by other windows in this app.
 - (double)approximateFractionOccluded;
+
+// See comments in iTermDelayedTitleSetter for why this is so.
+- (void)delayedSetTitle:(NSString *)title;
 
 @end
 

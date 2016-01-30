@@ -16,21 +16,11 @@
 @end
 
 
-@interface SmartSelectionController : NSWindowController <ContextMenuActionPrefsDelegate> {
-    NSString *guid_;
-    BOOL hasSelection_;
-    IBOutlet id<SmartSelectionDelegate> __unsafe_unretained delegate_;  // weak
-    IBOutlet NSTableView *tableView_;
-    IBOutlet NSTableColumn *regexColumn_;
-    IBOutlet NSTableColumn *notesColumn_;
-    IBOutlet NSTableColumn *precisionColumn_;
-    IBOutlet ContextMenuActionPrefsController *contextMenuPrefsController_;
-    IBOutlet NSButton *logDebugInfo_;
-}
+@interface SmartSelectionController : NSWindowController <ContextMenuActionPrefsDelegate>
 
 @property (nonatomic, copy) NSString *guid;
 @property (nonatomic, assign) BOOL hasSelection;
-@property (nonatomic, unsafe_unretained) id<SmartSelectionDelegate> delegate;
+@property (nonatomic, weak) id<SmartSelectionDelegate> delegate;
 
 + (BOOL)logDebugInfo;
 + (double)precisionInRule:(NSDictionary *)rule;

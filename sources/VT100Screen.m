@@ -1,15 +1,18 @@
 ﻿#import "VT100Screen.h"
+
 #import "CapturedOutput.h"
-#import "CommandHistory.h"
 #import "DebugLogging.h"
 #import "DVR.h"
 #import "IntervalTree.h"
 #import "iTermAdvancedSettingsModel.h"
+#import "iTermCapturedOutputMark.h"
 #import "iTermColorMap.h"
 #import "iTermExpose.h"
 #import "iTermGrowlDelegate.h"
+#import "iTermImageMark.h"
 #import "iTermPreferences.h"
 #import "iTermSelection.h"
+#import "iTermShellHistoryController.h"
 #import "iTermTemporaryDoubleBufferedGridController.h"
 #import "NSArray+iTerm.h"
 #import "NSColor+iTerm.h"
@@ -142,7 +145,6 @@ static const double kInterBellQuietPeriod = 0.1;
     BOOL _shellIntegrationInstalled;
 
     NSDictionary *inlineFileInfo_;  // Keys are kInlineFileXXX
-    NSMutableArray *inlineFileCodes_;
     VT100GridAbsCoord nextCommandOutputStart_;
     NSTimeInterval lastBell_;
     BOOL _cursorVisible;
@@ -211,9 +213,6 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 }
 
 - (void)dealloc {
-    for (NSNumber *code in inlineFileCodes_) {
-        ReleaseImage([code intValue]);
-    }
     _temporaryDoubleBuffer.delegate = nil;
     [_temporaryDoubleBuffer reset];
 }
@@ -946,36 +945,17 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
         buffer = staticBuffer;
     }
 
-    // Pick off leading combining marks and low surrogates and modify the
-    // character at the cursor position with them.
-    while ([string length] > 0 &&
-           (IsCombiningMark(firstChar) || IsLowSurrogate(firstChar))) {
-        VT100GridCoord pred = [currentGrid_ coordinateBefore:currentGrid_.cursor];
-        if (pred.x < 0 ||
-            ![currentGrid_ addCombiningChar:firstChar toCoord:pred]) {
-            // Combining mark will need to stand alone rather than combine
-            // because nothing precedes it.
-            if (IsCombiningMark(firstChar)) {
-                // Prepend a space to it so the combining mark has something
-                // to combine with.
-                string = [NSString stringWithFormat:@" %@", string];
-            } else {
-                // Got a low surrogate but can't find the matching high
-                // surrogate. Turn the low surrogate into a replacement
-                // char. This should never happen because decode_string
-                // ought to detect the broken unicode and substitute a
-                // replacement char.
-                string = [NSString stringWithFormat:@"%@%@",
-                          ReplacementString(),
-                          [string substringFromIndex:1]];
-            }
-            len = [string length];
-            break;
-        }
-        string = [string substringFromIndex:1];
-        if ([string length] > 0) {
-            firstChar = [string characterAtIndex:0];
-        }
+    BOOL predecessorIsDoubleWidth = NO;
+    VT100GridCoord pred = [currentGrid_ coordinateBefore:currentGrid_.cursor
+                                movedBackOverDoubleWidth:&predecessorIsDoubleWidth];
+    NSString *augmentedString = string;
+    NSString *predecessorString = pred.x >= 0 ? [currentGrid_ stringForCharacterAt:pred] : nil;
+    BOOL augmented = predecessorString != nil;
+    if (augmented) {
+        augmentedString = [predecessorString stringByAppendingString:string];
+    } else {
+        // Prepend a space so we can detect if the first character is a combining mark.
+        augmentedString = [@" " stringByAppendingString:string];
     }
 
     assert(terminal_);
@@ -983,7 +963,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     // and combining marks, replace private codes with replacement characters, swallow zero-
     // width spaces, and set fg/bg colors and attributes.
     BOOL dwc = NO;
-    StringToScreenChars(string,
+    StringToScreenChars(augmentedString,
                         buffer,
                         [terminal_ foregroundColorCode],
                         [terminal_ backgroundColorCode],
@@ -992,12 +972,33 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
                         NULL,
                         &dwc,
                         _useHFSPlusMapping);
+    ssize_t bufferOffset = 0;
+    if (augmented && len > 0) {
+        screen_char_t *theLine = [self getLineAtScreenIndex:pred.y];
+        theLine[pred.x].code = buffer[0].code;
+        theLine[pred.x].complexChar = buffer[0].complexChar;
+        bufferOffset++;
+
+        if (predecessorIsDoubleWidth && len > 1 && buffer[1].code == DWC_RIGHT) {
+            // Skip over a preexisting DWC_RIGHT in the predecessor.
+            bufferOffset++;
+        }
+    } else if (!buffer[0].complexChar) {
+        // We infer that the first character in |string| was not a combining mark. If it were, it
+        // would have combined with the space we added to the start of |augmentedString|. Skip past
+        // the space.
+        bufferOffset++;
+    }
+
     if (dwc) {
         linebuffer_.mayHaveDoubleWidthCharacter = dwc;
     }
-    [self appendScreenCharArrayAtCursor:buffer
-                                 length:len
-                             shouldFree:(buffer == dynamicBuffer)];
+    [self appendScreenCharArrayAtCursor:buffer + bufferOffset
+                                 length:len - bufferOffset
+                             shouldFree:NO];
+    if (buffer == dynamicBuffer) {
+        free(buffer);
+    }
 }
 
 - (void)appendScreenCharArrayAtCursor:(screen_char_t *)buffer
@@ -1841,6 +1842,9 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     if (!remoteHost.username || !remoteHost.hostname) {
         return nil;
     }
+    if (remoteHost.isLocalhost) {
+        return nil;
+    }
     NSString *workingDirectory = [self workingDirectoryOnLine:line];
     if (!workingDirectory) {
         return nil;
@@ -1891,7 +1895,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     }
 }
 
-- (BOOL)markIsValid:(VT100ScreenMark *)mark {
+- (BOOL)markIsValid:(iTermMark *)mark {
     return [intervalTree_ containsObject:mark];
 }
 
@@ -1899,8 +1903,11 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
                                        oneLine:(BOOL)oneLine
                                        ofClass:(Class)markClass {
     id<iTermMark> mark = [[markClass alloc] init];
-    mark.delegate = self;
-    mark.sessionGuid = [delegate_ screenSessionGuid];
+    if ([mark isKindOfClass:[VT100ScreenMark class]]) {
+        VT100ScreenMark *screenMark = mark;
+        screenMark.delegate = self;
+        screenMark.sessionGuid = [delegate_ screenSessionGuid];
+    }
     int nonAbsoluteLine = line - [self totalScrollbackOverflow];
     VT100GridCoordRange range;
     if (oneLine) {
@@ -2021,6 +2028,38 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
                                                [VT100ScreenMark class] ]];
     } while (objects && !objects.count);
     return objects;
+}
+
+- (int)lineNumberOfMarkBeforeLine:(int)line {
+    Interval *interval = [self intervalForGridCoordRange:VT100GridCoordRangeMake(0, line, 0, line)];
+    NSEnumerator *enumerator = [intervalTree_ reverseLimitEnumeratorAt:interval.limit];
+    NSArray *objects = [enumerator nextObject];
+    while (objects) {
+        for (id object in objects) {
+            if ([object isKindOfClass:[VT100ScreenMark class]]) {
+                VT100ScreenMark *mark = object;
+                return [self coordRangeForInterval:mark.entry.interval].start.y;
+            }
+        }
+        objects = [enumerator nextObject];
+    }
+    return line;
+}
+
+- (int)lineNumberOfMarkAfterLine:(int)line {
+    Interval *interval = [self intervalForGridCoordRange:VT100GridCoordRangeMake(0, line + 1, 0, line + 1)];
+    NSEnumerator *enumerator = [intervalTree_ forwardLimitEnumeratorAt:interval.limit];
+    NSArray *objects = [enumerator nextObject];
+    while (objects) {
+        for (id object in objects) {
+            if ([object isKindOfClass:[VT100ScreenMark class]]) {
+                VT100ScreenMark *mark = object;
+                return [self coordRangeForInterval:mark.entry.interval].end.y;
+            }
+        }
+        objects = [enumerator nextObject];
+    }
+    return line;
 }
 
 - (NSArray *)marksOrNotesBefore:(Interval *)location {
@@ -3010,7 +3049,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     [self reloadMarkCache];
 
     [currentGrid_ markAllCharsDirty:YES];
-    [delegate_ screenNeedsRedraw];
+    [delegate_ screenScheduleRedrawSoon];
     commandStartX_ = commandStartY_ = -1;
 }
 
@@ -3052,7 +3091,7 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
         [self reloadMarkCache];
 
         [currentGrid_ markAllCharsDirty:YES];
-        [delegate_ screenNeedsRedraw];
+        [delegate_ screenScheduleRedrawSoon];
     }
 }
 
@@ -3306,8 +3345,15 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
     }
     currentGrid_.cursorX = currentGrid_.cursorX + width + 1;
 
+    // Add a mark after the image. When the mark gets freed, it will release the image's memory.
     SetDecodedImage(c.code, image, data);
-    [inlineFileCodes_ addObject:@(c.code)];
+    long long absLine = (self.totalScrollbackOverflow +
+                         [self numberOfScrollbackLines] +
+                         currentGrid_.cursor.y + 1);
+    iTermImageMark *mark = [self addMarkStartingAtAbsoluteLine:absLine
+                                                       oneLine:YES
+                                                       ofClass:[iTermImageMark class]];
+    mark.imageCode = @(c.code);
     [delegate_ screenNeedsRedraw];
 }
 
@@ -3416,6 +3462,10 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
 
 - (void)terminalSetTabColorBlueComponentTo:(CGFloat)color {
     [delegate_ screenSetTabColorBlueComponentTo:color];
+}
+
+- (BOOL)terminalFocusReportingEnabled {
+    return [iTermAdvancedSettingsModel focusReportingEnabled];
 }
 
 - (NSColor *)terminalColorForIndex:(int)index {
@@ -3543,9 +3593,9 @@ static NSString *const kInlineFileBase64String = @"base64 string";  // NSMutable
         DLog(@"FinalTerm: setting code on mark %@", mark);
         mark.code = returnCode;
         VT100RemoteHost *remoteHost = [self remoteHostOnLine:[self numberOfLines]];
-        [[CommandHistory sharedInstance] setStatusOfCommandAtMark:mark
-                                                           onHost:remoteHost
-                                                               to:returnCode];
+        [[iTermShellHistoryController sharedInstance] setStatusOfCommandAtMark:mark
+                                                                        onHost:remoteHost
+                                                                            to:returnCode];
         [delegate_ screenNeedsRedraw];
     } else {
         DLog(@"No last command mark found.");
@@ -4104,10 +4154,10 @@ static void SwapInt(int *a, int *b) {
 
                     XYRange* xyrange = [allPositions objectAtIndex:k];
 
-                    result->startX = xyrange->xStart;
-                    result->endX = xyrange->xEnd;
-                    result->absStartY = xyrange->yStart + [self totalScrollbackOverflow];
-                    result->absEndY = xyrange->yEnd + [self totalScrollbackOverflow];
+                    result.startX = xyrange->xStart;
+                    result.endX = xyrange->xEnd;
+                    result.absStartY = xyrange->yStart + [self totalScrollbackOverflow];
+                    result.absEndY = xyrange->yEnd + [self totalScrollbackOverflow];
 
                     [results addObject:result];
                     if (!(context.options & FindMultipleResults)) {
@@ -4265,14 +4315,14 @@ static void SwapInt(int *a, int *b) {
     static NSString *const kScreenStateTabStopsKey = @"Tab Stops";
     dict[kScreenStateKey] =
         @{ kScreenStateTabStopsKey: [tabStops_ allObjects] ?: @[],
-           kScreenStateTerminalKey: [terminal_ stateDictionary],
+           kScreenStateTerminalKey: [terminal_ stateDictionary] ?: @{},
            kScreenStateLineDrawingModeKey: @[ @(charsetUsesLineDrawingMode_[0]),
                                               @(charsetUsesLineDrawingMode_[1]),
                                               @(charsetUsesLineDrawingMode_[2]),
                                               @(charsetUsesLineDrawingMode_[3]) ],
-           kScreenStateNonCurrentGridKey: [self contentsOfNonCurrentGrid],
+           kScreenStateNonCurrentGridKey: [self contentsOfNonCurrentGrid] ?: @{},
            kScreenStateCurrentGridIsPrimaryKey: @(primaryGrid_ == currentGrid_),
-           kScreenStateIntervalTreeKey: [intervalTree_ dictionaryValueWithOffset:intervalOffset],
+           kScreenStateIntervalTreeKey: [intervalTree_ dictionaryValueWithOffset:intervalOffset] ?: @{},
            kScreenStateSavedIntervalTreeKey: [savedIntervalTree_ dictionaryValueWithOffset:0] ?: [NSNull null],
            kScreenStateCommandStartXKey: @(commandStartX_),
            kScreenStateCommandStartYKey: @(commandStartY_),
@@ -4282,7 +4332,7 @@ static void SwapInt(int *a, int *b) {
            kScreenStateLastCommandOutputRangeKey: [NSDictionary dictionaryWithGridAbsCoordRange:_lastCommandOutputRange],
            kScreenStateShellIntegrationInstalledKey: @(_shellIntegrationInstalled),
            kScreenStateLastCommandMarkKey: _lastCommandMark.guid ?: [NSNull null],
-           kScreenStatePrimaryGridStateKey: primaryGrid_.dictionaryValue,
+           kScreenStatePrimaryGridStateKey: primaryGrid_.dictionaryValue ?: @{},
            kScreenStateAlternateGridStateKey: primaryGrid_.dictionaryValue ?: [NSNull null],
            kScreenStateNumberOfLinesDroppedKey: @(linesDroppedForBrevity)
            };
@@ -4400,27 +4450,25 @@ static void SwapInt(int *a, int *b) {
     NSMutableDictionary *markGuidToCapturedOutput = [NSMutableDictionary dictionary];
     for (NSArray *objects in [intervalTree forwardLimitEnumerator]) {
         for (id<IntervalTreeObject> object in objects) {
-            if ([object isKindOfClass:[iTermMark class]]) {
-                iTermMark *mark = (iTermMark *)object;
-                mark.delegate = self;
+            if ([object isKindOfClass:[VT100RemoteHost class]]) {
+                lastRemoteHost = object;
+            } else if ([object isKindOfClass:[VT100ScreenMark class]]) {
+                VT100ScreenMark *screenMark = (VT100ScreenMark *)object;
+                screenMark.delegate = self;
                 // If |capturedOutput| is not empty then this mark is a command, some of whose output
                 // was captured. The iTermCapturedOutputMarks will come later so save the GUIDs we need
                 // in markGuidToCapturedOutput and they'll get backfilled when found.
-                for (CapturedOutput *capturedOutput in mark.capturedOutput) {
+                for (CapturedOutput *capturedOutput in screenMark.capturedOutput) {
                     [capturedOutput setKnownTriggers:triggers];
                     if (capturedOutput.markGuid) {
                         markGuidToCapturedOutput[capturedOutput.markGuid] = capturedOutput;
                     }
                 }
-            }
-            if ([object isKindOfClass:[VT100RemoteHost class]]) {
-                lastRemoteHost = object;
-            } else if ([object isKindOfClass:[VT100ScreenMark class]]) {
-                VT100ScreenMark *screenMark = (VT100ScreenMark *)object;
                 if (screenMark.command) {
                     // Find the matching object in command history and link it.
-                    CommandUse *commandUse = [[CommandHistory sharedInstance] commandUseWithMarkGuid:screenMark.guid
-                                                                                              onHost:lastRemoteHost];
+                    iTermCommandHistoryCommandUseMO *commandUse =
+                        [[iTermShellHistoryController sharedInstance] commandUseWithMarkGuid:screenMark.guid
+                                                                                      onHost:lastRemoteHost];
                     commandUse.mark = screenMark;
                 }
                 if ([screenMark.guid isEqualToString:guidOfLastCommandMark]) {

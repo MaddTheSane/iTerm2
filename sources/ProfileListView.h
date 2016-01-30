@@ -34,6 +34,9 @@
 @class ProfileTagsView;
 @class iTermSearchField;
 
+// Post this after deleting a profile. It will call -reloadData.
+extern NSString *const kProfileWasDeletedNotification;
+
 @protocol ProfileListViewDelegate <NSObject>
 @optional
 - (void)profileTableSelectionDidChange:(id)profileTable;
@@ -59,8 +62,14 @@
 
 @property(nonatomic, readonly) BOOL tagsVisible;
 @property(nonatomic, unsafe_unretained) IBOutlet id<ProfileListViewDelegate> delegate;
+@property(nonatomic, readonly) NSInteger numberOfRows;
+@property(nonatomic, readonly) NSSet<NSString*> *selectedGuids;
+@property(nonatomic, readonly) BOOL hasSelection;
 
-- (instancetype)initWithFrame:(NSRect)frameRect;
+// Don't use these if you've called allowMultipleSelections.
+@property(nonatomic, readonly) NSInteger selectedRow;
+@property(nonatomic, readonly) NSString *selectedGuid;
+
 - (instancetype)initWithFrame:(NSRect)frameRect model:(ProfileModel*)dataSource;
 - (ProfileModelWrapper*)dataSource;
 - (void)setUnderlyingDatasource:(ProfileModel*)dataSource;
@@ -68,22 +77,15 @@
 - (BOOL)searchFieldHasText;
 
 
-// Don't use this if you've called allowMultipleSelections.
-@property (readonly) NSInteger selectedRow;
 - (void)reloadData;
 - (void)selectRowIndex:(int)theIndex;
 - (void)selectRowByGuid:(NSString*)guid;
-@property (readonly) NSInteger numberOfRows;
 - (void)clearSearchField;
 - (void)allowEmptySelection;
 - (void)allowMultipleSelections;
 - (void)deselectAll;
 - (void)multiColumns;
 
-// Don't use this if you've called allowMultipleSelections
-@property (weak, readonly) NSString *selectedGuid;
-@property (weak, readonly) NSSet<NSString*> *selectedGuids;
-@property (readonly) BOOL hasSelection;
 - (NSArray *)orderedSelectedGuids;
 - (void)dataChangeNotification:(id)sender;
 - (void)onDoubleClick:(id)sender;

@@ -31,6 +31,7 @@ NSString *const kSavedCursorOriginKey = @"Origin";
 NSString *const kSavedCursorWraparoundKey = @"Wraparound";
 
 NSString *const kTerminalStateTermTypeKey = @"Term Type";
+NSString *const kTerminalStateAnswerBackStringKey = @"Answerback String";
 NSString *const kTerminalStateStringEncodingKey = @"String Encoding";
 NSString *const kTerminalStateCanonicalEncodingKey = @"Canonical String Encoding";
 NSString *const kTerminalStateReportFocusKey = @"Report Focus";
@@ -221,7 +222,6 @@ static const int kMaxScreenRows = 4096;
     return self;
 }
 
-
 - (void)stopReceivingFile {
     receivingFile_ = NO;
 }
@@ -246,6 +246,9 @@ static const int kMaxScreenRows = 4096;
 
     int r;
 
+    // NOTE: This seems to cause a memory leak. The setter for termTypeIsValid (below) has the
+    // side effect of copying various curses strings, and it depends on this. When I redo output,
+    // fix this disaster.
     setupterm((char *)[_termType UTF8String], fileno(stdout), &r);
     if (r != 1) {
         NSLog(@"Terminal type %s is not defined.", [_termType UTF8String]);
@@ -255,6 +258,11 @@ static const int kMaxScreenRows = 4096;
     self.isAnsi = [_termType rangeOfString:@"ANSI"
                                    options:NSCaseInsensitiveSearch | NSAnchoredSearch ].location !=  NSNotFound;
     [delegate_ terminalTypeDidChange];
+}
+
+- (void)setAnswerBackString:(NSString *)s {
+    s = [s stringByExpandingVimSpecialCharacters];
+    _answerBackString = [s copy];
 }
 
 - (void)setForeground24BitColor:(NSColor *)color {
@@ -528,7 +536,7 @@ static const int kMaxScreenRows = 4096;
                 [delegate_ terminalMouseModeDidChangeTo:_mouseMode];
                 break;
             case 1004:
-                self.reportFocus = mode;
+                self.reportFocus = mode && [delegate_ terminalFocusReportingEnabled];
                 break;
 
             case 1005:
@@ -1222,7 +1230,7 @@ static const int kMaxScreenRows = 4096;
 
         //  VT100 CC
         case VT100CC_ENQ:
-            // TODO: Add support for an answerback string here.
+            [delegate_ terminalSendReport:[_answerBackString dataUsingEncoding:self.encoding]];
             break;
         case VT100CC_BEL:
             [delegate_ terminalRingBell];
@@ -2361,6 +2369,7 @@ static const int kMaxScreenRows = 4096;
 - (NSDictionary *)stateDictionary {
     NSDictionary *dict =
         @{ kTerminalStateTermTypeKey: self.termType ?: [NSNull null],
+           kTerminalStateAnswerBackStringKey: self.answerBackString ?: [NSNull null],
            kTerminalStateStringEncodingKey: @(self.encoding),
            kTerminalStateCanonicalEncodingKey: @(self.canonicalEncoding),
            kTerminalStateReportFocusKey: @(self.reportFocus),
@@ -2396,6 +2405,12 @@ static const int kMaxScreenRows = 4096;
         return;
     }
     self.termType = dict[kTerminalStateTermTypeKey];
+
+    self.answerBackString = dict[kTerminalStateAnswerBackStringKey];
+    if ([self.answerBackString isKindOfClass:[NSNull class]]) {
+        self.answerBackString = nil;
+    }
+
     self.encoding = [dict[kTerminalStateStringEncodingKey] unsignedIntegerValue];
     self.canonicalEncoding = [dict[kTerminalStateCanonicalEncodingKey] unsignedIntegerValue];
     self.reportFocus = [dict[kTerminalStateReportFocusKey] boolValue];

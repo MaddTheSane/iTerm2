@@ -14,7 +14,6 @@
 
 typedef NS_ENUM(NSInteger, iTermTabBarFlashState) {
     kFlashOff,
-    kFlashFadingIn,
     kFlashHolding,  // Regular delay
     kFlashExtending,  // Staying on because cmd pressed
     kFlashFadingOut,
@@ -55,9 +54,6 @@ static const NSTimeInterval kAnimationDuration = 0.25;
         case kFlashOff:
             break;
 
-        case kFlashFadingIn:
-            break;
-
         case kFlashHolding:
             break;
 
@@ -86,17 +82,9 @@ static const NSTimeInterval kAnimationDuration = 0.25;
 
 - (void)fadeIn {
     DLog(@"fade in");
-    [NSView animateWithDuration:kAnimationDuration
-                     animations:^{
-                         self.flashState = kFlashFadingIn;
-                         [_itermTabBarDelegate iTermTabBarWillBeginFlash];
-                         [self.animator setAlphaValue:1];
-                     }
-                     completion:^(BOOL finished) {
-                         if (self.flashState == kFlashFadingIn) {
-                             self.flashState = kFlashHolding;
-                         }
-                     }];
+    self.flashState = kFlashHolding;
+    [_itermTabBarDelegate iTermTabBarWillBeginFlash];
+    self.alphaValue = 1;
 }
 
 - (void)scheduleFadeOutAfterDelay {
@@ -178,7 +166,6 @@ static const NSTimeInterval kAnimationDuration = 0.25;
                 [self scheduleFadeOutAfterDelay];
                 break;
 
-            case kFlashFadingIn:
             case kFlashExtending:
                 break;
         }
@@ -187,7 +174,6 @@ static const NSTimeInterval kAnimationDuration = 0.25;
             case kFlashOff:
                 break;
 
-            case kFlashFadingIn:
             case kFlashHolding:
             case kFlashExtending:
                 [self fadeOut];

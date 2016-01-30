@@ -15,12 +15,15 @@
 
 @implementation SplitSelectionView {
     BOOL _isMove;
+    SplitSessionHalf half_;
+    NSTrackingArea *trackingArea_;
+    PTYSession *session_;  // weak
+    id<SplitSelectionViewDelegate> delegate_;  // weak
 }
 
 @synthesize cancelOnly = cancelOnly_;
 
-- (instancetype)initWithFrame:(NSRect)frameRect
-{
+- (instancetype)initWithFrame:(NSRect)frameRect {
     self = [super initWithFrame:frameRect];
     if (self) {
         half_ = kNoHalf;
@@ -31,10 +34,10 @@
 }
 
 - (instancetype)initAsCancelOnly:(BOOL)cancelOnly
-             withFrame:(NSRect)frame
-           withSession:(PTYSession *)session
-              delegate:(id<SplitSelectionViewDelegate>)delegate
-                  move:(BOOL)move {
+                       withFrame:(NSRect)frame
+                     withSession:(PTYSession *)session
+                        delegate:(id<SplitSelectionViewDelegate>)delegate
+                            move:(BOOL)move {
     self = [self initWithFrame:frame];
     if (self) {
         cancelOnly_ = cancelOnly;

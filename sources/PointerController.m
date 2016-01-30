@@ -12,13 +12,15 @@
 #import "PreferencePanel.h"
 
 @implementation PointerController {
-    id<PointerControllerDelegate> __unsafe_unretained delegate_;
     int mouseDownButton_;
     int clicks_;
 
     // If the mouse-down occurred while xterm mouse reporting was on, then when
     // the mouse-up is received, act as though the option key was not pressed.
     BOOL ignoreOption_;
+
+    // Last-seen force touch stage.
+    NSInteger _previousStage;
 }
 
 @synthesize delegate = delegate_;
@@ -80,6 +82,8 @@
         [delegate_ selectPreviousPaneWithEvent:event];
     } else if ([action isEqualToString:kExtendSelectionPointerAction]) {
         [delegate_ extendSelectionWithEvent:event];
+    } else if ([action isEqualToString:kQuickLookAction]) {
+        [delegate_ quickLookWithEvent:event];
     }
 }
 
@@ -149,9 +153,7 @@
     mouseDownButton_ = 0;
 }
 
-
-- (BOOL)mouseDown:(NSEvent *)event withTouches:(int)numTouches ignoreOption:(BOOL)ignoreOption
-{
+- (BOOL)mouseDown:(NSEvent *)event withTouches:(int)numTouches ignoreOption:(BOOL)ignoreOption {
     // A double left click plus an immediate right click reports a triple right
     // click! So we keep our own click count and use the lower of the OS's
     // value and ours. Theirs is lower when the time between clicks is long.
@@ -168,8 +170,8 @@
                     withTouches:numTouches] != nil;
 }
 
-- (BOOL)mouseUp:(NSEvent *)event withTouches:(int)numTouches
-{
+- (BOOL)mouseUp:(NSEvent *)event withTouches:(int)numTouches {
+    _previousStage = 0;
     NSString *argument = [self argumentForEvent:event
                                          clicks:clicks_
                                     withTouches:numTouches];
@@ -183,6 +185,26 @@
     } else {
         return NO;
     }
+}
+
+- (BOOL)pressureChangeWithEvent:(NSEvent *)event {
+    if ([event respondsToSelector:@selector(stage)]) {
+        NSInteger previousStage = _previousStage;
+        _previousStage = event.stage;
+        if (event.stage == 2 && previousStage < 2) {
+            NSString *action = [PointerPrefsController actionForGesture:kForceTouchSingleClick
+                                                              modifiers:[event modifierFlags]];
+            NSString *argument = [PointerPrefsController argumentForGesture:kForceTouchSingleClick
+                                                                  modifiers:[event modifierFlags]];
+            if (action) {
+                [self performAction:action forEvent:event withArgument:argument];
+                return YES;
+            } else {
+                [self performAction:kQuickLookAction forEvent:event withArgument:nil];
+            }
+        }
+    }
+    return NO;
 }
 
 - (void)swipeWithEvent:(NSEvent *)event

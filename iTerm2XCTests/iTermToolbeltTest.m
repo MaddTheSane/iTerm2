@@ -7,12 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import <XCTest/XCTest.h>
-#import "CommandHistory.h"
 #import "iTermApplication.h"
 #import "iTermController.h"
-#import "iTermDirectoriesModel.h"
 #import "iTermRootTerminalView.h"
+#import "iTermShellHistoryController.h"
 #import "PseudoTerminal.h"
 #import "PTYTab.h"
 #import "ToolCapturedOutputView.h"
@@ -20,6 +18,7 @@
 #import "ToolDirectoriesView.h"
 #import "Trigger.h"
 #import "VT100RemoteHost.h"
+#import <XCTest/XCTest.h>
 
 @interface iTermToolbeltTest : XCTestCase<iTermToolbeltViewDelegate>
 @property(nonatomic, retain) NSString *currentDir;
@@ -44,10 +43,10 @@
     VT100RemoteHost *host = [[[VT100RemoteHost alloc] init] autorelease];
     host.hostname = @"hostname";
     host.username = @"user";
-    [[CommandHistory sharedInstance] eraseHistoryForHost:host];
+    [[iTermShellHistoryController sharedInstance] eraseCommandHistoryForHost:host];
 
     // Erase directory history for the remotehost we test with.
-    [[iTermDirectoriesModel sharedInstance] eraseHistoryForHost:host];
+    [[iTermShellHistoryController sharedInstance] eraseDirectoriesForHost:host];
 
     // Create a window and save convenience pointers to its various bits.
     _session = [[iTermController sharedInstance] launchBookmark:nil inTerminal:nil];
@@ -78,7 +77,7 @@
 }
 
 - (void)tearDown {
-    iTermApplication *app = (iTermApplication *)[NSApplication sharedApplication];
+    iTermApplication *app = iTermApplication.sharedApplication;
     app.fakeCurrentEvent = nil;
     [_currentDir release];
     [_insertedText release];
@@ -341,7 +340,7 @@
                 byExtendingSelection:NO];
 
     tool.toolWrapper.delegate.delegate = self;
-    iTermApplication *app = (iTermApplication *)[NSApplication sharedApplication];
+    iTermApplication *app = iTermApplication.sharedApplication;
     CGEventRef fakeEvent = CGEventCreateKeyboardEvent(NULL, 0, true);
     CGEventSetFlags(fakeEvent, kCGEventFlagMaskAlternate);
     app.fakeCurrentEvent = [NSEvent eventWithCGEvent:fakeEvent];
@@ -510,7 +509,7 @@
     return NO;
 }
 
-- (NSArray *)toolbeltCommandUsesForCurrentSession {
+- (NSArray<iTermCommandHistoryCommandUseMO *> *)toolbeltCommandUsesForCurrentSession {
     return @[];
 }
 

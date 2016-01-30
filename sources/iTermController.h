@@ -1,5 +1,3 @@
-// -*- mode:objc -*-
-// $Id: iTermController.h,v 1.29 2008-10-08 05:54:50 yfabian Exp $
 /*
  **  iTermController.h
  **
@@ -34,7 +32,6 @@
 #define kApplicationDidFinishLaunchingNotification @"kApplicationDidFinishLaunchingNotification"
 
 @class GTMCarbonHotKey;
-@class iTermGrowlDelegate;
 @protocol iTermWindowController;
 @class iTermRestorableSession;
 @class PasteboardHistory;
@@ -42,6 +39,7 @@
 @class PTYSession;
 @class PTYTab;
 @class PTYTextView;
+@class PTYWindow;
 
 @interface iTermController : NSObject
 
@@ -51,12 +49,18 @@
 @property(nonatomic, assign) BOOL applicationIsQuitting;
 @property(nonatomic, readonly) BOOL willRestoreWindowsAtNextLaunch;
 @property(nonatomic, readonly) BOOL shouldLeaveSessionsRunningOnQuit;
+@property(nonatomic, readonly) BOOL haveTmuxConnection;
+@property(nonatomic, readonly, strong) PTYSession *sessionWithMostRecentSelection;
+@property(nonatomic, nonatomic, assign) PseudoTerminal *currentTerminal;
+@property(nonatomic, readonly) int numberOfTerminals;
+@property(nonatomic, readonly) BOOL hasRestorableSession;
+@property(nonatomic, readonly) BOOL keystrokesBeingStolen;
+@property(nonatomic, readonly) BOOL anyWindowIsMain;
+@property(nonatomic, readonly) PseudoTerminal *hotkeyWindow;
+@property(nonatomic, readonly) NSArray<PTYWindow *> *keyTerminalWindows;
 
 + (iTermController*)sharedInstance;
-+ (void)sharedInstanceRelease;
-+ (BOOL)getSystemVersionMajor:(unsigned *)major
-                        minor:(unsigned *)minor
-                       bugFix:(unsigned *)bugFix;
++ (void)releaseSharedInstance;
 
 + (void)switchToSpaceInBookmark:(NSDictionary*)aDict;
 
@@ -65,8 +69,8 @@
 - (void)newWindow:(id)sender possiblyTmux:(BOOL)possiblyTmux;
 - (void)newSessionWithSameProfile:(id)sender;
 - (void)newSession:(id)sender possiblyTmux:(BOOL)possiblyTmux;
-- (IBAction) previousTerminal:(id)sender;
-- (IBAction) nextTerminal:(id)sender;
+- (void)previousTerminal;
+- (void)nextTerminal;
 - (void)newSessionsInWindow:(id)sender;
 - (void)newSessionsInNewWindow:(id)sender;
 - (void)launchScript:(id)sender;
@@ -75,10 +79,8 @@
 - (void)newSessionInTabAtIndex:(id)sender;
 - (void)newSessionInWindowAtIndex:(id)sender;
 - (PseudoTerminal*)keyTerminalWindow;
-@property (readonly) BOOL haveTmuxConnection;
 - (PTYSession *)anyTmuxSession;
 
-@property int keyWindowIndexMemo;
 
 - (PseudoTerminal*)terminalWithNumber:(int)n;
 - (PseudoTerminal *)terminalWithGuid:(NSString *)guid;
@@ -87,9 +89,6 @@
 - (void)saveWindowArrangement:(BOOL)allWindows;
 - (void)loadWindowArrangementWithName:(NSString *)theName;
 
-@property (readonly, strong) PTYSession *sessionWithMostRecentSelection;
-
-@property (nonatomic, assign) PseudoTerminal *currentTerminal;
 - (void)terminalWillClose:(PseudoTerminal*)theTerminalWindow;
 - (void)addBookmarksToMenu:(NSMenu *)aMenu
               withSelector:(SEL)selector
@@ -105,19 +104,17 @@
                        withURL:(NSString *)url
                       isHotkey:(BOOL)isHotkey
                        makeKey:(BOOL)makeKey
+                   canActivate:(BOOL)canActivate
                        command:(NSString *)command
                          block:(PTYSession *(^)(PseudoTerminal *))block;
 - (PTYSession *)launchBookmark:(Profile *)profile inTerminal:(PseudoTerminal *)theTerm;
 - (PTYTextView*)frontTextView;
-@property (readonly) int numberOfTerminals;
 - (PseudoTerminal*)terminalAtIndex:(int)i;
 - (void)irAdvance:(int)dir;
 - (NSUInteger)indexOfTerminal:(PseudoTerminal*)terminal;
 
 - (void)dumpViewHierarchy;
 
-- (void)storePreviouslyActiveApp;
-- (void)restorePreviouslyActiveApp;
 - (int)windowTypeForBookmark:(Profile*)aDict;
 
 - (void)reloadAllBookmarks;
@@ -140,10 +137,9 @@
 - (iTermRestorableSession *)popRestorableSession;
 - (void)commitAndPopCurrentRestorableSession;
 - (void)pushCurrentRestorableSession:(iTermRestorableSession *)session;
-@property (readonly) BOOL hasRestorableSession;
 - (void)killRestorableSessions;
 
-- (NSArray<PseudoTerminal*>*)terminals;
+- (NSArray<PseudoTerminal *>*)terminals;
 - (void)addTerminalWindow:(PseudoTerminal *)terminalWindow;
 
 void OnHotKeyEvent(void);

@@ -97,6 +97,7 @@
                                                  withURL:nil
                                                 isHotkey:NO
                                                  makeKey:NO
+                                             canActivate:NO
                                                  command:nil
                                                    block:^PTYSession *(PseudoTerminal *term) {
                                                        iTermFileDescriptorServerConnection theServerConnection = serverConnection;

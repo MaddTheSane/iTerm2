@@ -1,5 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #import "CharacterRun.h"
+#import "ITAddressBookMgr.h"
 #import "iTerm.h"
 #import "iTermColorMap.h"
 #import "iTermIndicatorsHelper.h"
@@ -17,6 +18,7 @@
 @class CRunStorage;
 @class iTermFindCursorView;
 @class iTermFindOnPageHelper;
+@class iTermQuickLookController;
 @class iTermSelection;
 @protocol iTermSemanticHistoryControllerDelegate;
 @class MovingAverage;
@@ -40,6 +42,23 @@ typedef NS_ENUM(NSInteger, PTYCharType) {
     CHARTYPE_WORDCHAR,    // Any character considered part of a word, including user-defined chars.
     CHARTYPE_DW_FILLER,   // Double-width character effluvia.
     CHARTYPE_OTHER,       // Symbols, etc. Anything that doesn't fall into the other categories.
+};
+
+typedef NS_ENUM(NSInteger, PTYTextViewSelectionEndpoint) {
+    kPTYTextViewSelectionEndpointStart,
+    kPTYTextViewSelectionEndpointEnd
+};
+
+typedef NS_ENUM(NSInteger, PTYTextViewSelectionExtensionDirection) {
+    kPTYTextViewSelectionExtensionDirectionLeft,
+    kPTYTextViewSelectionExtensionDirectionRight
+};
+
+typedef NS_ENUM(NSInteger, PTYTextViewSelectionExtensionUnit) {
+    kPTYTextViewSelectionExtensionUnitCharacter,
+    kPTYTextViewSelectionExtensionUnitWord,
+    kPTYTextViewSelectionExtensionUnitLine,
+    kPTYTextViewSelectionExtensionUnitMark,
 };
 
 @protocol PTYTextViewDelegate <NSObject>
@@ -177,7 +196,7 @@ typedef NS_ENUM(NSInteger, PTYCharType) {
 @property(nonatomic, assign) BOOL useBoldFont;
 
 // Draw text with light font smoothing?
-@property(nonatomic, assign) BOOL thinStrokes;
+@property(nonatomic, assign) iTermThinStrokesSetting thinStrokes;
 
 // Use a bright version of the text color for bold text?
 @property(nonatomic, assign) BOOL useBrightBold;
@@ -259,6 +278,11 @@ typedef void (^PTYTextViewDrawingHookBlock)(iTermTextDrawingHelper *);
 
 // For tests.
 @property(nonatomic, readonly) NSRect cursorFrame;
+
+// Change the cursor to indicate that a search is being performed.
+@property(nonatomic, assign) BOOL showSearchingCursor;
+
+@property(nonatomic, readonly, retain) iTermQuickLookController *quickLookController;
 
 // Returns the size of a cell for a given font. hspace and vspace are multipliers and the width
 // and height.
@@ -358,7 +382,8 @@ typedef void (^PTYTextViewDrawingHookBlock)(iTermTextDrawingHelper *);
 // Saving/printing
 - (void)saveDocumentAs:(id)sender;
 - (void)print:(id)sender;
-- (void)printContent:(NSString *)aString;
+// aString is either an NSString or an NSAttributedString.
+- (void)printContent:(id)aString;
 
 // Begins a new search. You may need to call continueFind repeatedly after this.
 - (void)findString:(NSString*)aString
@@ -454,6 +479,18 @@ typedef void (^PTYTextViewDrawingHookBlock)(iTermTextDrawingHelper *);
 
 // Menu for session title bar hamburger button
 - (NSMenu *)titleBarMenu;
+
+- (void)moveSelectionEndpoint:(PTYTextViewSelectionEndpoint)endpoint
+                  inDirection:(PTYTextViewSelectionExtensionDirection)direction
+                           by:(PTYTextViewSelectionExtensionUnit)unit;
+
+// For focus follows mouse. Allows a new split pane to become focused even though the mouse pointer
+// is elsewhere. Records the mouse position. Refuses first responder as long as the mouse doesn't
+// move.
+- (void)refuseFirstResponderAtCurrentMouseLocation;
+
+// Undoes -refuseFirstResponderAtCurrentMouseLocation.
+- (void)resetMouseLocationToRefuseFirstResponderAt;
 
 #pragma mark - Testing only
 

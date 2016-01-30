@@ -9,8 +9,8 @@
 #import "ProfilesGeneralPreferencesViewController.h"
 #import "AdvancedWorkingDirectoryWindowController.h"
 #import "ITAddressBookMgr.h"
+#import "iTermLaunchServices.h"
 #import "iTermProfilePreferences.h"
-#import "iTermURLSchemeController.h"
 #import "NSTextField+iTerm.h"
 #import "ProfileListView.h"
 #import "ProfileModel.h"
@@ -106,7 +106,7 @@ static const NSInteger kInitialDirectoryTypeAdvancedTag = 3;
                  update:^BOOL { [self updateCommandType]; return YES; }];
     
     info = [self defineControl:_customCommand
-                           key:KEY_COMMAND
+                           key:KEY_COMMAND_LINE
                           type:kPreferenceInfoTypeStringTextField];
     info.shouldBeEnabled = ^BOOL {
         return [_commandType.selectedCell tag] == kCommandTypeCustomTag;
@@ -186,7 +186,7 @@ static const NSInteger kInitialDirectoryTypeAdvancedTag = 3;
     Profile *profile = [self.delegate profilePreferencesCurrentProfile];
     NSString *guid = profile[KEY_GUID];
     NSString *scheme = [[_urlSchemes selectedItem] title];
-    iTermURLSchemeController *schemeController = [iTermURLSchemeController sharedInstance];
+    iTermLaunchServices *schemeController = [iTermLaunchServices sharedInstance];
     NSString *boundGuid = [schemeController guidForScheme:scheme];
     if ([boundGuid isEqualToString:guid]) {
         [schemeController disconnectHandlerForScheme:scheme];
@@ -210,7 +210,7 @@ static const NSInteger kInitialDirectoryTypeAdvancedTag = 3;
     [[_urlSchemes menu] setAutoenablesItems:YES];
     [[_urlSchemes menu] setDelegate:self];
     for (NSMenuItem* item in [[_urlSchemes menu] itemArray]) {
-        Profile* handler = [[iTermURLSchemeController sharedInstance] profileForScheme:[item title]];
+        Profile* handler = [[iTermLaunchServices sharedInstance] profileForScheme:[item title]];
         if (handler && [[handler objectForKey:KEY_GUID] isEqualToString:guid]) {
             [item setState:NSOnState];
         } else {

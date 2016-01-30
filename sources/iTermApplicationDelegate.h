@@ -28,6 +28,7 @@
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
 #import "DebugLogging.h"
+#import "iTermApplication.h"
 
 @class PTYSession;
 @class PseudoTerminal;
@@ -39,6 +40,7 @@ extern NSString *const kNonTerminalWindowBecameKeyNotification;
 
 extern NSString *const kMarkAlertActionModalAlert;
 extern NSString *const kMarkAlertActionPostNotification;
+extern NSString *const kShowFullscreenTabsSettingDidChange;
 
 int DebugLogImpl(const char *file, int line, const char *function, NSString* value);
 
@@ -52,6 +54,9 @@ int DebugLogImpl(const char *file, int line, const char *function, NSString* val
 
 // Is Sparkle in the process of restarting us?
 @property(nonatomic, readonly) BOOL sparkleRestarting;
+
+@property(nonatomic, readonly) BOOL useBackgroundPatternIndicator;
+@property(nonatomic, readonly) BOOL warnBeforeMultiLinePaste;
 
 - (void)awakeFromNib;
 
@@ -86,12 +91,8 @@ int DebugLogImpl(const char *file, int line, const char *function, NSString* val
 
 - (IBAction)showPrefWindow:(id)sender;
 - (IBAction)showBookmarkWindow:(id)sender;
-- (IBAction)instantReplayPrev:(id)sender;
-- (IBAction)instantReplayNext:(id)sender;
 
     // navigation
-- (IBAction)previousTerminal: (id) sender;
-- (IBAction)nextTerminal: (id) sender;
 - (IBAction)arrangeHorizontally:(id)sender;
 
 // Notifications
@@ -118,7 +119,6 @@ int DebugLogImpl(const char *file, int line, const char *function, NSString* val
 - (IBAction)editCurrentSession:(id)sender;
 
 - (IBAction)toggleUseBackgroundPatternIndicator:(id)sender;
-@property (readonly) BOOL useBackgroundPatternIndicator;
 
 - (void)makeHotKeyWindowKeyIfOpen;
 
@@ -126,7 +126,6 @@ int DebugLogImpl(const char *file, int line, const char *function, NSString* val
 
 // Call this when the user has any nontrivial interaction with a session, such as typing in it or closing a window.
 - (void)userDidInteractWithASession;
-@property (readonly) BOOL warnBeforeMultiLinePaste;
 
 - (NSMenu *)downloadsMenu;
 - (NSMenu *)uploadsMenu;

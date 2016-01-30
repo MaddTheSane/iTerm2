@@ -1,4 +1,3 @@
-// -*- mode:objc -*-
 /*
  **  FindViewController.h
  **
@@ -28,6 +27,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "FutureMethods.h"
+#import "iTermController.h"
 
 @protocol FindViewControllerDelegate <NSObject>
 
@@ -78,7 +78,7 @@
 
 
 @interface FindViewController : NSViewController <NSTextFieldDelegate>
-- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil;
+
 - (void)close;
 - (void)open;
 - (void)makeVisible;

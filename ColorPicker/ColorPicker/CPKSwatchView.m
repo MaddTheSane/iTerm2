@@ -6,7 +6,7 @@
 - (instancetype)initWithFrame:(NSRect)frameRect {
     self = [super initWithFrame:frameRect];
     if (self) {
-        self.cornerRadius = 3;
+        self.cornerRadius = 2;
         self.borderColor = [NSColor grayColor];
     }
     return self;
@@ -27,17 +27,27 @@
     [NSGraphicsContext saveGraphicsState];
     [path addClip];
 
-    [[NSColor colorWithPatternImage:[self cpk_imageNamed:@"SwatchCheckerboard"]] set];
-    [[NSGraphicsContext currentContext] setPatternPhase:NSMakePoint(1, 2)];
-    NSRectFill(rect);
-
-    [self.color set];
-    NSRectFillUsingOperation(self.bounds, NSCompositeSourceOver);
+    if (self.color) {
+        [[NSColor colorWithPatternImage:[self cpk_imageNamed:@"SwatchCheckerboard"]] set];
+        NSRect offset = [self convertRect:self.bounds toView:nil];
+        [[NSGraphicsContext currentContext] setPatternPhase:offset.origin];
+        NSRectFill(rect);
+        
+        [self.color set];
+        NSRectFillUsingOperation(self.bounds, NSCompositeSourceOver);
+    }
 
     [NSGraphicsContext restoreGraphicsState];
 
     [self.borderColor set];
     [path stroke];
+    
+    if (!self.color) {
+        path = [NSBezierPath bezierPath];
+        [path moveToPoint:NSMakePoint(NSMaxX(rect), NSMinY(rect))];
+        [path lineToPoint:NSMakePoint(NSMinX(rect), NSMaxY(rect))];
+        [path stroke];
+    }
 }
 
 - (void)setColor:(NSColor *)color {

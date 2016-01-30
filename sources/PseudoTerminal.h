@@ -3,9 +3,9 @@
 #import "Autocomplete.h"
 #import "FutureMethods.h"
 #import "iTermInstantReplayWindowController.h"
+#import "iTermPopupWindowController.h"
 #import "iTermToolbeltView.h"
 #import "PasteboardHistory.h"
-#import "Popup.h"
 #import "ProfileListView.h"
 #import "PSMTabBarControl.h"
 #import "PTYTabView.h"
@@ -101,17 +101,17 @@ extern NSString *const kPseudoTerminalStateRestorationWindowArrangementKey;
 // screen: An index into [NSScreen screens], or -1 to let the system pick a
 //   screen.
 - (instancetype)initWithSmartLayout:(BOOL)smartLayout
-               windowType:(iTermWindowType)windowType
-          savedWindowType:(iTermWindowType)savedWindowType
-                   screen:(int)screenIndex;
+                         windowType:(iTermWindowType)windowType
+                    savedWindowType:(iTermWindowType)savedWindowType
+                             screen:(int)screenIndex;
 
 // isHotkey indicates if this is a hotkey window, which recieves special
 // treatment and must be unique.
 - (instancetype)initWithSmartLayout:(BOOL)smartLayout
-               windowType:(iTermWindowType)windowType
-          savedWindowType:(iTermWindowType)savedWindowType
-                   screen:(int)screenNumber
-                 isHotkey:(BOOL)isHotkey;
+                         windowType:(iTermWindowType)windowType
+                    savedWindowType:(iTermWindowType)savedWindowType
+                             screen:(int)screenNumber
+                           isHotkey:(BOOL)isHotkey;
 
 // If a PseudoTerminal is created with -init (such as happens with AppleScript)
 // this must be called before it is used.
@@ -146,9 +146,6 @@ extern NSString *const kPseudoTerminalStateRestorationWindowArrangementKey;
 // [sender representedObject]. Used by menu items in the Bookmarks menu.
 - (void)newSessionInTabAtIndex:(id)sender;
 
-// Toggles visibility of fullscreen tab bar.
-- (void)toggleFullScreenTabBar;
-
 // Is there a saved scroll position?
 - (BOOL)hasSavedScrollPosition;
 
@@ -163,9 +160,6 @@ extern NSString *const kPseudoTerminalStateRestorationWindowArrangementKey;
 
 // Toggle non-Lion fullscreen mode.
 - (void)toggleTraditionalFullScreenMode;
-
-// accessor
-- (BOOL)fullScreenTabControl;
 
 // Should the tab bar be shown?
 - (BOOL)tabBarShouldBeVisible;

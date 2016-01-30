@@ -25,7 +25,8 @@ extern NSString * const kTmuxGatewayErrorDomain;
 
 - (TmuxController *)tmuxController;
 - (void)tmuxUpdateLayoutForWindow:(int)windowId
-                           layout:(NSString *)layout;
+                           layout:(NSString *)layout
+                           zoomed:(NSNumber *)zoomed;
 - (void)tmuxWindowAddedWithId:(int)windowId;
 - (void)tmuxWindowClosedWithId:(int)windowId;
 - (void)tmuxWindowRenamedWithId:(int)windowId to:(NSString *)newName;
@@ -52,25 +53,12 @@ typedef NS_ENUM(NSInteger, ControlCommand) {
     CONTROL_COMMAND_NOOP
 };
 
-@interface TmuxGateway : NSObject {
-    id<TmuxGatewayDelegate> delegate_;  // weak
-
-    // Data from parsing an incoming command
-    ControlCommand command_;
-
-    NSMutableArray *commandQueue_;  // NSMutableDictionary objects
-    NSMutableString *currentCommandResponse_;
-    NSMutableDictionary *currentCommand_;  // Set between %begin and %end
-    NSMutableData *currentCommandData_;
-
-    BOOL detachSent_;
-    BOOL acceptNotifications_;  // Initially NO. When YES, respond to notifications.
-    NSMutableString *strayMessages_;
-}
+@interface TmuxGateway : NSObject
 
 // Should all protocol-level input be logged to the gateway's session?
 @property(nonatomic, assign) BOOL tmuxLogging;
 @property(weak, nonatomic, readonly) NSWindowController<iTermWindowController> *window;
+@property(nonatomic, readonly) id<TmuxGatewayDelegate> delegate;
 
 - (instancetype)initWithDelegate:(id<TmuxGatewayDelegate>)delegate;
 
@@ -106,6 +94,5 @@ typedef NS_ENUM(NSInteger, ControlCommand) {
 
 - (void)sendKeys:(NSData *)data toWindowPane:(int)windowPane;
 - (void)detach;
-@property (readonly, assign) id<TmuxGatewayDelegate> delegate;
 
 @end

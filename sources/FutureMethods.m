@@ -8,6 +8,8 @@
 
 #import "FutureMethods.h"
 
+static NSString *const kApplicationServicesFramework = @"/System/Library/Frameworks/ApplicationServices.framework";
+
 @implementation NSScreen (future)
 
 + (BOOL)futureScreensHaveSeparateSpaces {
@@ -35,11 +37,39 @@ static void *GetFunctionByName(NSString *library, char *func) {
     return f;
 }
 
+
+CPSGetCurrentProcessFunction *GetCPSGetCurrentProcessFunction(void) {
+    static dispatch_once_t onceToken;
+    static CPSGetCurrentProcessFunction *function;
+    dispatch_once(&onceToken, ^{
+        function = GetFunctionByName(kApplicationServicesFramework, "CPSGetCurrentProcess");
+    });
+    return function;
+}
+
+CPSStealKeyFocusFunction *GetCPSStealKeyFocusFunction(void) {
+    static dispatch_once_t onceToken;
+    static CPSStealKeyFocusFunction *function;
+    dispatch_once(&onceToken, ^{
+        function = GetFunctionByName(kApplicationServicesFramework, "CPSStealKeyFocus");
+    });
+    return function;
+}
+
+CPSReleaseKeyFocusFunction *GetCPSReleaseKeyFocusFunction(void) {
+    static dispatch_once_t onceToken;
+    static CPSReleaseKeyFocusFunction *function;
+    dispatch_once(&onceToken, ^{
+        function = GetFunctionByName(kApplicationServicesFramework, "CPSReleaseKeyFocus");
+    });
+    return function;
+}
+
 CGSSetWindowBackgroundBlurRadiusFunction* GetCGSSetWindowBackgroundBlurRadiusFunction(void) {
     static BOOL tried = NO;
     static CGSSetWindowBackgroundBlurRadiusFunction *function = NULL;
     if (!tried) {
-        function  = GetFunctionByName(@"/System/Library/Frameworks/ApplicationServices.framework",
+        function  = GetFunctionByName(kApplicationServicesFramework,
                                       "CGSSetWindowBackgroundBlurRadius");
         tried = YES;
     }
@@ -98,6 +128,65 @@ CGSSetWindowBackgroundBlurRadiusFunction* GetCGSSetWindowBackgroundBlurRadiusFun
         return function((__bridge CTFontRef)self);
     }
     return NO;
+}
+
+@end
+
+@implementation FutureWKWebViewConfiguration
+
++ (instancetype)alloc {
+    Class theClass = NSClassFromString(@"WKWebViewConfiguration");
+    return [theClass alloc];
+}
+
+@end
+
+@implementation FutureWKPreferences
+
++ (instancetype)alloc {
+    Class theClass = NSClassFromString(@"WKPreferences");
+    return [theClass alloc];
+}
+
+@end
+
+@implementation FutureWKProcessPool
+
++ (instancetype)alloc {
+    Class theClass = NSClassFromString(@"WKProcessPool");
+    return [theClass alloc];
+}
+
+@end
+
+@implementation FutureWKUserContentController
+
++ (instancetype)alloc {
+    Class theClass = NSClassFromString(@"WKUserContentController");
+    return [theClass alloc];
+}
+
+@end
+
+@implementation FutureWKWebsiteDataStore
+
++ (instancetype)alloc {
+    Class theClass = NSClassFromString(@"WKWebsiteDataStore");
+    return [theClass alloc];
+}
+
++ (instancetype)defaultDataStore {
+    Class theClass = NSClassFromString(@"WKWebsiteDataStore");
+    return [theClass defaultDataStore];
+}
+
+@end
+
+@implementation FutureWKWebView
+
++ (instancetype)alloc {
+    Class theClass = NSClassFromString(@"WKWebView");
+    return [theClass alloc];
 }
 
 @end

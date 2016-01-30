@@ -22,14 +22,15 @@
  */
 
 #import "iTerm.h"
-#import "PTYWindow.h"
+#import "FutureMethods.h"
+#import "iTermAdvancedSettingsModel.h"
+#import "iTermApplicationDelegate.h"
+#import "iTermController.h"
+#import "iTermDelayedTitleSetter.h"
+#import "iTermPreferences.h"
 #import "PreferencePanel.h"
 #import "PseudoTerminal.h"
-#import "FutureMethods.h"
-#import "iTermController.h"
-#import "iTermApplicationDelegate.h"
-#import "iTermPreferences.h"
-#import "iTermAdvancedSettingsModel.h"
+#import "PTYWindow.h"
 #import "objc/runtime.h"
 
 #ifdef PSEUDOTERMINAL_VERBOSE_LOGGING
@@ -50,13 +51,20 @@
     // True while in -[NSWindow toggleFullScreen:].
     BOOL isTogglingLionFullScreen_;
     NSObject *restoreState_;
+    iTermDelayedTitleSetter *_titleSetter;
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@: %p frame=%@>",
+    return [NSString stringWithFormat:@"<%@: %p frame=%@ title=%@ alpha=%f isMain=%d isKey=%d isVisible=%d delegate=%p>",
             [self class],
             self,
-            [NSValue valueWithRect:self.frame]];
+            [NSValue valueWithRect:self.frame],
+            self.title,
+            self.alphaValue,
+            (int)self.isMainWindow,
+            (int)self.isKeyWindow,
+            (int)self.isVisible,
+            self.delegate];
 }
 
 - (void)encodeRestorableStateWithCoder:(NSCoder *)coder {
@@ -325,6 +333,14 @@ end:
     }
 
     return totalOcclusion;
+}
+
+- (void)delayedSetTitle:(NSString *)title {
+    if (!_titleSetter) {
+        _titleSetter = [[iTermDelayedTitleSetter alloc] init];
+        _titleSetter.window = self;
+    }
+    [_titleSetter setTitle:title];
 }
 
 @end

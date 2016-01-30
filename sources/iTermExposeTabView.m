@@ -13,7 +13,16 @@
 #import "iTermExposeView.h"
 #import "PseudoTerminal.h"
 
-@implementation iTermExposeTabView
+@implementation iTermExposeTabView {
+    NSInteger tabIndex_;
+    NSInteger windowIndex_;
+    BOOL showLabel_;
+    BOOL highlight_;
+    id<iTermExposeTabViewDelegate> delegate_;
+    BOOL hasResult_;
+    NSSize origSize_;
+}
+
 @synthesize tabObject = tabObject_;
 @synthesize dirty = dirty_;
 @synthesize originalFrame = originalFrame_;
@@ -23,6 +32,7 @@
 @synthesize index = index_;
 @synthesize label = label_;
 @synthesize wasMaximized = wasMaximized_;
+@synthesize trackingRectTag = trackingRectTag_;
 
 - (instancetype)initWithImage:(NSImage*)image
               label:(NSString*)label
@@ -32,8 +42,7 @@
         normalFrame:(NSRect)normalFrame
            delegate:(id<iTermExposeTabViewDelegate>)delegate
               index:(int)theIndex
-       wasMaximized:(BOOL)wasMaximized
-{
+       wasMaximized:(BOOL)wasMaximized {
     self = [super initWithFrame:frame];
     if (self) {
         wasMaximized_ = wasMaximized;
@@ -41,7 +50,7 @@
         label_ = label;
         tabIndex_ = [[tab realParentWindow] indexOfTab:tab];
         assert(tabIndex_ != NSNotFound);
-        windowIndex_ = [[[iTermController sharedInstance] terminals] indexOfObjectIdenticalTo:(PseudoTerminal*)[tab realParentWindow]];
+        windowIndex_ = [[[iTermController sharedInstance] terminals] indexOfObjectIdenticalTo:(PseudoTerminal *)[tab realParentWindow]];
         fullSizeFrame_ = fullSizeFrame;
         normalFrame_ = normalFrame;
         showLabel_ = NO;
@@ -50,11 +59,9 @@
         tabObject_ = tab;
         origSize_ = frame.size;
         index_ = theIndex;
-        //NSLog(@"Label %@ has index %d", label_, index_);
     }
     return self;
 }
-
 
 - (void)setWindowIndex:(int)windowIndex tabIndex:(int)tabIndex
 {
@@ -79,16 +86,6 @@
     [image_ unlockFocus];
 }
 
-- (NSTrackingRectTag)trackingRectTag
-{
-    return trackingRectTag_;
-}
-
-- (void)setTrackingRectTag:(NSTrackingRectTag)tag
-{
-    trackingRectTag_ = tag;
-}
-
 static BOOL RectsApproxEqual(NSRect a, NSRect b)
 {
     return fabs(a.origin.x - b.origin.x) < 1 &&
@@ -100,7 +97,6 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
 - (void)onMouseExit
 {
     highlight_ = NO;
-    //NSLog(@"onMouseExit: Set rect of tabview to %@", FormatRect(normalFrame_));
     [[self animator] setFrame:normalFrame_];
     [self setNeedsDisplay:YES];
 }
@@ -121,7 +117,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
         if (!RectsApproxEqual([self frame], fullSizeFrame_)) {
             [[self animator] setFrame:fullSizeFrame_];
         }
-        
+
         [self moveToTop];
     }
 }
@@ -234,7 +230,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
                                  6,
                                  strRect.size.width,
                                  strRect.size.height);
-    
+
     [[[NSColor blackColor] colorWithAlphaComponent:0.5] set];
     NSBezierPath* thePath = [NSBezierPath bezierPath];
     [thePath appendBezierPathWithRoundedRect:NSMakeRect(textRect.origin.x + textRect.size.width / 2 - strRect.size.width / 2 - 10,
@@ -250,7 +246,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
         [[NSColor darkGrayColor] set];
     }
     [thePath stroke];
-    
+
     [str drawWithRect:textRect
               options:NSStringDrawingTruncatesLastVisibleLine];
 }
@@ -263,15 +259,15 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
     [dropShadow setShadowColor:[theColor colorWithAlphaComponent:1]];
     [dropShadow setShadowBlurRadius:5];
     [dropShadow setShadowOffset:NSMakeSize(0,-4)];
-    
+
     // save graphics state
     [NSGraphicsContext saveGraphicsState];
-    
+
     [dropShadow set];
-    
+
     // fill the desired area
     NSRectFill(aRect);
-    
+
     // restore state
     [NSGraphicsContext restoreGraphicsState];
 }
@@ -284,15 +280,15 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
     [dropShadow setShadowColor:[theColor colorWithAlphaComponent:1]];
     [dropShadow setShadowBlurRadius:5];
     [dropShadow setShadowOffset:NSMakeSize(0,0)];
-    
+
     // save graphics state
     [NSGraphicsContext saveGraphicsState];
-    
+
     [dropShadow set];
-    
+
     // fill the desired area
     NSRectFill(aRect);
-    
+
     // restore state
     [NSGraphicsContext restoreGraphicsState];
 }
@@ -301,7 +297,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
 {
     NSImage* image = [image_ copy];
     NSRect imageFrame = [self imageFrame:[self frame].size];
-    
+
     if (windowIndex_ >= 0 && tabIndex_ >= 0) {
         if (hasResult_) {
             [self _drawGlow:imageFrame];
@@ -309,9 +305,9 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
             [self _drawDropShadow:imageFrame];
         }
     }
-    
+
     [image setSize:imageFrame.size];
-    
+
     iTermExposeView* theView =  (iTermExposeView*)[[self superview] superview];
     if (!highlight_ && !hasResult_ && [theView resultView]) {
         [image drawAtPoint:imageFrame.origin
@@ -324,7 +320,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
                  operation:NSCompositeSourceOver
                   fraction:1.0];
     }
-    
+
     if (windowIndex_ >= 0 && tabIndex_ >= 0) {
         if (highlight_) {
             [self _drawFocusRing:imageFrame];
@@ -333,7 +329,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
             [self _drawLabel];
         }
     }
-    
+
 }
 
 - (void)showLabel
@@ -353,7 +349,7 @@ static BOOL RectsApproxEqual(NSRect a, NSRect b)
         return nil;
     }
     PseudoTerminal* window = [allTerms objectAtIndex:windowIndex_];
-    
+
     if ([window numberOfTabs] <= tabIndex_) {
         return nil;
     }

@@ -153,7 +153,7 @@ NSString *const kLineBlockMayHaveDWCKey = @"May Have Double Width Character";
     }
 }
 
-- (LineBlock *)copy {
+- (LineBlock *)copyWithZone:(NSZone *)zone {
     LineBlock *theCopy = [[LineBlock alloc] init];
     theCopy->raw_buffer = (screen_char_t*) malloc(sizeof(screen_char_t) * buffer_size);
     memmove(theCopy->raw_buffer, raw_buffer, sizeof(screen_char_t) * buffer_size);
@@ -807,8 +807,7 @@ static NSString* RewrittenRegex(NSString* originalRegex) {
 
 static int CoreSearch(NSString* needle, screen_char_t* rawline, int raw_line_length, int start, int end,
                       FindOptions options, int* resultLength, NSString* haystack, unichar* charHaystack,
-                      int* deltas, int deltaOffset)
-{
+                      int* deltas, int deltaOffset) {
     int apiOptions = 0;
     NSRange range;
     BOOL regex;

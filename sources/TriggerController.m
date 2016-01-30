@@ -23,6 +23,8 @@
 #import "ProfileModel.h"
 #import "ScriptTrigger.h"
 #import "SendTextTrigger.h"
+#import "SetDirectoryTrigger.h"
+#import "SetHostnameTrigger.h"
 #import "StopTrigger.h"
 #import "Trigger.h"
 
@@ -72,6 +74,7 @@ static NSString *const kBackgroundColorWellIdentifier = @"kBackgroundColorWellId
     IBOutlet NSTableColumn *_partialLineColumn;
     IBOutlet NSTableColumn *_actionColumn;
     IBOutlet NSTableColumn *_parametersColumn;
+    IBOutlet NSButton *_removeTriggerButton;
 }
 
 - (instancetype)init {
@@ -105,6 +108,8 @@ static NSString *const kBackgroundColorWellIdentifier = @"kBackgroundColorWellId
                              [HighlightTrigger class],
                              [MarkTrigger class],
                              [PasswordTrigger class],
+                             [SetDirectoryTrigger class],
+                             [SetHostnameTrigger class],
                              [StopTrigger class] ];
 
     return [allClasses sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
@@ -231,6 +236,8 @@ static NSString *const kBackgroundColorWellIdentifier = @"kBackgroundColorWellId
 - (IBAction)removeTrigger:(id)sender {
     assert(_tableView.selectedRow >= 0);
     [self setTriggerDictionary:nil forRow:[_tableView selectedRow] reloadData:YES];
+    self.hasSelection = [_tableView numberOfSelectedRows] > 0;
+    _removeTriggerButton.enabled = self.hasSelection;
 }
 
 - (void)setGuid:(NSString *)guid {
@@ -354,6 +361,7 @@ static NSString *const kBackgroundColorWellIdentifier = @"kBackgroundColorWellId
                                                            0,
                                                            tableColumn.width,
                                                            self.tableView.rowHeight)] autorelease];
+        textField.font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
         textField.stringValue = triggerDictionary[kTriggerRegexKey] ?: @"";
         textField.editable = YES;
         textField.selectable = YES;
@@ -392,6 +400,7 @@ static NSString *const kBackgroundColorWellIdentifier = @"kBackgroundColorWellId
                                                                       0,
                                                                       kWellWidth,
                                                                       _tableView.rowHeight)] autorelease];
+                well.noColorAllowed = YES;
                 well.continuous = NO;
                 well.tag = row;
                 x += kWellWidth;
@@ -416,6 +425,7 @@ static NSString *const kBackgroundColorWellIdentifier = @"kBackgroundColorWellId
                                                                          0,
                                                                          kWellWidth,
                                                                          _tableView.rowHeight)] autorelease];
+                well.noColorAllowed = YES;
                 well.continuous = NO;
                 well.color = trigger.backgroundColor;
                 well.tag = row;
@@ -474,12 +484,14 @@ static NSString *const kBackgroundColorWellIdentifier = @"kBackgroundColorWellId
                                                                    0,
                                                                    tableColumn.width,
                                                                    self.tableView.rowHeight)] autorelease];
+                textField.font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
                 textField.stringValue = triggerDictionary[kTriggerParameterKey] ?: @"";
                 textField.editable = YES;
                 textField.selectable = YES;
                 textField.bordered = NO;
                 textField.drawsBackground = NO;
                 textField.delegate = self;
+                textField.placeholderString = [trigger paramPlaceholder];
                 textField.identifier = kParameterColumnIdentifier;
 
                 return textField;
@@ -493,6 +505,7 @@ static NSString *const kBackgroundColorWellIdentifier = @"kBackgroundColorWellId
 
 - (void)tableViewSelectionDidChange:(NSNotification *)notification {
     self.hasSelection = [_tableView numberOfSelectedRows] > 0;
+    _removeTriggerButton.enabled = self.hasSelection;
 }
 
 #pragma mark NSWindowDelegate

@@ -72,10 +72,13 @@
  */
 
 #import "ITAddressBookMgr.h"
+
+#import "DebugLogging.h"
 #import "iTermKeyBindingMgr.h"
 #import "iTermPasteSpecialViewController.h"
 #import "iTermPreferences.h"
 #import "HotkeyWindowController.h"
+#import "PTYTextView.h"   // For selection movement units
 #import <Carbon/Carbon.h>
 
 static NSDictionary* globalKeyMap;
@@ -202,31 +205,20 @@ static NSString *const kFactoryDefaultsGlobalPreset = @"Factory Defaults";
             aString = @".";
             break;
         case NSClearLineFunctionKey:
-            aString = NSLocalizedStringFromTableInBundle(@"Numlock",
-                                                         @"iTerm",
-                                                         [NSBundle bundleForClass: [self class]],
-                                                         @"Key Names");
+            aString = @"Numlock";
             break;
         case NSPageDownFunctionKey:
-            aString = NSLocalizedStringFromTableInBundle(@"Page Down",
-                                                         @"iTerm",
-                                                         [NSBundle bundleForClass: [self class]],
-                                                         @"Key Names");
+            aString = @"Page Down";
             break;
         case NSPageUpFunctionKey:
-            aString = NSLocalizedStringFromTableInBundle(@"Page Up",
-                                                         @"iTerm",
-                                                         [NSBundle bundleForClass: [self class]],
-                                                         @"Key Names");
+            aString = @"Page Up";
             break;
         case 0x3: // 'enter' on numeric key pad
             aString = @"↩";
             break;
+        case NSInsertFunctionKey:  // Fall through
         case NSInsertCharFunctionKey:
-            aString = NSLocalizedStringFromTableInBundle(@"Insert",
-                                                         @"iTerm",
-                                                         [NSBundle bundleForClass: [self class]],
-                                                         @"Key Names");
+            aString = @"Insert";
             break;
 
         default:
@@ -453,12 +445,60 @@ static NSString *const kFactoryDefaultsGlobalPreset = @"Factory Defaults";
             }
             break;
         }
+        case KEY_ACTION_MOVE_END_OF_SELECTION_LEFT:
+            actionString = [NSString stringWithFormat:@"Move End of Selection Left %@",
+                            [self stringForSelectionMovementUnit:auxText.integerValue]];
+            break;
+        case KEY_ACTION_MOVE_END_OF_SELECTION_RIGHT:
+            actionString = [NSString stringWithFormat:@"Move End of Selection Right %@",
+                            [self stringForSelectionMovementUnit:auxText.integerValue]];
+            break;
+        case KEY_ACTION_MOVE_START_OF_SELECTION_LEFT:
+            actionString = [NSString stringWithFormat:@"Move Start of Selection Left %@",
+                            [self stringForSelectionMovementUnit:auxText.integerValue]];
+            break;
+        case KEY_ACTION_MOVE_START_OF_SELECTION_RIGHT:
+            actionString = [NSString stringWithFormat:@"Move Start of Selection Right %@",
+                            [self stringForSelectionMovementUnit:auxText.integerValue]];
+            break;
+
+        case KEY_ACTION_DECREASE_HEIGHT:
+            actionString = @"Decrease Height";
+            break;
+
+        case KEY_ACTION_INCREASE_HEIGHT:
+            actionString = @"Increase Height";
+            break;
+
+        case KEY_ACTION_DECREASE_WIDTH:
+            actionString = @"Decrease Width";
+            break;
+            
+        case KEY_ACTION_INCREASE_WIDTH:
+            actionString = @"Increase Width";
+            break;
+
         default:
             actionString = [NSString stringWithFormat: @"%@ %d", @"Unknown Action ID", action];
             break;
     }
 
     return actionString;
+}
+
++ (NSString *)stringForSelectionMovementUnit:(PTYTextViewSelectionExtensionUnit)unit {
+    switch (unit) {
+        case kPTYTextViewSelectionExtensionUnitLine:
+            return @"By Line";
+        case kPTYTextViewSelectionExtensionUnitCharacter:
+            return @"By Character";
+        case kPTYTextViewSelectionExtensionUnitWord:
+            return @"By Word";
+        case kPTYTextViewSelectionExtensionUnitMark:
+            return @"By Mark";
+    }
+    ELog(@"Unrecognized selection movement unit %@", @(unit));
+    return @"";
 }
 
 + (BOOL)haveGlobalKeyMappingForKeyString:(NSString*)keyString

@@ -11,11 +11,17 @@
 #import "iTermExpose.h"
 #import "PTYSession.h"
 
-@implementation iTermExposeView
+@implementation iTermExposeView {
+    // Not explicitly retained, but a subview.
+    GlobalSearch *search_;
+    iTermExposeTabView *resultView_;
+    PTYSession *resultSession_;
+    double prevSearchHeight_;
+}
+
 @synthesize grid = grid_;
 
-- (instancetype)initWithFrame:(NSRect)frameRect
-{
+- (instancetype)initWithFrame:(NSRect)frameRect {
     self = [super initWithFrame:frameRect];
     if (self) {
         search_ = [[GlobalSearch alloc] initWithNibName:@"GlobalSearch" bundle:nil];

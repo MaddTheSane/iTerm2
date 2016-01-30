@@ -12,6 +12,12 @@
 #import "NSColor+iTerm.h"
 #import "PreferencePanel.h"
 
+#if __has_feature(objc_arc)
+#define PROFILE_BLOCK(x) [^id(Profile *profile) { return [self x:profile]; } copy]
+#else
+#define PROFILE_BLOCK(x) [[^id(Profile *profile) { return [self x:profile]; } copy] autorelease]
+#endif
+
 NSString *const kProfilePreferenceCommandTypeCustomValue = @"Yes";
 NSString *const kProfilePreferenceCommandTypeLoginShellValue = @"No";
 
@@ -46,6 +52,17 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
     [self setObject:@(value) forKey:key inProfile:profile model:model];
 }
 
++ (NSUInteger)unsignedIntegerForKey:(NSString *)key inProfile:(Profile *)profile {
+    return [[self objectForKey:key inProfile:profile] unsignedIntegerValue];
+}
+
++ (void)setUnsignedInteger:(NSUInteger)value
+        forKey:(NSString *)key
+     inProfile:(Profile *)profile
+         model:(ProfileModel *)model {
+    [self setObject:@(value) forKey:key inProfile:profile model:model];
+}
+
 + (double)floatForKey:(NSString *)key inProfile:(Profile *)profile {
     return [[self objectForKey:key inProfile:profile] doubleValue];
 }
@@ -54,6 +71,17 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
           forKey:(NSString *)key
        inProfile:(Profile *)profile
            model:(ProfileModel *)model {
+    [self setObject:@(value) forKey:key inProfile:profile model:model];
+}
+
++ (double)doubleForKey:(NSString *)key inProfile:(Profile *)profile {
+    return [[self objectForKey:key inProfile:profile] doubleValue];
+}
+
++ (void)setDouble:(double)value
+           forKey:(NSString *)key
+        inProfile:(Profile *)profile
+            model:(ProfileModel *)model {
     [self setObject:@(value) forKey:key inProfile:profile model:model];
 }
 
@@ -77,10 +105,15 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
     id defaultValue = [self defaultValueMap][key];
     switch (type) {
         case kPreferenceInfoTypeIntegerTextField:
+        case kPreferenceInfoTypeDoubleTextField:
         case kPreferenceInfoTypePopup:
             return ([defaultValue isKindOfClass:[NSNumber class]] &&
                     [defaultValue doubleValue] == ceil([defaultValue doubleValue]));
+        case kPreferenceInfoTypeUnsignedIntegerTextField:
+        case kPreferenceInfoTypeUnsignedIntegerPopup:
+            return ([defaultValue isKindOfClass:[NSNumber class]]);
         case kPreferenceInfoTypeCheckbox:
+        case kPreferenceInfoTypeInvertedCheckbox:
             return ([defaultValue isKindOfClass:[NSNumber class]] &&
                     ([defaultValue intValue] == YES ||
                      [defaultValue intValue] == NO));
@@ -110,7 +143,7 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
                   KEY_SHORTCUT: [NSNull null],
                   KEY_TAGS: [NSNull null],
                   KEY_CUSTOM_COMMAND: kProfilePreferenceCommandTypeLoginShellValue,
-                  KEY_COMMAND: @"",
+                  KEY_COMMAND_LINE: @"",
                   KEY_INITIAL_TEXT: @"",
                   KEY_CUSTOM_DIRECTORY: kProfilePreferenceInitialDirectoryHomeValue,
                   KEY_WORKING_DIRECTORY: @"",
@@ -151,7 +184,7 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
                   KEY_CURSOR_TYPE: @(CURSOR_BOX),
                   KEY_BLINKING_CURSOR: @NO,
                   KEY_USE_BOLD_FONT: @YES,
-                  KEY_THIN_STROKES: @YES,
+                  KEY_THIN_STROKES: @(iTermThinStrokesSettingRetinaOnly),
                   KEY_USE_BRIGHT_BOLD: @YES,
                   KEY_BLINK_ALLOWED: @NO,
                   KEY_USE_ITALIC_FONT: @YES,
@@ -183,6 +216,7 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
                   KEY_SCROLLBACK_IN_ALTERNATE_SCREEN: @YES,
                   KEY_CHARACTER_ENCODING: @(NSUTF8StringEncoding),
                   KEY_TERMINAL_TYPE: @"xterm",
+                  KEY_ANSWERBACK_STRING: @"",
                   KEY_XTERM_MOUSE_REPORTING: @NO,
                   KEY_ALLOW_TITLE_REPORTING: @NO,
                   KEY_ALLOW_TITLE_SETTING: @YES,
@@ -202,11 +236,12 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
                   KEY_PROMPT_CLOSE: @(PROMPT_NEVER),
                   KEY_UNDO_TIMEOUT: @(5),
                   KEY_JOBS: @[],
-                  KEY_REDUCE_FLICKER: @YES,
+                  KEY_REDUCE_FLICKER: @NO,
                   KEY_AUTOLOG: @NO,
                   KEY_LOGDIR: @"",
                   KEY_SEND_CODE_WHEN_IDLE: @NO,
                   KEY_IDLE_CODE: @0,
+                  KEY_IDLE_PERIOD: @60,
                   KEY_OPTION_KEY_SENDS: @(OPT_NORMAL),
                   KEY_RIGHT_OPTION_KEY_SENDS: @(OPT_NORMAL),
                   KEY_APPLICATION_KEYPAD_ALLOWED: @NO,
@@ -253,7 +288,7 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
 + (NSDictionary *)computedObjectDictionary {
     static NSDictionary *dict;
     if (!dict) {
-        dict = @{ };
+        dict = @{ KEY_IDLE_PERIOD: PROFILE_BLOCK(antiIdlePeriodWithLegacyDefaultInProfile) };
     }
     return dict;
 }
@@ -273,6 +308,25 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
         object = [self defaultObjectForKey:key];
     }
     return object;
+}
+
++ (id)antiIdlePeriodWithLegacyDefaultInProfile:(Profile *)profile {
+    NSString *const key = KEY_IDLE_PERIOD;
+
+    // If the profile has a value.
+    NSNumber *value = profile[key];
+    if (value) {
+        return value;
+    }
+
+    // If the user set a preference with the now-removed advanced setting, use it.
+    NSNumber *legacyDefault = [[NSUserDefaults standardUserDefaults] objectForKey:@"AntiIdleTimerPeriod"];
+    if (legacyDefault) {
+        return legacyDefault;
+    }
+
+    // Fall back to the default from the dictionary.
+    return [self defaultObjectForKey:key];
 }
 
 @end

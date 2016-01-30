@@ -9,8 +9,12 @@
 #import "PTYTextView.h"
 #import "SessionView.h"
 #import "VT100LineInfo.h"
+#import "iTermPreferences.h"
+#import "iTermSelectorSwizzler.h"
 #import <objc/runtime.h>
 #import <XCTest/XCTest.h>
+#import <OCHamcrest/OCHamcrest.h>
+#import <OCMockito/OCMockito.h>
 
 @interface PTYTextViewTest : XCTestCase
 @end
@@ -325,6 +329,14 @@
 }
 
 - (void)textViewCreateTabWithProfileGuid:(NSString *)guid {
+}
+
+- (int)lineNumberOfMarkAfterLine:(int)line {
+    return line + 1;
+}
+
+- (int)lineNumberOfMarkBeforeLine:(int)line {
+    return line - 1;
 }
 
 - (VT100ScreenMark *)markOnLine:(int)line {
@@ -2072,6 +2084,8 @@
                               // Need to call refresh to clear dirty flags, otherwise find matches
                               // get reset when refresh gets called.
                               [textView refresh];
+
+                              [textView resetFindCursor];
                               [textView findString:@"xx"
                                   forwardDirection:NO
                                       ignoringCase:NO
@@ -2289,35 +2303,74 @@
 #pragma mark - Test selection
 
 - (void)testSelectedTextVeryBasic {
+    // Given
     PTYSession *session = [self sessionWithProfileOverrides:@{} size:VT100GridSizeMake(10, 2)];
     _textView.dataSource = session.screen;
     NSString *text = @"123456789";
     [session synchronousReadTask:text];
-    [_textView selectAll:nil];
-    NSString *selectedText = [_textView selectedText];
-    XCTAssertEqualObjects(@"123456789\n\n", selectedText);
+    NSUserDefaults *mockDefaults = MKTMock([NSUserDefaults class]);
+    [MKTGiven([mockDefaults objectForKey:kPreferenceKeyCopyLastNewline]) willReturn:@YES];
+    [MKTGiven([mockDefaults objectForKey:@"TrimWhitespaceOnCopy"]) willReturn:@YES];
+
+    [iTermSelectorSwizzler swizzleSelector:@selector(standardUserDefaults)
+                                 fromClass:[NSUserDefaults class]
+                                 withBlock:^ id { return mockDefaults; }
+                                  forBlock:^{
+                                      // When
+                                      [_textView selectAll:nil];
+                                      NSString *selectedText = [_textView selectedText];
+
+                                      // Then
+                                      XCTAssertEqualObjects(@"123456789\n\n", selectedText);
+                                  }];
 }
 
 - (void)testSelectedTextWrappedLine {
+    // Given
     PTYSession *session = [self sessionWithProfileOverrides:@{} size:VT100GridSizeMake(10, 2)];
     _textView.dataSource = session.screen;
     NSString *text = @"123456789abc";
     [session synchronousReadTask:text];
-    [_textView selectAll:nil];
-    NSString *selectedText = [_textView selectedText];
-    XCTAssertEqualObjects([text stringByAppendingString:@"\n"], selectedText);
+    NSUserDefaults *mockDefaults = MKTMock([NSUserDefaults class]);
+    [MKTGiven([mockDefaults objectForKey:kPreferenceKeyCopyLastNewline]) willReturn:@YES];
+    [MKTGiven([mockDefaults objectForKey:@"TrimWhitespaceOnCopy"]) willReturn:@YES];
+
+    [iTermSelectorSwizzler swizzleSelector:@selector(standardUserDefaults)
+                                 fromClass:[NSUserDefaults class]
+                                 withBlock:^ id { return mockDefaults; }
+                                  forBlock:^{
+                                      // When
+                                      [_textView selectAll:nil];
+                                      NSString *selectedText = [_textView selectedText];
+
+                                      // Then
+                                      XCTAssertEqualObjects([text stringByAppendingString:@"\n"], selectedText);
+                                  }];
 }
 
 - (void)testSelectedTextWrappedAttributedLinesDontGetNewlinesInserted {
+    // Given
     PTYSession *session = [self sessionWithProfileOverrides:@{} size:VT100GridSizeMake(10, 2)];
     _textView.dataSource = session.screen;
     NSString *text = @"123456789abcdefghi";
     [session synchronousReadTask:text];
-    [_textView selectAll:nil];
-    NSAttributedString *selectedAttributedText = [_textView selectedTextAttributed:YES
-                                                                     cappedAtSize:0
-                                                                minimumLineNumber:0];
-    XCTAssertEqualObjects([text stringByAppendingString:@"\n"], selectedAttributedText.string);
+    NSUserDefaults *mockDefaults = MKTMock([NSUserDefaults class]);
+    [MKTGiven([mockDefaults objectForKey:kPreferenceKeyCopyLastNewline]) willReturn:@YES];
+    [MKTGiven([mockDefaults objectForKey:@"TrimWhitespaceOnCopy"]) willReturn:@YES];
+
+    [iTermSelectorSwizzler swizzleSelector:@selector(standardUserDefaults)
+                                 fromClass:[NSUserDefaults class]
+                                 withBlock:^ id { return mockDefaults; }
+                                  forBlock:^{
+                                      // When
+                                      [_textView selectAll:nil];
+                                      NSAttributedString *selectedAttributedText = [_textView selectedTextAttributed:YES
+                                                                                                        cappedAtSize:0
+                                                                                                   minimumLineNumber:0];
+
+                                      // Then
+                                      XCTAssertEqualObjects([text stringByAppendingString:@"\n"], selectedAttributedText.string);
+                                  }];
 }
 
 - (void)testSelectedTextWithSizeCap {
@@ -2331,13 +2384,26 @@
 }
 
 - (void)testSelectedTextWithMinimumLine {
+    // Given
     PTYSession *session = [self sessionWithProfileOverrides:@{} size:VT100GridSizeMake(10, 2)];
     _textView.dataSource = session.screen;
     NSString *text = @"blah\r\n12345";
     [session synchronousReadTask:text];
-    [_textView selectAll:nil];
-    NSString *selectedText = [_textView selectedTextAttributed:NO cappedAtSize:0 minimumLineNumber:1];
-    XCTAssertEqualObjects(@"12345\n", selectedText);
+    NSUserDefaults *mockDefaults = MKTMock([NSUserDefaults class]);
+    [MKTGiven([mockDefaults objectForKey:kPreferenceKeyCopyLastNewline]) willReturn:@YES];
+    [MKTGiven([mockDefaults objectForKey:@"TrimWhitespaceOnCopy"]) willReturn:@YES];
+
+    [iTermSelectorSwizzler swizzleSelector:@selector(standardUserDefaults)
+                                 fromClass:[NSUserDefaults class]
+                                 withBlock:^ id { return mockDefaults; }
+                                  forBlock:^{
+                                      // When
+                                      [_textView selectAll:nil];
+                                      NSString *selectedText = [_textView selectedTextAttributed:NO cappedAtSize:0 minimumLineNumber:1];
+
+                                      // Then
+                                      XCTAssertEqualObjects(@"12345\n", selectedText);
+                                  }];
 }
 
 - (void)testSelectedTextWithSizeCapAndMinimumLine {

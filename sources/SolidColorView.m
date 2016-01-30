@@ -7,14 +7,14 @@
 
 #import "SolidColorView.h"
 
-@implementation SolidColorView
-@synthesize color = color_;
+@implementation SolidColorView {
+    BOOL _isFlipped;
+}
 
-- (instancetype)initWithFrame:(NSRect)frame color:(NSColor*)color
-{
+- (instancetype)initWithFrame:(NSRect)frame color:(NSColor*)color {
     self = [super initWithFrame:frame];
     if (self) {
-        color_ = color;
+        _color = color;
     }
     return self;
 }
@@ -24,27 +24,23 @@
             [self class], self, NSStringFromRect(self.frame), @(self.isHidden), @(self.alphaValue)];
 }
 
-- (void)drawRect:(NSRect)dirtyRect
-{
-    [color_ setFill];
+- (void)drawRect:(NSRect)dirtyRect {
+    [_color setFill];
     NSRectFill(dirtyRect);
     [super drawRect:dirtyRect];
 }
 
-- (void)setColor:(NSColor*)color
-{
-    color_ = color;
+- (void)setColor:(NSColor*)color {
+    _color = color;
     [self setNeedsDisplay:YES];
 }
 
-- (BOOL)isFlipped
-{
-    return isFlipped_;
+- (BOOL)isFlipped {
+    return _isFlipped;
 }
 
-- (void)setFlipped:(BOOL)value
-{
-    isFlipped_ = value;
+- (void)setFlipped:(BOOL)value {
+    _isFlipped = value;
 }
 
 @end

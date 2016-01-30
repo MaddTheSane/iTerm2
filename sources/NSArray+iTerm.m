@@ -43,6 +43,24 @@
     return temp;
 }
 
+- (NSArray *)filteredArrayUsingBlock:(BOOL (^)(id anObject))block {
+    NSIndexSet *indexes = [self indexesOfObjectsPassingTest:^BOOL(id  _Nonnull obj,
+                                                                  NSUInteger idx,
+                                                                  BOOL * _Nonnull stop) {
+        return block(obj);
+    }];
+    return [self objectsAtIndexes:indexes];
+}
+
+- (BOOL)containsObjectBesides:(id)anObject {
+    for (id object in self) {
+        if (![object isEqual:anObject]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 @end
 
 @implementation NSMutableArray (iTerm)

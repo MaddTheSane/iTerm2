@@ -25,30 +25,12 @@
 
 @end
 
-@interface TmuxSessionsTable : NSObject <NSTableViewDelegate, NSTableViewDataSource> {
-    NSMutableArray *model_;
-    BOOL canAttachToSelectedSession_;
-    id<TmuxSessionsTableProtocol> __unsafe_unretained delegate_;  // weak
+@interface TmuxSessionsTable : NSObject <NSTableViewDelegate, NSTableViewDataSource>
 
-    IBOutlet NSTableColumn *checkColumn_;
-    IBOutlet NSTableColumn *nameColumn_;
-    IBOutlet NSTableView *tableView_;
-    IBOutlet NSButton *attachButton_;
-    IBOutlet NSButton *detachButton_;
-    IBOutlet NSButton *removeButton_;
-}
-
-@property (nonatomic, unsafe_unretained) id<TmuxSessionsTableProtocol> delegate;
+@property(nonatomic, weak) id<TmuxSessionsTableProtocol> delegate;
+@property(nonatomic, readonly) NSString *selectedSessionName;
 
 - (void)setSessions:(NSArray *)names;
-@property (readonly, copy) NSString *selectedSessionName;
 - (void)selectSessionWithName:(NSString *)name;
-
-#pragma mark Interface Builder actions
-
-- (IBAction)addSession:(id)sender;
-- (IBAction)removeSession:(id)sender;
-- (IBAction)attach:(id)sender;
-- (IBAction)detach:(id)sender;
 
 @end

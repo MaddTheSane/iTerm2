@@ -44,6 +44,17 @@
     [iTermProfilePreferences setInt:value forKey:key inProfile:profile model:model];
 }
 
+- (NSUInteger)unsignedIntegerForKey:(NSString *)key {
+    Profile *profile = [_delegate profilePreferencesCurrentProfile];
+    return [iTermProfilePreferences unsignedIntegerForKey:key inProfile:profile];
+}
+
+- (void)setUnsignedInteger:(NSUInteger)value forKey:(NSString *)key {
+    Profile *profile = [_delegate profilePreferencesCurrentProfile];
+    ProfileModel *model = [_delegate profilePreferencesCurrentModel];
+    [iTermProfilePreferences setUnsignedInteger:value forKey:key inProfile:profile model:model];
+}
+
 - (double)floatForKey:(NSString *)key {
     Profile *profile = [_delegate profilePreferencesCurrentProfile];
     return [iTermProfilePreferences floatForKey:key inProfile:profile];
@@ -53,6 +64,17 @@
     Profile *profile = [_delegate profilePreferencesCurrentProfile];
     ProfileModel *model = [_delegate profilePreferencesCurrentModel];
     [iTermProfilePreferences setFloat:value forKey:key inProfile:profile model:model];
+}
+
+- (double)doubleForKey:(NSString *)key {
+    Profile *profile = [_delegate profilePreferencesCurrentProfile];
+    return [iTermProfilePreferences doubleForKey:key inProfile:profile];
+}
+
+- (void)setDouble:(double)value forKey:(NSString *)key {
+    Profile *profile = [_delegate profilePreferencesCurrentProfile];
+    ProfileModel *model = [_delegate profilePreferencesCurrentModel];
+    [iTermProfilePreferences setDouble:value forKey:key inProfile:profile model:model];
 }
 
 - (NSString *)stringForKey:(NSString *)key {

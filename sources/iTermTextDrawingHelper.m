@@ -23,6 +23,7 @@
 #import "iTermTextExtractor.h"
 #import "MovingAverage.h"
 #import "NSColor+iTerm.h"
+#import "RegexKitLite.h"
 #import "VT100ScreenMark.h"
 #import "VT100Terminal.h"  // TODO: Remove this dependency
 
@@ -498,7 +499,6 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         [fmt setDateFormat:[NSDateFormatter dateFormatFromTemplate:@"EEE hh:mm:ss"
                                                            options:0
                                                             locale:[NSLocale currentLocale]]];
-
     } else {
         // In last 24 hours, just show time
         [fmt setDateFormat:[NSDateFormatter dateFormatFromTemplate:@"hh:mm:ss"
@@ -514,7 +514,8 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         s = @"";
     }
 
-    NSSize size = [s sizeWithAttributes:@{ NSFontAttributeName: [NSFont systemFontOfSize:10] }];
+    NSString *widest = [s stringByReplacingOccurrencesOfRegex:@"[\\d\\p{Alphabetic}]" withString:@"M"];
+    NSSize size = [widest sizeWithAttributes:@{ NSFontAttributeName: [NSFont systemFontOfSize:10] }];
     int w = size.width + MARGIN;
     int x = MAX(0, _frame.size.width - w);
     CGFloat y = line * _cellSize.height;
@@ -547,11 +548,15 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
     NSDictionary *attributes;
     if (self.isRetina) {
-        attributes = @{ NSFontAttributeName: [NSFont systemFontOfSize:10],
+        attributes = @{ NSFontAttributeName: [NSFont userFixedPitchFontOfSize:10],
                         NSForegroundColorAttributeName: fgColor,
                         NSShadowAttributeName: shadow };
     } else {
-        attributes = @{ NSFontAttributeName: [NSFont boldSystemFontOfSize:10],
+        NSFont *font = [NSFont userFixedPitchFontOfSize:10];    
+        attributes = @{ NSFontAttributeName: [[NSFontManager sharedFontManager] fontWithFamily:font.familyName
+                                                                                        traits:NSBoldFontMask
+                                                                                        weight:0
+                                                                                          size:font.pointSize],
                         NSForegroundColorAttributeName: fgColor };
     }
     CGFloat offset = (_cellSize.height - size.height) / 2;
@@ -637,12 +642,25 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     }
 }
 
+- (BOOL)useThinStrokes {
+    switch (self.thinStrokes) {
+        case iTermThinStrokesSettingAlways:
+            return YES;
+            
+        case iTermThinStrokesSettingNever:
+            return NO;
+            
+        case iTermThinStrokesSettingRetinaOnly:
+            return _isRetina;
+    }
+}
 - (void)drawRunsAt:(NSPoint)initialPoint
                run:(CRun *)run
            storage:(CRunStorage *)storage
            context:(CGContextRef)ctx {
     int savedFontSmoothingStyle = 0;
-    if (_thinStrokes) {
+    BOOL useThinStrokes = [self useThinStrokes];
+    if (useThinStrokes) {
         // This seems to be available at least on 10.8 and later. The only reference to it is in
         // WebKit. This causes text to render just a little lighter, which looks nicer.
         savedFontSmoothingStyle = CGContextGetFontSmoothingStyle(ctx);
@@ -655,7 +673,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         run = run->next;
     }
 
-    if (_thinStrokes) {
+    if (useThinStrokes) {
         CGContextSetFontSmoothingStyle(ctx, savedFontSmoothingStyle);
     }
 }
@@ -974,8 +992,8 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         // High-quality but slow rendering, needed especially for multiple combining marks.
         [self drawStringWithCombiningMarksInRun:complexRun at:pos];
     } else {
-        // Faster (not fast, but faster) than drawStringWithCombiningMarksInRun. AFAICT this is only
-        // used for surrogate pairs, so it's a candidate for deletion.
+        // Faster (not fast, but faster) than drawStringWithCombiningMarksInRun. This is used for
+        // surrogate pairs and when drawing a simple run fails because a glyph couldn't be found.
         [self drawAttributedStringInRun:complexRun at:pos];
     }
 }
@@ -1165,6 +1183,27 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
                      focused:((_isInKeyWindow && _textViewIsActiveSession) || _shouldDrawFilledInCursor)
                        coord:_cursorCoord
                   cellHeight:_cellSize.height];
+        if (_showSearchingCursor) {
+            NSImage *image = [NSImage imageNamed:@"SearchCursor"];
+            if (image) {
+                NSRect imageRect = rect;
+                CGFloat aspectRatio = image.size.height / image.size.width;
+                imageRect.size.height = imageRect.size.width * aspectRatio;
+                if (imageRect.size.height > rect.size.height) {
+                    imageRect.size.height = rect.size.height;
+                    imageRect.size.width = rect.size.height / aspectRatio;
+                }
+                imageRect.origin.y += (rect.size.height - imageRect.size.height) / 2;
+                imageRect.origin.x += (rect.size.width - imageRect.size.width) / 2;
+
+                [image drawInRect:imageRect
+                         fromRect:NSZeroRect
+                        operation:NSCompositeSourceOver
+                         fraction:1
+                   respectFlipped:YES
+                            hints:nil];
+            }
+        }
     }
 
     _oldCursorPosition = _cursorCoord;
@@ -1783,7 +1822,13 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
     CRunStorage *storage = [CRunStorage cRunStorageWithCapacity:1];
     // Draw the characters.
-    CRun *run = [self constructTextRuns:&screenChar
+    screen_char_t temp[2];
+    temp[0] = screenChar;
+    memset(temp + 1, 0, sizeof(temp[1]));
+    if (doubleWidth) {
+        temp[1].code = DWC_RIGHT;
+    }
+    CRun *run = [self constructTextRuns:temp
                                     row:row
                                selected:NO
                              indexRange:NSMakeRange(0, 1)

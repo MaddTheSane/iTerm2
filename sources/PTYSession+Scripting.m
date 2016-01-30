@@ -75,7 +75,7 @@
     }
     if (text != nil) {
         if (newline) {
-            aString = [NSString stringWithFormat:@"%@\n", text];
+            aString = [NSString stringWithFormat:@"%@\r", text];
             data = [aString dataUsingEncoding:[self.terminal encoding]];
         } else {
             data = [text dataUsingEncoding:[self.terminal encoding]];
@@ -103,6 +103,38 @@
     }
 }
 
+- (id)handleVariableNamedCommand:(NSScriptCommand *)command {
+    NSDictionary *args = [command evaluatedArguments];
+    NSString *name = args[@"name"];
+    if (!name) {
+        [command setScriptErrorNumber:1];
+        [command setScriptErrorString:@"No name given"];
+    }
+    
+    return self.variables[name];
+}
+
+- (id)handleSetVariableNamedCommand:(NSScriptCommand *)command {
+    NSDictionary *args = [command evaluatedArguments];
+    NSString *name = args[@"name"];
+    NSString *value = args[@"value"];
+    if (!name) {
+        [command setScriptErrorNumber:1];
+        [command setScriptErrorString:@"No name given"];
+    }
+    if (!value) {
+        [command setScriptErrorNumber:2];
+        [command setScriptErrorString:@"No value given"];
+    }
+    if (![name hasPrefix:@"user."]) {
+        [command setScriptErrorNumber:3];
+        [command setScriptErrorString:@"Only user variables may be set. Name must start with “user.”."];
+    }
+    self.variables[[@"user." stringByAppendingString:name]] = value;
+    [self.textview setBadgeLabel:[self badgeLabel]];
+    return value;
+}
+
 - (PTYSession *)activateSessionAndTab {
     PTYSession *saved = [self.tab.realParentWindow currentSession];
     [[self.tab.realParentWindow tabView] selectTabViewItemWithIdentifier:self.tab];
@@ -110,10 +142,19 @@
     return saved;
 }
 
-- (PTYSession *)splitVertically:(BOOL)vertically withProfile:(Profile *)profile {
+- (PTYSession *)splitVertically:(BOOL)vertically
+                    withProfile:(Profile *)profile
+                        command:(NSString *)command {
     PTYSession *formerSession = [self activateSessionAndTab];
+    if (command) {
+        // Create a modified profile to run "command".
+        NSMutableDictionary *temp = [profile mutableCopy];
+        temp[KEY_CUSTOM_COMMAND] = @"Yes";
+        temp[KEY_COMMAND_LINE] = command;
+        profile = temp;
+    }
     PTYSession *session = [[[self tab] realParentWindow] splitVertically:vertically
-                                              withProfile:profile];
+                                                             withProfile:profile];
     [formerSession activateSessionAndTab];
     return session;
 }
@@ -124,7 +165,9 @@
     Profile *profile = [[ProfileModel sharedInstance] bookmarkWithName:profileName];
     if (profile) {
         PTYSession *formerSession = [self activateSessionAndTab];
-        PTYSession *session = [self splitVertically:YES withProfile:profile];
+        PTYSession *session = [self splitVertically:YES
+                                        withProfile:profile
+                                            command:args[@"command"]];
         [formerSession activateSessionAndTab];
         return session;
     } else {
@@ -137,14 +180,20 @@
 
 - (id)handleSplitVerticallyWithDefaultProfile:(NSScriptCommand *)scriptCommand {
     PTYSession *formerSession = [self activateSessionAndTab];
-    PTYSession *session = [self splitVertically:YES withProfile:[[ProfileModel sharedInstance] defaultBookmark]];
+    NSDictionary *args = [scriptCommand evaluatedArguments];
+    PTYSession *session = [self splitVertically:YES
+                                    withProfile:[[ProfileModel sharedInstance] defaultBookmark]
+                                        command:args[@"command"]];
     [formerSession activateSessionAndTab];
     return session;
 }
 
 - (id)handleSplitVerticallyWithSameProfile:(NSScriptCommand *)scriptCommand {
     PTYSession *formerSession = [self activateSessionAndTab];
-    PTYSession *session = [self splitVertically:YES withProfile:self.profile];
+    NSDictionary *args = [scriptCommand evaluatedArguments];
+    PTYSession *session = [self splitVertically:YES
+                                    withProfile:self.profile
+                                        command:args[@"command"]];
     [formerSession activateSessionAndTab];
     return session;
 }
@@ -155,7 +204,9 @@
     Profile *profile = [[ProfileModel sharedInstance] bookmarkWithName:profileName];
     if (profile) {
         PTYSession *formerSession = [self activateSessionAndTab];
-        PTYSession *session = [self splitVertically:NO withProfile:profile];
+        PTYSession *session = [self splitVertically:NO
+                                        withProfile:profile
+                                            command:args[@"command"]];
         [formerSession activateSessionAndTab];
         return session;
     } else {
@@ -168,14 +219,20 @@
 
 - (id)handleSplitHorizontallyWithDefaultProfile:(NSScriptCommand *)scriptCommand {
     PTYSession *formerSession = [self activateSessionAndTab];
-    PTYSession *session = [self splitVertically:NO withProfile:[[ProfileModel sharedInstance] defaultBookmark]];
+    NSDictionary *args = [scriptCommand evaluatedArguments];
+    PTYSession *session = [self splitVertically:NO
+                                    withProfile:[[ProfileModel sharedInstance] defaultBookmark]
+                                        command:args[@"command"]];
     [formerSession activateSessionAndTab];
     return session;
 }
 
 - (id)handleSplitHorizontallyWithSameProfile:(NSScriptCommand *)scriptCommand {
     PTYSession *formerSession = [self activateSessionAndTab];
-    PTYSession *session = [self splitVertically:NO withProfile:self.profile];
+    NSDictionary *args = [scriptCommand evaluatedArguments];
+    PTYSession *session = [self splitVertically:NO
+                                    withProfile:self.profile
+                                        command:args[@"command"]];
     [formerSession activateSessionAndTab];
     return session;
 }
@@ -246,6 +303,14 @@
 
 - (NSString *)contents {
     return [self.textview content];
+}
+
+- (NSString *)answerBackString {
+    return self.terminal.answerBackString;
+}
+
+- (void)setAnswerBackString:(NSString *)string {
+    [self setSessionSpecificProfileValues:@{ KEY_ANSWERBACK_STRING: string ?: @"" }];
 }
 
 #pragma mark ANSI Colors

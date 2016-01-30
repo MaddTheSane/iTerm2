@@ -2,13 +2,13 @@
 // likely suffixes. Selecting one appends it, and you can search the list Quicksilver-style.
 
 #import <Cocoa/Cocoa.h>
+#import "iTermPopupWindowController.h"
 #import "PTYSession.h"
 #import "LineBuffer.h"
-#import "Popup.h"
 
-@interface AutocompleteView : Popup
+@class iTermCommandHistoryEntryMO;
 
-- (instancetype)init;
+@interface AutocompleteView : iTermPopupWindowController
 
 - (void)onOpen;
 - (void)refresh;
@@ -16,12 +16,10 @@
 - (void)rowSelected:(id)sender;
 - (void)more;
 - (void)less;
-- (void)_populateMore:(id)sender;
-- (void)_doPopulateMore;
 
-// Add a bunch of CommandHistoryEntry's. 'context' gives the prefix that
+// Add a bunch of iTermCommandHistoryEntryMO*s. 'context' gives the prefix that
 // generated the entries.
-- (void)addCommandEntries:(NSArray *)entries context:(NSString *)context;
+- (void)addCommandEntries:(NSArray<iTermCommandHistoryEntryMO *> *)entries context:(NSString *)context;
 
 @end
 

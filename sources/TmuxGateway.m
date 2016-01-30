@@ -41,10 +41,23 @@ static NSString *kCommandIsLastInList = @"lastInList";
     // Set to YES when the remote host closed the connection. We won't send commands when this is
     // set.
     BOOL disconnected_;
+
+    // Data from parsing an incoming command
+    ControlCommand command_;
+
+    NSMutableArray *commandQueue_;  // NSMutableDictionary objects
+    NSMutableString *currentCommandResponse_;
+    NSMutableDictionary *currentCommand_;  // Set between %begin and %end
+    NSMutableData *currentCommandData_;
+
+    BOOL detachSent_;
+    BOOL acceptNotifications_;  // Initially NO. When YES, respond to notifications.
+    NSMutableString *strayMessages_;
 }
 
-- (instancetype)initWithDelegate:(id<TmuxGatewayDelegate>)delegate
-{
+@synthesize delegate = delegate_;
+
+- (instancetype)initWithDelegate:(id<TmuxGatewayDelegate>)delegate {
     self = [super init];
     if (self) {
         delegate_ = delegate;
@@ -159,7 +172,8 @@ error:
     int window = [[components objectAtIndex:1] intValue];
     NSString *layout = [components objectAtIndex:2];
     [delegate_ tmuxUpdateLayoutForWindow:window
-                                  layout:layout];
+                                  layout:layout
+                                  zoomed:nil];
 }
 
 - (void)broadcastWindowChange
@@ -504,11 +518,6 @@ error:
        responseTarget:self
      responseSelector:@selector(noopResponseSelector:)];
     detachSent_ = YES;
-}
-
-- (id<TmuxGatewayDelegate>)delegate
-{
-    return delegate_;
 }
 
 - (void)noopResponseSelector:(NSString *)response

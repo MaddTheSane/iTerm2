@@ -18,6 +18,7 @@
     int numTouches_;
 
     ThreeFingerTapGestureRecognizer *_threeFingerTapGestureRecognizer;
+    NSInteger _maximumStage;
 }
 
 - (void)awakeFromNib {
@@ -69,9 +70,10 @@
     if (numTouches_ == 3) {
         [pointerPrefs_ setGesture:kThreeFingerClickGesture
                         modifiers:[theEvent modifierFlags]];
-    } else {
+    } else if (_maximumStage < 2) {
         [self showNotSupported];
     }
+    _maximumStage = 0;
 }
 
 - (void)mouseDown:(NSEvent *)event {
@@ -80,6 +82,15 @@
         return;
     } else {
         [super mouseDown:event];
+    }
+}
+
+- (void)pressureChangeWithEvent:(NSEvent *)event {
+    if ([event respondsToSelector:@selector(stage)]) {
+        _maximumStage = MAX(_maximumStage, event.stage);
+        if (event.stage == 2) {
+            [pointerPrefs_ setGesture:kForceTouchSingleClick modifiers:[event modifierFlags]];
+        }
     }
 }
 

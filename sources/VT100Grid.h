@@ -193,6 +193,9 @@
 // Returns a human-readable string with the screen contents and dirty lines interspersed.
 - (NSString *)debugString;
 
+// Returns a string for the character at |coord|.
+- (NSString *)stringForCharacterAt:(VT100GridCoord)coord;
+
 // Converts a run into one or more VT100GridRect NSValues.
 - (NSArray *)rectsForRun:(VT100GridRun)run;
 
@@ -224,7 +227,7 @@
 // Returns the coordinate of the cell before this one. It respects scroll regions and double-width
 // characters.
 // Returns (-1,-1) if there is no previous cell.
-- (VT100GridCoord)coordinateBefore:(VT100GridCoord)coord;
+- (VT100GridCoord)coordinateBefore:(VT100GridCoord)coord movedBackOverDoubleWidth:(BOOL *)dwc;
 
 - (BOOL)addCombiningChar:(unichar)combiningChar toCoord:(VT100GridCoord)coord;
 

@@ -137,7 +137,7 @@ int decode_utf8_char(const unsigned char * restrict datap,
 - (NSString *)stringByEscapingForURL;
 - (NSString *)stringByCapitalizingFirstLetter;
 
-- (NSString *)hexOrDecimalConversionHelp;
+- (NSArray<NSString *> *)helpfulSynonyms;
 
 // String starts with http:// or https://. Used to tell if a custom prefs
 // location is a path or URL.
@@ -198,6 +198,16 @@ int decode_utf8_char(const unsigned char * restrict datap,
 // x*y).
 // Only * is supported as a wildcard.
 - (BOOL)stringMatchesCaseInsensitiveGlobPattern:(NSString *)glob;
+
+// Call |block| for each composed character in the string. If it is a single base character or a
+// high surrogate, then |simple| will be valid and |complex| will be nil. Otherwise, |complex| will
+// be non-nil.
+- (void)enumerateComposedCharacters:(void (^)(NSRange range,
+                                              unichar simple,
+                                              NSString *complexString,
+                                              BOOL *stop))block;
+
+- (NSUInteger)iterm_unsignedIntegerValue;
 
 @end
 

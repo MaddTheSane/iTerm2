@@ -140,7 +140,7 @@ typedef NS_ENUM(int, JournalAction) {
 }
 
 + (instancetype)journalWithAction:(JournalAction)action
-                                  bookmark:(Profile*)bookmark
-                                     model:(ProfileModel*)model;
+                         bookmark:(Profile*)bookmark
+                            model:(ProfileModel*)model;
 
 @end

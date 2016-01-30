@@ -372,8 +372,11 @@ static const BOOL USE_THIN_SPLITTERS = YES;
     }
 }
 
-- (void)nameOfSession:(PTYSession*)session didChangeTo:(NSString*)newName
-{
+- (void)loadTitleFromSession {
+    tabViewItem_.label = self.activeSession.name;
+}
+
+- (void)nameOfSession:(PTYSession*)session didChangeTo:(NSString*)newName {
     if ([self activeSession] == session) {
         [tabViewItem_ setLabel:newName];
     }
@@ -500,7 +503,7 @@ static const BOOL USE_THIN_SPLITTERS = YES;
             NSPoint origin2 = [self rootRelativeOriginOfSession:obj2];
             if (useTrueReadingOrder) {
                 // True reading order--top to bottom, then left to right.
-                if ((int)origin1.y == (int)origin2.y) {
+                if (fabs(origin1.y - origin2.y) < 1) {
                     return [@(origin1.x) compare:@(origin2.x)];
                 } else {
                     return [@(origin1.y) compare:@(origin2.y)];
@@ -508,7 +511,7 @@ static const BOOL USE_THIN_SPLITTERS = YES;
             } else {
                 // Inverted reading order. Left to right, then top to bottom.
                 // Generally makes more sense when the root split is vertical.
-                if ((int)origin1.x == (int)origin2.x) {
+                if (fabs(origin1.x - origin2.x) < 1) {
                     return [@(origin1.y) compare:@(origin2.y)];
                 } else {
                     return [@(origin1.x) compare:@(origin2.x)];
@@ -525,6 +528,13 @@ static const BOOL USE_THIN_SPLITTERS = YES;
 }
 
 - (void)activateSessionInDirection:(int)offset {
+    DLog(@"offset=%@", @(offset));
+    BOOL maximize = NO;
+    if (isMaximized_ && self.activeSession.isTmuxClient) {
+        DLog(@"Set maximize to YES");
+        maximize = YES;
+        [self.activeSession toggleTmuxZoom];
+    }
     NSArray *orderedSessions = [self orderedSessions];
     NSUInteger index = [orderedSessions indexOfObject:[self activeSession]];
     if (index != NSNotFound) {
@@ -534,6 +544,9 @@ static const BOOL USE_THIN_SPLITTERS = YES;
                              with:[orderedSessions[index] view]];
         }
         [self setActiveSession:orderedSessions[index] updateActivityCounter:NO];
+    }
+    if (maximize) {
+        [self.activeSession toggleTmuxZoom];
     }
 }
 
@@ -1888,8 +1901,12 @@ static NSString* FormatRect(NSRect r) {
         return NO;
     }
     NSSize temp = [self sessionSizeForViewSize:aSession];
-    int width = temp.width;
-    int height = temp.height;
+    return [self resizeSession:aSession toSize:VT100GridSizeMake(temp.width, temp.height)];
+}
+
+- (BOOL)resizeSession:(PTYSession *)aSession toSize:(VT100GridSize)newSize {
+    int width = newSize.width;
+    int height = newSize.height;
     if ([aSession rows] == height &&
         [aSession columns] == width) {
         PtyLog(@"PTYTab fitSessionToCurrentViewSize: noop");
@@ -1903,7 +1920,7 @@ static NSString* FormatRect(NSRect r) {
     [aSession setWidth:width height:height];
     PtyLog(@"fitSessionToCurrentViewSize -  calling setWidth:%d height:%d", width, height);
     [[aSession scrollview] setLineScroll:[[aSession textview] lineHeight]];
-    [[aSession scrollview] setPageScroll:2*[[aSession textview] lineHeight]];
+    [[aSession scrollview] setPageScroll:2 * [[aSession textview] lineHeight]];
     if ([aSession backgroundImagePath]) {
         [aSession setBackgroundImagePath:[aSession backgroundImagePath]];
     }
@@ -2660,7 +2677,7 @@ static NSString* FormatRect(NSRect r) {
 
 - (void)setTmuxWindowName:(NSString *)tmuxWindowName
 {
-    tmuxWindowName_ = tmuxWindowName;
+    tmuxWindowName_ = [tmuxWindowName copy];
     [[self realParentWindow] setWindowTitle];
 }
 
@@ -2746,8 +2763,7 @@ static NSString* FormatRect(NSRect r) {
 + (PTYTab *)openTabWithTmuxLayout:(NSMutableDictionary *)parseTree
                        inTerminal:(NSWindowController<iTermWindowController> *)term
                        tmuxWindow:(int)tmuxWindow
-                   tmuxController:(TmuxController *)tmuxController
-{
+                   tmuxController:(TmuxController *)tmuxController {
     [PTYTab setSizesInTmuxParseTree:parseTree inTerminal:term];
     parseTree = [PTYTab parseTreeWithInjectedRootSplit:parseTree];
 
@@ -3168,7 +3184,16 @@ static NSString* FormatRect(NSRect r) {
 }
 
 - (void)setTmuxLayout:(NSMutableDictionary *)parseTree
-       tmuxController:(TmuxController *)tmuxController {
+       tmuxController:(TmuxController *)tmuxController
+               zoomed:(NSNumber *)zoomed {
+    BOOL shouldZoom = isMaximized_;
+    if (isMaximized_) {
+        DLog(@"Unmaximizing");
+        [self unmaximize];
+    }
+    if (zoomed) {
+        shouldZoom = zoomed.boolValue;
+    }
     DLog(@"setTmuxLayout:tmuxController:");
     [PTYTab setSizesInTmuxParseTree:parseTree
                          inTerminal:realParentWindow_];
@@ -3182,12 +3207,18 @@ static NSString* FormatRect(NSRect r) {
             [[self realParentWindow] showHideInstantReplay];
         }
         [self replaceViewHierarchyWithParseTree:parseTree];
+        shouldZoom = NO;
     }
     [self updateFlexibleViewColors];
     [[root_ window] makeFirstResponder:[[self activeSession] textview]];
     parseTree_ = parseTree;
 
     [self activateJuniorSession];
+
+    if (shouldZoom) {
+        DLog(@"Maximizing");
+        [self maximize];
+    }
 }
 
 // Find a session that is not "senior" to a tmux pane getting split by the user and make it
@@ -3243,15 +3274,12 @@ static NSString* FormatRect(NSRect r) {
     return isMaximized_;
 }
 
-- (void)maximize
-{
+- (void)maximize {
+    DLog(@"maximize");
     for (PTYSession *session in [self sessions]) {
         session.savedRootRelativeOrigin = [self rootRelativeOriginOfSession:session];
     }
-    
-    if ([self isTmuxTab]) {
-        return;
-    }
+
     assert(!savedArrangement_);
     assert(!idMap_);
     assert(!isMaximized_);
@@ -3275,6 +3303,32 @@ static NSString* FormatRect(NSRect r) {
 
     [[root_ window] makeFirstResponder:[activeSession_ textview]];
     [realParentWindow_ invalidateRestorableState];
+
+    if ([self isTmuxTab]) {
+        DLog(@"Is a tmux tab");
+        // Resize the session (VT100Screen, etc.) to the size of the tmux window.
+        VT100GridSize gridSize = VT100GridSizeMake([parseTree_[kLayoutDictWidthKey] intValue],
+                                                   [parseTree_[kLayoutDictHeightKey] intValue]);
+        [self resizeSession:self.activeSession toSize:gridSize];
+
+        // Resize the scroll view
+        [self fitSubviewsToRoot];
+
+        // Resize the SessionView
+        [self resizeTmuxSessionView:self.activeSession.view toGridSize:gridSize];
+    }
+}
+
+- (void)resizeTmuxSessionView:(SessionView *)sessionView toGridSize:(VT100GridSize)gridSize {
+    const BOOL showTitles = [iTermPreferences boolForKey:kPreferenceKeyShowPaneTitles];
+    NSSize size = [PTYTab _sessionSizeWithCellSize:[PTYTab cellSizeForBookmark:[PTYTab tmuxBookmark]]
+                                        dimensions:NSMakeSize(gridSize.width, gridSize.height)
+                                        showTitles:showTitles
+                                        inTerminal:self.realParentWindow];
+    NSRect frame;
+    frame.origin = sessionView.frame.origin;
+    frame.size = size;
+    sessionView.frame = frame;
 }
 
 - (void)unmaximize
@@ -4225,8 +4279,9 @@ static void SetAgainstGrainDim(BOOL isVertical, NSSize* dest, CGFloat value)
     [self _splitViewDidResizeSubviews:splitView];
 }
 
-- (void)_splitViewDidResizeSubviews:(NSSplitView*)splitView
-{
+// This is the implementation of splitViewDidResizeSubviews. The delegate method isn't called when
+// views are added or adjusted, so we often have to call this ourselves.
+- (void)_splitViewDidResizeSubviews:(NSSplitView*)splitView {
     PtyLog(@"_splitViewDidResizeSubviews running");
     for (NSView* subview in [splitView subviews]) {
         if ([subview isKindOfClass:[SessionView class]]) {

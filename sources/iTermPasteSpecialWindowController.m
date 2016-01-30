@@ -33,7 +33,6 @@
     return self;
 }
 
-
 - (NSData *)data {
     return [NSData dataWithContentsOfFile:_name];
 }
@@ -113,8 +112,14 @@
     return self;
 }
 
-
 - (void)awakeFromNib {
+    _preview.automaticSpellingCorrectionEnabled = NO;
+    _preview.automaticDashSubstitutionEnabled = NO;
+    _preview.automaticQuoteSubstitutionEnabled = NO;
+    _preview.automaticDataDetectionEnabled = NO;
+    _preview.automaticLinkDetectionEnabled = NO;
+    _preview.smartInsertDeleteEnabled = NO;
+
     for (NSString *label in _labels) {
         [_itemList addItemWithTitle:label];
     }

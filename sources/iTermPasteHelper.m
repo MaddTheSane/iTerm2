@@ -446,7 +446,7 @@ const int kNumberOfSpacesPerTabNoConversion = -1;
 }
 
 - (BOOL)maybeWarnAboutMultiLinePaste:(NSString *)string {
-    iTermApplicationDelegate *applicationDelegate = [[NSApplication sharedApplication] delegate];
+    iTermApplicationDelegate *applicationDelegate = iTermApplication.sharedApplication.delegate;
     if (![applicationDelegate warnBeforeMultiLinePaste]) {
         return YES;
     }

@@ -4,7 +4,7 @@
 @interface AppDelegate ()
 
 @property (weak) IBOutlet NSWindow *window;
-@property (nonatomic) CPKMainViewController *viewController;
+@property (weak) IBOutlet NSColorWell *nativeColorWell;
 @end
 
 @interface CustomWell : CPKColorWell
@@ -29,24 +29,20 @@
     self.colorWell.target = self;
     self.colorWell.action = @selector(colorDidChange:);
     self.colorWell.continuous = NO;
+    self.colorWell.noColorAllowed = YES;
 
-    self.viewController = [[CPKMainViewController alloc] initWithBlock:^(NSColor *color) {
-        self.loremIpsum.textColor = color;
-    }
-                                                                 color:[NSColor blackColor]
-                                                          alphaAllowed:YES];
-    [self.window.contentView addSubview:self.viewController.view];
-    NSRect frame = self.viewController.view.frame;
-    frame.origin.y = 0;
-    self.viewController.view.frame = frame;
-
+    self.continuousColorWell.color = [NSColor blackColor];
+    self.continuousColorWell.noColorAllowed = YES;
+    self.continuousColorWell.target = self;
+    self.continuousColorWell.action = @selector(colorDidChange:);
+    
     // This opens the popover from the left side even though the well is on the right.
-    frame = NSMakeRect([self.window.contentView frame].size.width - 50, 0, 50, 25);
+    NSRect frame = NSMakeRect([self.window.contentView frame].size.width - 50, 0, 50, 25);
     CustomWell *customWell = [[CustomWell alloc] initWithFrame:frame];
     [self.window.contentView addSubview:customWell];
 }
 
-- (void)colorDidChange:(id)sender {
+- (IBAction)colorDidChange:(id)sender {
     self.loremIpsum.textColor = [sender color];
 }
 

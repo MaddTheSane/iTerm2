@@ -22,6 +22,11 @@ static NSString *const kPreferenceDidChangeFromOtherPanel = @"kPreferenceDidChan
 // key of changed preference.
 static NSString *const kKey = @"key";
 
+@interface iTermPreferencesBaseViewController()
+// If set to YES, then controls won't be updated with values from backing store when it changes.
+@property(nonatomic, assign) BOOL disableUpdates;
+@end
+
 @implementation iTermPreferencesBaseViewController {
     // Maps NSControl* -> PreferenceInfo*.
     NSMapTable *_keyMap;
@@ -29,8 +34,7 @@ static NSString *const kKey = @"key";
     NSMutableSet *_keys;
 }
 
-- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         _keyMap = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsStrongMemory
@@ -77,12 +81,28 @@ static NSString *const kKey = @"key";
     [iTermPreferences setInt:value forKey:key];
 }
 
+- (NSUInteger)unsignedIntegerForKey:(NSString *)key {
+    return [iTermPreferences unsignedIntegerForKey:key];
+}
+
+- (void)setUnsignedInteger:(NSUInteger)value forKey:(NSString *)key {
+    [iTermPreferences setUnsignedInteger:value forKey:key];
+}
+
 - (double)floatForKey:(NSString *)key {
     return [iTermPreferences floatForKey:key];
 }
 
 - (void)setFloat:(double)value forKey:(NSString *)key {
     [iTermPreferences setFloat:value forKey:key];
+}
+
+- (double)doubleForKey:(NSString *)key {
+    return [iTermPreferences doubleForKey:key];
+}
+
+- (void)setDouble:(double)value forKey:(NSString *)key {
+    [iTermPreferences setDouble:value forKey:key];
 }
 
 - (NSString *)stringForKey:(NSString *)key {
@@ -122,7 +142,7 @@ static NSString *const kKey = @"key";
     if (info.willChange) {
         info.willChange();
     }
-    
+
     if (info.customSettingChangedHandler) {
         info.customSettingChangedHandler(sender);
     } else {
@@ -131,24 +151,55 @@ static NSString *const kKey = @"key";
                 [self setBool:([sender state] == NSOnState) forKey:info.key];
                 break;
 
+            case kPreferenceInfoTypeInvertedCheckbox:
+                [self setBool:([sender state] == NSOffState) forKey:info.key];
+                break;
+
             case kPreferenceInfoTypeIntegerTextField:
                 [self applyIntegerConstraints:info];
                 [self setInt:[sender separatorTolerantIntValue] forKey:info.key];
                 break;
+
+            case kPreferenceInfoTypeDoubleTextField: {
+                NSScanner *scanner = [NSScanner localizedScannerWithString:[sender stringValue]];
+                double value;
+                if ([scanner scanDouble:&value]) {
+                    // A double value may take a legal but non-canonical form during editing. For
+                    // example, "1." is a valid way of specifying 1.0. But we don't want to replace
+                    // the control's value with "1", or there's no way of entering "1.2", for
+                    // example. We turn on disableUpdates so -setDouble:forKey: doesn't have the
+                    // side-effect of updating the control with its canonical value.
+                    BOOL savedValue = self.disableUpdates;
+                    self.disableUpdates = YES;
+                    [self setDouble:value forKey:info.key];
+                    self.disableUpdates = savedValue;
+                }
+                break;
+            }
                 
+            case kPreferenceInfoTypeUnsignedIntegerTextField:
+                [self applyUnsignedIntegerConstraints:info];
+                [self setUnsignedInteger:[sender separatorTolerantUnsignedIntegerValue] forKey:info.key];
+                break;
+
             case kPreferenceInfoTypeStringTextField:
                 [self setString:[sender stringValue] forKey:info.key];
                 break;
-                
+
             case kPreferenceInfoTypeTokenField:
                 [self setObject:[sender objectValue] forKey:info.key];
                 break;
 
             case kPreferenceInfoTypeMatrix:
                 assert(false);  // Must use a custom setting changed handler
-            
+
             case kPreferenceInfoTypePopup:
                 [self setInt:[sender selectedTag] forKey:info.key];
+                break;
+
+            case kPreferenceInfoTypeUnsignedIntegerPopup:
+                assert([sender selectedTag]>=0);
+                [self setUnsignedInteger:[sender selectedTag] forKey:info.key];
                 break;
                 
             case kPreferenceInfoTypeSlider:
@@ -174,7 +225,7 @@ static NSString *const kKey = @"key";
                                                             object:self
                                                           userInfo:@{ kKey: info.key }];
     }
-    
+
 }
 
 - (PreferenceInfo *)defineControl:(NSControl *)control
@@ -200,7 +251,7 @@ static NSString *const kKey = @"key";
         assert([self defaultValueForKey:key isCompatibleWithType:type]);
         assert(type != kPreferenceInfoTypeMatrix);  // Matrix type requires both.
     }
-    
+
     PreferenceInfo *info = [PreferenceInfo infoForPreferenceWithKey:key
                                                                type:type
                                                             control:control];
@@ -209,11 +260,14 @@ static NSString *const kKey = @"key";
     [_keyMap setObject:info forKey:control];
     [_keys addObject:key];
     [self updateValueForInfo:info];
-    
+
     return info;
 }
 
 - (void)updateValueForInfo:(PreferenceInfo *)info {
+    if (_disableUpdates) {
+        return;
+    }
     if (info.onUpdate) {
         if (info.onUpdate()) {
             return;
@@ -226,14 +280,34 @@ static NSString *const kKey = @"key";
             button.state = [self boolForKey:info.key] ? NSOnState : NSOffState;
             break;
         }
-            
+
+        case kPreferenceInfoTypeInvertedCheckbox: {
+            assert([info.control isKindOfClass:[NSButton class]]);
+            NSButton *button = (NSButton *)info.control;
+            button.state = [self boolForKey:info.key] ? NSOffState : NSOnState;
+            break;
+        }
+
         case kPreferenceInfoTypeIntegerTextField: {
             assert([info.control isKindOfClass:[NSTextField class]]);
             NSTextField *field = (NSTextField *)info.control;
             field.intValue = [self intForKey:info.key];
             break;
         }
-            
+
+        case kPreferenceInfoTypeUnsignedIntegerTextField: {
+            assert([info.control isKindOfClass:[NSTextField class]]);
+            NSTextField *field = (NSTextField *)info.control;
+            field.stringValue = [NSString stringWithFormat:@"%lu", [self unsignedIntegerForKey:info.key]];
+        }
+
+        case kPreferenceInfoTypeDoubleTextField: {
+            assert([info.control isKindOfClass:[NSTextField class]]);
+            NSTextField *field = (NSTextField *)info.control;
+            field.doubleValue = [self doubleForKey:info.key];
+            break;
+        }
+
         case kPreferenceInfoTypeStringTextField: {
             assert([info.control isKindOfClass:[NSTextField class]]);
             NSTextField *field = (NSTextField *)info.control;
@@ -256,7 +330,16 @@ static NSString *const kKey = @"key";
             [popup selectItemWithTag:[self intForKey:info.key]];
             break;
         }
-            
+
+        case kPreferenceInfoTypeUnsignedIntegerPopup: {
+            assert([info.control isKindOfClass:[NSPopUpButton class]]);
+            NSPopUpButton *popup = (NSPopUpButton *)info.control;
+            const NSUInteger value = [self unsignedIntegerForKey:info.key];
+            assert(value <= NSIntegerMax);
+            [popup selectItemWithTag:value];
+            break;
+        }
+
         case kPreferenceInfoTypeSlider: {
             assert([info.control isKindOfClass:[NSSlider class]]);
             NSSlider *slider = (NSSlider *)info.control;
@@ -277,7 +360,7 @@ static NSString *const kKey = @"key";
             }
             break;
         }
-            
+
         default:
             assert(false);
     }
@@ -321,10 +404,22 @@ static NSString *const kKey = @"key";
 - (int)intForString:(NSString *)s inRange:(NSRange)range
 {
     NSString *i = [s stringWithOnlyDigits];
-    
+
     int val = 0;
     if ([i length]) {
         val = [i intValue];
+    }
+    val = MAX(val, range.location);
+    val = MIN(val, range.location + range.length - 1);
+    return val;
+}
+
+- (NSUInteger)unsignedIntegerForString:(NSString *)s inRange:(NSRange)range {
+    NSString *i = [s stringWithOnlyDigits];
+    
+    NSUInteger val = 0;
+    if ([i length]) {
+        val = [i iterm_unsignedIntegerValue];
     }
     val = MAX(val, range.location);
     val = MIN(val, range.location + range.length - 1);
@@ -349,6 +444,20 @@ static NSString *const kKey = @"key";
     }
 }
 
+- (void)applyUnsignedIntegerConstraints:(PreferenceInfo *)info {
+    assert([info.control isKindOfClass:[NSTextField class]]);
+    NSTextField *textField = (NSTextField *)info.control;
+    NSUInteger iv = [self unsignedIntegerForString:[textField stringValue] inRange:info.range];
+    unichar lastChar = '0';
+    int numChars = [[textField stringValue] length];
+    if (numChars) {
+        lastChar = [[textField stringValue] characterAtIndex:numChars - 1];
+    }
+    if (iv != [textField separatorTolerantUnsignedIntegerValue] || (lastChar < '0' || lastChar > '9')) {
+        [textField setStringValue:[NSString stringWithFormat:@"%lu", iv]];
+    }
+}
+
 #pragma mark - NSControl Delegate Informal Protocol
 
 // This is a notification signature but it gets called because we're the delegate of text fields.
@@ -365,6 +474,28 @@ static NSString *const kKey = @"key";
     PreferenceInfo *info = [_keyMap objectForKey:control];
     if (info.controlTextDidEndEditing) {
         info.controlTextDidEndEditing(aNotification);
+    } else {
+        switch (info.type) {
+            case kPreferenceInfoTypeCheckbox:
+            case kPreferenceInfoTypeColorWell:
+            case kPreferenceInfoTypeInvertedCheckbox:
+            case kPreferenceInfoTypeMatrix:
+            case kPreferenceInfoTypePopup:
+            case kPreferenceInfoTypeSlider:
+            case kPreferenceInfoTypeStringTextField:
+            case kPreferenceInfoTypeTokenField:
+            case kPreferenceInfoTypeIntegerTextField:
+            case kPreferenceInfoTypeUnsignedIntegerPopup:
+            case kPreferenceInfoTypeUnsignedIntegerTextField:
+                break;
+                
+            case kPreferenceInfoTypeDoubleTextField:
+                // Replace the control with its canonical value. Only floating point text fields can
+                // temporarily take illegal values, which are tolerated until editing ends.
+                // See the comments in -settingChanged: for more details on why doubles are special.
+                [control setDoubleValue:[self doubleForKey:info.key]];
+                break;
+        }
     }
 }
 
